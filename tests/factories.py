@@ -7,7 +7,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils import timezone
 from PIL import Image
 
-from campings.models import AccommodationType, Camping, Membership, Season, Service
+from campings.models import AccommodationType, Camping, Membership, Season, SeasonPeriod, Service
 
 
 def make_user(email="owner@example.com", password="s3cret-pass!", **extra):
@@ -42,10 +42,15 @@ def make_accommodation(camping, **extra):
     return AccommodationType.objects.create(camping=camping, **defaults)
 
 
-def make_season(camping, start, end, **extra):
-    defaults = {"name": {"es": "Alta", "en": "High"}}
+def make_season(camping, start=None, end=None, periods=(), **extra):
+    """A season with the period ``start``-``end`` and/or the given ``periods``."""
+    defaults = {"name": {"es": "Alta", "en": "High"}, "kind": "high"}
     defaults.update(extra)
-    return Season.objects.create(camping=camping, start_date=start, end_date=end, **defaults)
+    season = Season.objects.create(camping=camping, **defaults)
+    ranges = list(periods) + ([(start, end)] if start and end else [])
+    for first, last in ranges:
+        SeasonPeriod.objects.create(season=season, start_date=first, end_date=last)
+    return season
 
 
 def make_service(camping, **extra):

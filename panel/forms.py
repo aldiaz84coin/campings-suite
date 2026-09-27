@@ -1,3 +1,5 @@
+import json
+
 from django import forms
 from django.conf import settings
 from django.contrib.auth import get_user_model, password_validation
@@ -13,6 +15,7 @@ from campings.models import (
     Membership,
     Photo,
     Season,
+    SeasonPeriod,
     Service,
     domain_validator,
 )
@@ -368,12 +371,52 @@ class ServiceForm(CampingContentForm):
 class SeasonForm(CampingContentForm):
     class Meta:
         model = Season
-        fields = ["name", "start_date", "end_date", "min_nights", "color"]
-        widgets = {"start_date": DATE_WIDGET, "end_date": DATE_WIDGET, "color": COLOR_WIDGET}
+        fields = ["name", "kind", "min_nights", "color"]
+        widgets = {"color": COLOR_WIDGET}
 
     def __init__(self, *args, camping, **kwargs):
         super().__init__(*args, camping=camping, **kwargs)
         self.fields["name"].required = True
+        self.fields["kind"].widget.attrs["data-season-kind"] = ""
+        self.fields["color"].widget.attrs["data-kind-colors"] = json.dumps(Season.KIND_COLORS)
+        if not self.instance.pk:
+            kind = self.initial.get("kind") or self.instance.kind
+            self.initial.setdefault("color", Season.KIND_COLORS.get(kind, Season.KIND_COLORS["mid"]))
+
+
+class SeasonPeriodForm(forms.ModelForm):
+    class Meta:
+        model = SeasonPeriod
+        fields = ["start_date", "end_date"]
+        widgets = {"start_date": DATE_WIDGET, "end_date": DATE_WIDGET}
+
+
+class BaseSeasonPeriodFormSet(forms.BaseInlineFormSet):
+    """Periods of one season: they cannot overlap each other."""
+
+    def clean(self):
+        super().clean()
+        self.ranges = []
+        if any(self.errors):
+            return
+        for form in self.forms:
+            data = getattr(form, "cleaned_data", None) or {}
+            start, end = data.get("start_date"), data.get("end_date")
+            if data.get("DELETE") or not start or not end:
+                continue
+            if any(start <= other_end and other_start <= end for other_start, other_end in self.ranges):
+                raise forms.ValidationError(_("The periods of a season cannot overlap each other."))
+            self.ranges.append((start, end))
+
+
+SeasonPeriodFormSet = forms.inlineformset_factory(
+    Season,
+    SeasonPeriod,
+    form=SeasonPeriodForm,
+    formset=BaseSeasonPeriodFormSet,
+    extra=1,
+    can_delete=True,
+)
 
 
 class PolicyForm(CampingContentForm):

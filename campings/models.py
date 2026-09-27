@@ -366,10 +366,24 @@ class Membership(models.Model):
 
 
 class Season(models.Model):
+    """A rate: low, mid or high season, or a special period (Easter, bank holidays, events).
+
+    Its prices apply on the dates of its periods, which may repeat several
+    times a year (e.g. high season in summer and at Christmas). Where a special
+    period overlaps a regular season, the special period wins.
+    """
+
+    class Kind(models.TextChoices):
+        LOW = "low", _("Low season")
+        MID = "mid", _("Mid season")
+        HIGH = "high", _("High season")
+        SPECIAL = "special", _("Special period")
+
+    KIND_COLORS = {"low": "#3f8f6b", "mid": "#d69a2d", "high": "#d4553a", "special": "#7c5cbf"}
+
     camping = models.ForeignKey(Camping, on_delete=models.CASCADE, related_name="seasons")
     name = TranslatedField(_("name"), max_chars=60)
-    start_date = models.DateField(_("from"))
-    end_date = models.DateField(_("to (inclusive)"))
+    kind = models.CharField(_("type"), max_length=10, choices=Kind.choices, default=Kind.MID)
     min_nights = models.PositiveSmallIntegerField(
         _("minimum nights"),
         null=True,
@@ -379,29 +393,54 @@ class Season(models.Model):
     color = models.CharField(_("colour"), max_length=7, default="#3f8f6b", validators=[hex_color_validator])
 
     class Meta:
-        ordering = ["start_date"]
+        ordering = [
+            models.Case(
+                models.When(kind="low", then=models.Value(0)),
+                models.When(kind="mid", then=models.Value(1)),
+                models.When(kind="high", then=models.Value(2)),
+                default=models.Value(3),
+            ),
+            "id",
+        ]
         verbose_name = _("season")
         verbose_name_plural = _("seasons")
 
     def __str__(self):
-        return f"{translate_value(self.name)} ({self.start_date:%d/%m/%Y} - {self.end_date:%d/%m/%Y})"
+        return translate_value(self.name) or f"#{self.pk}"
 
-    def clean(self):
-        if self.start_date and self.end_date:
-            if self.end_date < self.start_date:
-                raise ValidationError({"end_date": _("The end date must be on or after the start date.")})
-            if self.camping_id:
-                overlapping = Season.objects.filter(
-                    camping_id=self.camping_id, start_date__lte=self.end_date, end_date__gte=self.start_date
-                ).exclude(pk=self.pk)
-                if overlapping.exists():
-                    raise ValidationError(
-                        _("These dates overlap with the season “%(season)s”.")
-                        % {"season": translate_value(overlapping.first().name)}
-                    )
+    @property
+    def is_special(self):
+        return self.kind == self.Kind.SPECIAL
 
     def contains(self, day):
-        return self.start_date <= day <= self.end_date
+        return any(period.start_date <= day <= period.end_date for period in self.periods.all())
+
+    def upcoming_periods(self, today):
+        """Periods that have not ended yet (uses the prefetched ``periods``)."""
+        return [period for period in self.periods.all() if period.end_date >= today]
+
+
+class SeasonPeriod(models.Model):
+    """Dates on which a season applies (both days included)."""
+
+    season = models.ForeignKey(Season, on_delete=models.CASCADE, related_name="periods", verbose_name=_("season"))
+    start_date = models.DateField(_("from"))
+    end_date = models.DateField(_("to (inclusive)"))
+
+    class Meta:
+        ordering = ["start_date"]
+        verbose_name = _("period")
+        verbose_name_plural = _("periods")
+
+    def __str__(self):
+        return f"{self.start_date:%d/%m/%Y} – {self.end_date:%d/%m/%Y}"
+
+    def clean(self):
+        if self.start_date and self.end_date and self.end_date < self.start_date:
+            raise ValidationError({"end_date": _("The end date must be on or after the start date.")})
+
+    def overlaps(self, start, end):
+        return self.start_date <= end and start <= self.end_date
 
 
 class AccommodationType(models.Model):

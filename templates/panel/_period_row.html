@@ -1,0 +1,8 @@
+{% load i18n core_tags %}
+<div class="period-row" data-formset-row>
+  {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}
+  {% include "partials/field.html" with field=form.start_date %}
+  {% include "partials/field.html" with field=form.end_date %}
+  {% if form.DELETE %}<label class="check period-row__delete" title="{% translate 'Delete this period' %}">{{ form.DELETE }} {% icon "trash-2" %}<span class="sr-only">{% translate "Delete this period" %}</span></label>{% endif %}
+  {% for error in form.non_field_errors %}<p class="field__error period-row__error">{{ error }}</p>{% endfor %}
+</div>

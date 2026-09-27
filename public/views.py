@@ -15,6 +15,7 @@ from bookings.forms import BookingRequestForm, QuoteForm, StaySearchForm
 from bookings.models import BookingRequest
 from campings import catalog
 from campings.models import Camping, Photo
+from campings.seasons import has_uncovered_days
 from core.urlutils import camping_reverse, camping_site_url, request_camping_id
 
 logger = logging.getLogger(__name__)
@@ -179,7 +180,12 @@ def camping_detail(request, slug=None):
             "rates", Prefetch("photos", queryset=Photo.objects.order_by("position", "id"))
         )
     )
-    seasons = [season for season in camping.seasons.all() if season.end_date >= today]
+    all_seasons = list(camping.seasons.prefetch_related("periods"))
+    seasons = []
+    for season in all_seasons:
+        season.upcoming = season.upcoming_periods(today)
+        if season.upcoming:
+            seasons.append(season)
     services = list(camping.services.filter(is_active=True).prefetch_related("rates", "accommodations"))
     facilities = list(camping.facilities.all())
     policy = camping.get_policy()
@@ -217,6 +223,7 @@ def camping_detail(request, slug=None):
         "included_services": [s for s in services if s.mode == "included"],
         "policy": policy,
         "season_minimums": season_minimums,
+        "show_base_prices": bool(seasons) and has_uncovered_days(camping, all_seasons, today),
         "starting_price": starting_price,
         "search_form": StaySearchForm(camping),
         "is_preview": not camping.is_public,

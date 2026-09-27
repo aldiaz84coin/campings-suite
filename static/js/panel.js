@@ -287,6 +287,37 @@
     refresh();
   }
 
+  // Inline formsets (e.g. the periods of a season): "Add" clones the empty form.
+  function setupFormsets() {
+    document.querySelectorAll("[data-formset]").forEach(function (box) {
+      var rows = $("[data-formset-rows]", box);
+      var template = $("template[data-formset-template]", box);
+      var add = $("[data-formset-add]", box);
+      var total = $('input[name$="-TOTAL_FORMS"]', box);
+      if (!rows || !template || !add || !total) return;
+      add.addEventListener("click", function () {
+        var index = parseInt(total.value, 10) || 0;
+        rows.insertAdjacentHTML("beforeend", template.innerHTML.replace(/__prefix__/g, String(index)));
+        total.value = index + 1;
+        var input = rows.lastElementChild && rows.lastElementChild.querySelector('input[type="date"]');
+        if (input) input.focus();
+      });
+    });
+  }
+
+  // A season's colour follows its type until the user picks another one.
+  function setupSeasonKind() {
+    var kind = $("[data-season-kind]");
+    var color = $("[data-kind-colors]");
+    if (!kind || !color) return;
+    var colors = JSON.parse(color.getAttribute("data-kind-colors") || "{}");
+    var touched = (color.value || "").toLowerCase() !== (colors[kind.value] || "").toLowerCase();
+    color.addEventListener("input", function () { touched = true; });
+    kind.addEventListener("change", function () {
+      if (!touched && colors[kind.value]) color.value = colors[kind.value];
+    });
+  }
+
   // Occupancy calendar: bring today's column into view (after the sticky names).
   function setupCalendarScroll() {
     var scroller = $(".calendar-scroll");
@@ -298,6 +329,8 @@
   }
 
   document.addEventListener("DOMContentLoaded", function () {
+    setupFormsets();
+    setupSeasonKind();
     setupCalendarScroll();
     setupDropdowns();
     setupSidebar();

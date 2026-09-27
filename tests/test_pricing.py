@@ -34,6 +34,33 @@ class QuoteTests(TestCase):
         self.assertEqual(quote.total, Decimal("110.00"))
         self.assertEqual(len(quote.lines), 2)
 
+    def test_season_with_several_periods(self):
+        season = make_season(self.camping, periods=[(future(10), future(11)), (future(20), future(21))])
+        AccommodationRate.objects.create(accommodation=self.acc, season=season, price=Decimal("35"))
+        self.assertEqual(self.quote(future(10), future(12), adults=2).total, Decimal("70.00"))
+        self.assertEqual(self.quote(future(19), future(21), adults=2).total, Decimal("55.00"))
+        self.assertEqual(self.quote(future(14), future(16), adults=2).total, Decimal("40.00"))
+
+    def test_special_period_wins_over_the_season(self):
+        high = make_season(self.camping, future(1), future(60), kind="high")
+        easter = make_season(self.camping, future(10), future(11), kind="special", name={"en": "Easter"}, min_nights=3)
+        AccommodationRate.objects.create(accommodation=self.acc, season=high, price=Decimal("30"))
+        AccommodationRate.objects.create(accommodation=self.acc, season=easter, price=Decimal("45"))
+        quote = self.quote(future(9), future(12), adults=2)
+        self.assertEqual(quote.total, Decimal("120.00"))  # 30 + 45 + 45
+        self.assertIn("Easter", " ".join(line.detail for line in quote.lines))
+        # The special period's minimum stay applies to arrivals on its dates.
+        self.assertFalse(self.quote(future(10), future(12), adults=2).ok)
+        self.assertTrue(self.quote(future(10), future(13), adults=2).ok)
+
+    def test_easter_sunday(self):
+        from campings.seasons import easter_sunday
+
+        self.assertEqual(
+            [easter_sunday(year) for year in (2024, 2025, 2026, 2027, 2038)],
+            [date(2024, 3, 31), date(2025, 4, 20), date(2026, 4, 5), date(2027, 3, 28), date(2038, 4, 25)],
+        )
+
     def test_mandatory_and_optional_services(self):
         make_service(self.camping, price=Decimal("5"), unit="adult_night", mode="mandatory")
         make_service(self.camping, name={"en": "Child"}, price=Decimal("3"), unit="child_night", mode="mandatory")

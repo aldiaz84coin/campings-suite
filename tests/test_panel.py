@@ -1,13 +1,15 @@
 import json
+from datetime import date, timedelta
 from decimal import Decimal
 
 from django.core import mail
 from django.test import TestCase, override_settings
 from django.urls import reverse
-from django.utils import translation
+from django.utils import timezone, translation
 
 from bookings.models import BookingRequest
-from campings.models import AccommodationRate, Camping, Facility, Membership, Photo, Season, ServiceRate
+from campings.models import AccommodationRate, Camping, Facility, Membership, Photo, ServiceRate
+from campings.seasons import easter_sunday
 
 from .factories import future, image_file, make_accommodation, make_camping, make_season, make_service, make_user
 
@@ -233,29 +235,112 @@ class CampingEditingTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn("name", response.context["form"].errors)
 
-    def test_season_overlap_is_rejected(self):
-        make_season(self.camping, future(10), future(20))
+    def season_data(self, name="Alta", kind="high", periods=(), **extra):
+        data = {
+            "name_es": name,
+            "kind": kind,
+            "color": "#123456",
+            "min_nights": "",
+            "periods-TOTAL_FORMS": str(len(periods)),
+            "periods-INITIAL_FORMS": "0",
+            "periods-MIN_NUM_FORMS": "0",
+            "periods-MAX_NUM_FORMS": "1000",
+        }
+        for index, (start, end) in enumerate(periods):
+            data[f"periods-{index}-start_date"] = start.isoformat()
+            data[f"periods-{index}-end_date"] = end.isoformat()
+        data.update(extra)
+        return data
+
+    def test_season_with_several_periods(self):
         response = self.client.post(
             panel_url("season_create", self.camping),
-            {
-                "name_es": "Otra",
-                "start_date": future(15).isoformat(),
-                "end_date": future(25).isoformat(),
-                "color": "#123456",
-            },
+            self.season_data(periods=[(future(10), future(20)), (future(100), future(110))]),
+        )
+        self.assertRedirects(response, panel_url("seasons", self.camping), fetch_redirect_response=False)
+        season = self.camping.seasons.get()
+        self.assertEqual(season.kind, "high")
+        self.assertEqual([p.start_date for p in season.periods.all()], [future(10), future(100)])
+        response = self.client.get(panel_url("seasons", self.camping))
+        self.assertContains(response, "period-chip", count=2)
+
+    def test_periods_of_a_season_cannot_overlap(self):
+        response = self.client.post(
+            panel_url("season_create", self.camping),
+            self.season_data(periods=[(future(10), future(20)), (future(15), future(25))]),
         )
         self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context["formset"].non_form_errors())
+        self.assertFalse(self.camping.seasons.exists())
+
+    def test_regular_seasons_cannot_overlap(self):
+        make_season(self.camping, future(10), future(20), name={"es": "Media"}, kind="mid")
+        response = self.client.post(
+            panel_url("season_create", self.camping), self.season_data(periods=[(future(15), future(25))])
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Media", str(response.context["form"].non_field_errors()))
         self.assertEqual(self.camping.seasons.count(), 1)
 
-    def test_copy_seasons_to_next_year(self):
-        season = make_season(self.camping, future(10), future(20), min_nights=3)
+    def test_special_periods_can_overlap_seasons_but_not_each_other(self):
+        make_season(self.camping, future(1), future(60), kind="mid")
+        url = panel_url("season_create", self.camping)
+        response = self.client.post(url, self.season_data("Semana Santa", "special", [(future(10), future(14))]))
+        self.assertEqual(response.status_code, 302)
+        response = self.client.post(url, self.season_data("Puente", "special", [(future(12), future(16))]))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(self.camping.seasons.count(), 2)
+
+    def test_edit_season_removes_a_period(self):
+        season = make_season(self.camping, periods=[(future(10), future(20)), (future(40), future(50))])
+        first, second = season.periods.all()
+        data = self.season_data(periods=[])
+        data.update(
+            {
+                "periods-TOTAL_FORMS": "2",
+                "periods-INITIAL_FORMS": "2",
+                "periods-0-id": str(first.pk),
+                "periods-0-start_date": first.start_date.isoformat(),
+                "periods-0-end_date": first.end_date.isoformat(),
+                "periods-1-id": str(second.pk),
+                "periods-1-start_date": second.start_date.isoformat(),
+                "periods-1-end_date": second.end_date.isoformat(),
+                "periods-1-DELETE": "on",
+            }
+        )
+        response = self.client.post(panel_url("season_edit", self.camping, pk=season.pk), data)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(list(season.periods.values_list("pk", flat=True)), [first.pk])
+
+    def test_copy_dates_to_next_year(self):
+        this_year = timezone.localdate().year
+        high = make_season(self.camping, date(this_year, 7, 1), date(this_year, 8, 31), min_nights=3)
         acc = make_accommodation(self.camping)
-        AccommodationRate.objects.create(accommodation=acc, season=season, price=Decimal("99"))
+        AccommodationRate.objects.create(accommodation=acc, season=high, price=Decimal("99"))
+        easter = easter_sunday(this_year)
+        holy_week = make_season(
+            self.camping,
+            easter - timedelta(days=3),
+            easter,
+            name={"es": "Semana Santa"},
+            kind="special",
+        )
         self.client.post(panel_url("seasons_copy", self.camping))
-        copy = Season.objects.exclude(pk=season.pk).get()
-        self.assertEqual(copy.start_date.year, season.start_date.year + 1)
-        self.assertEqual(copy.min_nights, 3)
-        self.assertEqual(copy.accommodation_rates.get().price, Decimal("99"))
+        self.assertEqual(
+            [(p.start_date, p.end_date) for p in high.periods.all()][-1],
+            (date(this_year + 1, 7, 1), date(this_year + 1, 8, 31)),
+        )
+        next_easter = easter_sunday(this_year + 1)
+        self.assertEqual(
+            [(p.start_date, p.end_date) for p in holy_week.periods.all()][-1],
+            (next_easter - timedelta(days=3), next_easter),
+        )
+        # Prices belong to the season: nothing to copy.
+        self.assertEqual(AccommodationRate.objects.count(), 1)
+        # Dates are prepared up to next year: copying again changes nothing.
+        response = self.client.post(panel_url("seasons_copy", self.camping), follow=True)
+        self.assertEqual(high.periods.count(), 2)
+        self.assertContains(response, str(this_year + 1))
 
     def test_price_matrix(self):
         acc = make_accommodation(self.camping)

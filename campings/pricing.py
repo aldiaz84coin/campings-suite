@@ -27,11 +27,30 @@ def nights_between(arrival, departure):
         yield arrival + timedelta(days=offset)
 
 
-def season_for(day, seasons):
-    for season in seasons:
-        if season.start_date <= day <= season.end_date:
-            return season
-    return None
+class SeasonCalendar:
+    """Which season applies on each night.
+
+    Seasons can have several periods; where a special period (Easter, a long
+    weekend...) overlaps a regular season, the special period wins. Nights
+    outside every period use the base prices (``None``).
+    """
+
+    def __init__(self, seasons):
+        self.special, self.regular = [], []
+        for season in seasons:
+            layer = self.special if season.is_special else self.regular
+            layer.extend((period.start_date, period.end_date, season) for period in season.periods.all())
+
+    def season_for(self, day):
+        for layer in (self.special, self.regular):
+            for start, end, season in layer:
+                if start <= day <= end:
+                    return season
+        return None
+
+    @classmethod
+    def for_camping(cls, camping):
+        return cls(camping.seasons.prefetch_related("periods"))
 
 
 def nights_label(n):
@@ -91,11 +110,11 @@ class Quote:
         }
 
 
-def minimum_nights(camping, accommodation, arrival, seasons):
+def minimum_nights(camping, accommodation, arrival, calendar):
     values = [camping.get_policy().min_nights or 1]
     if accommodation is not None and accommodation.min_nights:
         values.append(accommodation.min_nights)
-    season = season_for(arrival, seasons) if arrival else None
+    season = calendar.season_for(arrival) if arrival else None
     if season is not None and season.min_nights:
         values.append(season.min_nights)
     return max(values)
@@ -185,7 +204,7 @@ def build_quote(
     """
     quote = Quote(currency=camping.currency)
     policy = camping.get_policy()
-    seasons = list(camping.seasons.all())
+    calendar = SeasonCalendar.for_camping(camping)
     errors = quote.errors
     adults, children, pets = int(adults or 0), int(children or 0), int(pets or 0)
     units = max(int(units or 1), 1)
@@ -218,7 +237,7 @@ def build_quote(
             }
         )
 
-    min_nights = minimum_nights(camping, accommodation if valid_accommodation else None, arrival, seasons)
+    min_nights = minimum_nights(camping, accommodation if valid_accommodation else None, arrival, calendar)
     if nights < min_nights:
         errors.append(_("The minimum stay for these dates is %(nights)s.") % {"nights": nights_label(min_nights)})
     if policy.max_nights and nights > policy.max_nights:
@@ -255,7 +274,7 @@ def build_quote(
     acc_rates = accommodation.rate_map()
     groups = _group_nights(
         stay_nights,
-        lambda night: (accommodation.price_for(season_for(night, seasons), acc_rates), season_for(night, seasons)),
+        lambda night: (accommodation.price_for(calendar.season_for(night), acc_rates), calendar.season_for(night)),
     )
     name = accommodation.display_name
     for price, season, count in groups:
@@ -285,7 +304,7 @@ def build_quote(
             continue
         rates = service.rate_map()
         if service.unit in catalog.PER_NIGHT_UNITS:
-            amounts = [service.price_for(season_for(night, seasons), rates) for night in stay_nights]
+            amounts = [service.price_for(calendar.season_for(night), rates) for night in stay_nights]
             amount = sum(amounts, Decimal("0")) * factor
             parts = [
                 label
@@ -296,7 +315,7 @@ def build_quote(
                 parts.append(format_money(amounts[0], camping.currency))
             detail = " × ".join(parts)
         else:
-            price = service.price_for(season_for(arrival, seasons), rates)
+            price = service.price_for(calendar.season_for(arrival), rates)
             amount = price * factor
             quantity = _quantity_label(service.unit, adults, children, pets)
             price_text = format_money(price, camping.currency)

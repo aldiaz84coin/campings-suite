@@ -163,6 +163,17 @@ a.stat:hover { border-color: var(--primary-muted); color: var(--text); }
 .quick-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
 .quick-actions .btn { flex: 1; }
 .season-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--dot, var(--primary)); margin-right: 4px; flex: none; }
+.section-title { font-size: 1.12rem; margin: 26px 0 10px; }
+.period-chip { display: inline-block; margin: 2px 6px 2px 0; padding: 2px 10px; border-radius: 999px; background: var(--surface-2); font-size: .86rem; white-space: nowrap; }
+.period-chip.is-past { color: var(--text-muted); text-decoration: line-through; }
+.period-rows { display: grid; gap: 4px; margin-bottom: 8px; }
+.period-row { display: grid; grid-template-columns: 1fr 1fr auto; gap: 0 12px; align-items: end; }
+.period-row .field { margin-bottom: 8px; }
+.period-row__delete { margin-bottom: 18px; color: var(--text-muted); }
+.period-row__error { grid-column: 1 / -1; }
+.period-row:has(input[name$="-DELETE"]:checked) input[type="date"] { opacity: .5; text-decoration: line-through; }
+.period-row:has(input[name$="-DELETE"]:checked) .period-row__delete { color: var(--danger, #b42318); }
+.price-matrix__periods { display: block; font-weight: 500; color: var(--text-muted); font-size: .76rem; white-space: nowrap; }
 
 /* Items (accommodation cards) */
 .item-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 16px; margin-bottom: 14px; }

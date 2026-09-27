@@ -9,7 +9,7 @@ from django.utils import translation
 from bookings.models import BookingRequest
 from campings.models import Photo
 
-from .factories import future, make_accommodation, make_camping, make_service, make_user
+from .factories import future, make_accommodation, make_camping, make_season, make_service, make_user
 
 
 class PlatformRootTests(TestCase):
@@ -77,6 +77,18 @@ class CampingPageTests(TestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "preview-banner")
+
+    def test_prices_show_every_period_and_other_dates(self):
+        season = make_season(
+            self.camping, periods=[(future(10), future(20)), (future(40), future(50))], name={"en": "High"}
+        )
+        make_season(self.camping, future(-30), future(-20), name={"en": "Past"}, kind="low")
+        response = self.client.get(f"/en/camping/{self.camping.slug}/")
+        self.assertEqual(response.context["seasons"], [season])
+        self.assertEqual(len(response.context["seasons"][0].upcoming), 2)
+        self.assertTrue(response.context["show_base_prices"])
+        self.assertContains(response, "Other dates")
+        self.assertNotContains(response, ">Past<")
 
     def test_quote_endpoint(self):
         response = self.client.get(

@@ -1,12 +1,12 @@
 """Facilities, accommodation, services, seasons, prices and booking policies."""
 
-from datetime import date
 from decimal import Decimal, InvalidOperation
 
 from django.contrib import messages
 from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect
 from django.utils import timezone
+from django.utils.formats import date_format
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
@@ -19,9 +19,10 @@ from campings.models import (
     Service,
     ServiceRate,
 )
+from campings.seasons import copy_periods_to_next_year, easter_sunday, overlapping_season, season_label
 from core.i18n import translate_value
 
-from ..forms import AccommodationForm, FacilityForm, PolicyForm, SeasonForm, ServiceForm
+from ..forms import AccommodationForm, FacilityForm, PolicyForm, SeasonForm, SeasonPeriodFormSet, ServiceForm
 from ..utils import camping_view, panel_render
 
 # --- Generic helpers ---------------------------------------------------------------
@@ -220,35 +221,64 @@ def service_delete(request, camping, pk):
 
 @camping_view()
 def seasons(request, camping):
-    return panel_render(request, "panel/seasons.html", {"seasons": camping.seasons.all()}, section="seasons")
+    today = timezone.localdate()
+    season_list = list(camping.seasons.prefetch_related("periods"))
+    context = {
+        "regular_seasons": [season for season in season_list if not season.is_special],
+        "special_seasons": [season for season in season_list if season.is_special],
+        "has_periods": any(season.periods.all() for season in season_list),
+        "today": today,
+    }
+    return panel_render(request, "panel/seasons.html", context, section="seasons")
+
+
+def _season_form_view(request, camping, season, saved_message):
+    initial = {}
+    if season.pk is None and request.GET.get("kind") in Season.Kind.values:
+        initial["kind"] = request.GET["kind"]
+    form = SeasonForm(request.POST or None, instance=season, camping=camping, initial=initial)
+    formset = SeasonPeriodFormSet(request.POST or None, instance=season, prefix="periods")
+    if request.method == "POST" and form.is_valid() and formset.is_valid():
+        special = form.cleaned_data["kind"] == Season.Kind.SPECIAL
+        for start, end in formset.ranges:
+            other = overlapping_season(camping, special, start, end, exclude_season=season)
+            if other is not None:
+                form.add_error(
+                    None,
+                    _("The dates %(start)s – %(end)s overlap with “%(season)s”.")
+                    % {
+                        "start": date_format(start, "SHORT_DATE_FORMAT"),
+                        "end": date_format(end, "SHORT_DATE_FORMAT"),
+                        "season": season_label(other),
+                    },
+                )
+        if not form.errors:
+            with transaction.atomic():
+                season = form.save()
+                formset.instance = season
+                formset.save()
+            messages.success(request, saved_message)
+            return redirect("panel:seasons", slug=camping.slug)
+    today = timezone.localdate()
+    context = {
+        "form": form,
+        "formset": formset,
+        "object": season,
+        "is_new": season.pk is None,
+        "easter_dates": [easter_sunday(year) for year in (today.year, today.year + 1)],
+    }
+    return panel_render(request, "panel/season_form.html", context, section="seasons")
 
 
 @camping_view()
 def season_create(request, camping):
-    return _edit_object(
-        request,
-        camping,
-        form_class=SeasonForm,
-        instance=Season(camping=camping),
-        template="panel/season_form.html",
-        section="seasons",
-        list_url="panel:seasons",
-        saved_message=_("The season has been created."),
-    )
+    return _season_form_view(request, camping, Season(camping=camping), _("The season has been created."))
 
 
 @camping_view()
 def season_edit(request, camping, pk):
-    return _edit_object(
-        request,
-        camping,
-        form_class=SeasonForm,
-        instance=get_object_or_404(Season, pk=pk, camping=camping),
-        template="panel/season_form.html",
-        section="seasons",
-        list_url="panel:seasons",
-        saved_message=_("The season has been saved."),
-    )
+    season = get_object_or_404(Season, pk=pk, camping=camping)
+    return _season_form_view(request, camping, season, _("The season has been saved."))
 
 
 @require_POST
@@ -258,53 +288,27 @@ def season_delete(request, camping, pk):
     return _delete_object(request, camping, season, "panel:seasons", _("The season has been deleted."))
 
 
-def _shift_year(day, years):
-    try:
-        return day.replace(year=day.year + years)
-    except ValueError:  # 29 February
-        return date(day.year + years, 2, 28)
-
-
 @require_POST
 @camping_view()
 def seasons_copy(request, camping):
-    """Duplicate the latest year's seasons (and their prices) one year later."""
-    all_seasons = list(camping.seasons.prefetch_related("accommodation_rates", "service_rates"))
-    if not all_seasons:
-        messages.info(request, _("There are no seasons to copy yet."))
-        return redirect("panel:seasons", slug=camping.slug)
-    last_year = max(season.start_date.year for season in all_seasons)
-    copied = 0
+    """Repeat last year's periods one year later (prices stay in each season)."""
     with transaction.atomic():
-        for season in [s for s in all_seasons if s.start_date.year == last_year]:
-            start, end = _shift_year(season.start_date, 1), _shift_year(season.end_date, 1)
-            overlaps = camping.seasons.filter(start_date__lte=end, end_date__gte=start).exists()
-            if overlaps:
-                continue
-            new_season = Season.objects.create(
-                camping=camping,
-                name=season.name,
-                start_date=start,
-                end_date=end,
-                min_nights=season.min_nights,
-                color=season.color,
-            )
-            AccommodationRate.objects.bulk_create(
-                AccommodationRate(accommodation_id=r.accommodation_id, season=new_season, price=r.price)
-                for r in season.accommodation_rates.all()
-            )
-            ServiceRate.objects.bulk_create(
-                ServiceRate(service_id=r.service_id, season=new_season, price=r.price)
-                for r in season.service_rates.all()
-            )
-            copied += 1
-    if copied:
+        year, created, skipped = copy_periods_to_next_year(camping, timezone.localdate())
+    if year is None:
+        messages.info(request, _("There are no periods to copy yet."))
+    elif created:
         messages.success(
             request,
-            _("%(count)s season(s) copied to %(year)s with their prices.") % {"count": copied, "year": last_year + 1},
+            _("%(count)s period(s) copied to %(year)s. Check the dates of special periods such as long weekends.")
+            % {"count": created, "year": year},
         )
     else:
-        messages.info(request, _("The seasons of %(year)s already exist.") % {"year": last_year + 1})
+        messages.info(request, _("The dates of %(year)s already exist.") % {"year": year})
+    if skipped and created:
+        messages.warning(
+            request,
+            _("%(count)s period(s) were not copied because their dates were already taken.") % {"count": skipped},
+        )
     return redirect("panel:seasons", slug=camping.slug)
 
 
@@ -359,8 +363,7 @@ def _sync_rates(owner, rate_model, owner_field, seasons, data, prefix, errors, l
 
 @camping_view()
 def prices(request, camping):
-    # Past seasons keep their prices but are no longer editable here.
-    seasons = list(camping.seasons.filter(end_date__gte=timezone.localdate()))
+    seasons = list(camping.seasons.prefetch_related("periods"))
     accommodation_list = list(camping.accommodations.prefetch_related("rates"))
     service_list = list(camping.services.exclude(mode="included").prefetch_related("rates"))
 
@@ -405,6 +408,7 @@ def prices(request, camping):
 
     context = {
         "seasons": seasons,
+        "today": timezone.localdate(),
         "accommodation_rows": rows(accommodation_list, "acc", "base_price"),
         "service_rows": rows(service_list, "svc", "price"),
     }

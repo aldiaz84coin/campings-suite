@@ -5,7 +5,7 @@
     <thead>
       <tr>
         <th scope="col"><span class="sr-only">{% translate "Item" %}</span></th>
-        {% if seasons %}{% for season in seasons %}<th scope="col"><span class="season-dot" style="--dot: {{ season.color }}"></span>{{ season.name|tr }}<small>{{ season.start_date|date:"j M" }} – {{ season.end_date|date:"j M Y" }}</small></th>{% endfor %}{% else %}<th scope="col">{% translate "Price" %}</th>{% endif %}
+        {% if seasons %}{% for season in seasons %}<th scope="col"><span class="season-dot" style="--dot: {{ season.color }}"></span>{{ season.name|tr }}</th>{% endfor %}{% if show_base_prices %}<th scope="col">{% translate "Other dates" %}</th>{% endif %}{% else %}<th scope="col">{% translate "Price" %}</th>{% endif %}
       </tr>
     </thead>
     <tbody>
@@ -14,6 +14,7 @@
         <th scope="row"><span class="price-table__item">{% icon row.icon %}<span>{{ row.name }}<small>{{ row.unit }}{% if row.kind == "optional" %} · {% translate "optional" %}{% endif %}</small></span></span></th>
         {% if seasons %}
           {% for price in row.prices %}<td>{% if price %}{{ price|money:camping.currency }}{% else %}<span class="muted">—</span>{% endif %}</td>{% endfor %}
+          {% if show_base_prices %}<td>{% if row.base %}{{ row.base|money:camping.currency }}{% else %}<span class="muted">—</span>{% endif %}</td>{% endif %}
         {% else %}
           <td>{% if row.base %}{{ row.base|money:camping.currency }}{% else %}<span class="muted">—</span>{% endif %}</td>
         {% endif %}

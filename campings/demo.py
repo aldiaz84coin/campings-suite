@@ -1,7 +1,7 @@
 """Demo content: a complete example camping with generated illustrations."""
 
 import random
-from datetime import date, time
+from datetime import date, time, timedelta
 from decimal import Decimal
 from io import BytesIO
 
@@ -18,9 +18,11 @@ from .models import (
     Facility,
     Photo,
     Season,
+    SeasonPeriod,
     Service,
     ServiceRate,
 )
+from .seasons import easter_sunday
 
 PALETTES = {
     "day": {
@@ -322,55 +324,54 @@ def create_demo_camping(slug="los-pinos-demo", year=None, with_photos=True):
         ),
         amenities=["private_bathroom", "terrace", "bed_linen", "towels", "wifi"],
     )
-    season_names = [
+    season_specs = [
         (
+            "low",
             T("Temporada baja", "Low season", "Basse saison", "Nebensaison", "Laagseizoen", "Bassa stagione"),
-            (3, 15),
-            (6, 14),
             "#3f8f6b",
             None,
+            [((3, 15), (6, 14)), ((10, 1), (10, 31))],
         ),
         (
+            "mid",
             T("Temporada media", "Mid season", "Moyenne saison", "Zwischensaison", "Middenseizoen", "Media stagione"),
-            (6, 15),
-            (7, 14),
-            "#e9a23b",
+            "#d69a2d",
             3,
+            [((6, 15), (7, 14)), ((9, 1), (9, 30))],
         ),
         (
+            "high",
             T("Temporada alta", "High season", "Haute saison", "Hauptsaison", "Hoogseizoen", "Alta stagione"),
-            (7, 15),
-            (8, 31),
             "#d4553a",
             5,
-        ),
-        (
-            T("Septiembre", "September", "Septembre", "September", "September", "Settembre"),
-            (9, 1),
-            (10, 31),
-            "#3b82a6",
-            None,
+            [((7, 15), (8, 31))],
         ),
     ]
-    prices = {pitch: (14, 20, 29, 16), bungalow: (65, 95, 140, 70), glamping: (85, 110, 150, 90)}
-    seasons_by_year = {}
-    for season_year in (year, year + 1):
-        created = []
-        for name, (m1, d1), (m2, d2), color, min_nights in season_names:
-            created.append(
-                Season.objects.create(
-                    camping=camping,
-                    name=name,
-                    start_date=date(season_year, m1, d1),
-                    end_date=date(season_year, m2, d2),
-                    color=color,
-                    min_nights=min_nights,
+    seasons = []
+    for kind, name, color, min_nights, ranges in season_specs:
+        season = Season.objects.create(camping=camping, kind=kind, name=name, color=color, min_nights=min_nights)
+        for season_year in (year, year + 1):
+            for (m1, d1), (m2, d2) in ranges:
+                SeasonPeriod.objects.create(
+                    season=season, start_date=date(season_year, m1, d1), end_date=date(season_year, m2, d2)
                 )
-            )
-        seasons_by_year[season_year] = created
-        for accommodation, values in prices.items():
-            for season, price in zip(created, values, strict=True):
-                AccommodationRate.objects.create(accommodation=accommodation, season=season, price=Decimal(price))
+        seasons.append(season)
+    easter = Season.objects.create(
+        camping=camping,
+        kind=Season.Kind.SPECIAL,
+        name=T("Semana Santa", "Easter", "Pâques", "Ostern", "Pasen", "Pasqua"),
+        color=Season.KIND_COLORS["special"],
+        min_nights=3,
+    )
+    for season_year in (year, year + 1):
+        sunday = easter_sunday(season_year)
+        SeasonPeriod.objects.create(season=easter, start_date=sunday - timedelta(days=3), end_date=sunday)
+    seasons.append(easter)
+    # Low, mid, high and Easter prices per night.
+    prices = {pitch: (14, 20, 29, 22), bungalow: (65, 95, 140, 110), glamping: (85, 110, 150, 125)}
+    for accommodation, values in prices.items():
+        for season, price in zip(seasons, values, strict=True):
+            AccommodationRate.objects.create(accommodation=accommodation, season=season, price=Decimal(price))
     adult = Service.objects.create(
         camping=camping,
         position=0,
@@ -452,10 +453,9 @@ def create_demo_camping(slug="los-pinos-demo", year=None, with_photos=True):
         price=Decimal("0"),
         name=T("Wi-Fi", "Wi-Fi", "Wi-Fi", "WLAN", "Wifi", "Wi-Fi"),
     )
-    for created in seasons_by_year.values():
-        high = created[2]
-        ServiceRate.objects.create(service=adult, season=high, price=Decimal("8.5"))
-        ServiceRate.objects.create(service=dog, season=high, price=Decimal("4"))
+    high = seasons[2]
+    ServiceRate.objects.create(service=adult, season=high, price=Decimal("8.5"))
+    ServiceRate.objects.create(service=dog, season=high, price=Decimal("4"))
 
     for position, kind in enumerate(
         [

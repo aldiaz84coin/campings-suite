@@ -163,7 +163,7 @@
     <div class="section-head"><h2>{% translate "Prices" %}</h2>{% if seasons %}<span class="muted">{% translate "Prices per season" %}</span>{% endif %}</div>
     {% if seasons %}
     <ul class="season-legend" role="list">
-      {% for season in seasons %}<li><span class="season-dot" style="--dot: {{ season.color }}"></span><strong>{{ season.name|tr }}</strong> {{ season.start_date|date:"j M" }} – {{ season.end_date|date:"j M Y" }}{% if season.min_nights and season.min_nights > 1 %} · {% blocktranslate count counter=season.min_nights %}min. {{ counter }} night{% plural %}min. {{ counter }} nights{% endblocktranslate %}{% endif %}</li>{% endfor %}
+      {% for season in seasons %}<li><span class="season-dot" style="--dot: {{ season.color }}"></span><strong>{{ season.name|tr }}</strong> {% for period in season.upcoming %}<span class="nowrap">{{ period.start_date|date:"j M" }} – {{ period.end_date|date:"j M Y" }}</span>{% if not forloop.last %}, {% endif %}{% endfor %}{% if season.min_nights and season.min_nights > 1 %} · {% blocktranslate count counter=season.min_nights %}min. {{ counter }} night{% plural %}min. {{ counter }} nights{% endblocktranslate %}{% endif %}</li>{% endfor %}
     </ul>
     {% endif %}
     {% if accommodation_rows %}

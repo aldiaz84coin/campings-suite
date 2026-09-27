@@ -6,8 +6,8 @@
       <thead>
         <tr>
           <th scope="col">{% translate "Item" %}</th>
-          <th scope="col">{% translate "Base price" %}</th>
-          {% for season in seasons %}<th scope="col"><span class="season-dot" style="--dot: {{ season.color }}"></span>{{ season.name|tr }}<small>{{ season.start_date|date:"j/m" }}–{{ season.end_date|date:"j/m/y" }}</small></th>{% endfor %}
+          <th scope="col">{% translate "Base price" %}<small class="price-matrix__periods">{% translate "other dates" %}</small></th>
+          {% for season in seasons %}<th scope="col"><span class="season-dot" style="--dot: {{ season.color }}"></span>{{ season.name|tr }}{% for period in season.periods.all %}{% if period.end_date >= today %}<small class="price-matrix__periods">{{ period.start_date|date:"j/m" }}–{{ period.end_date|date:"j/m/y" }}</small>{% endif %}{% empty %}<small class="price-matrix__periods">{% translate "No dates yet" %}</small>{% endfor %}</th>{% endfor %}
         </tr>
       </thead>
       <tbody>

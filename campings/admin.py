@@ -13,6 +13,7 @@ from .models import (
     Membership,
     Photo,
     Season,
+    SeasonPeriod,
     Service,
     ServiceRate,
 )
@@ -105,11 +106,25 @@ class ServiceAdmin(TranslatedNameMixin, admin.ModelAdmin):
     inlines = [ServiceRateInline]
 
 
+class SeasonPeriodInline(admin.TabularInline):
+    model = SeasonPeriod
+    extra = 1
+
+
 @admin.register(Season)
 class SeasonAdmin(TranslatedNameMixin, admin.ModelAdmin):
-    list_display = ("translated_name", "camping", "start_date", "end_date", "min_nights")
+    list_display = ("translated_name", "camping", "kind", "period_list", "min_nights")
+    list_filter = ("kind",)
     search_fields = ("camping__name",)
     autocomplete_fields = ("camping",)
+    inlines = [SeasonPeriodInline]
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).prefetch_related("periods")
+
+    @admin.display(description=_("periods"))
+    def period_list(self, obj):
+        return ", ".join(str(period) for period in obj.periods.all())
 
 
 @admin.register(Facility)
