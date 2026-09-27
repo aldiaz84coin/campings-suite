@@ -1,14 +1,18 @@
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
-from django.shortcuts import redirect
+from django.shortcuts import get_object_or_404, redirect
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
 from bookings.models import BookingRequest
+from campings.models import Camping
 from core.i18n import has_translation
 from core.images import ImageProcessingError, process_logo
+from core.urlutils import platform_url, request_camping_id
 
 from ..forms import AppearanceForm, LocationForm, ProfileForm, SettingsForm
 from ..utils import camping_view, panel_render, user_campings
@@ -16,6 +20,12 @@ from ..utils import camping_view, panel_render, user_campings
 
 @login_required
 def home(request):
+    if request_camping_id(request):
+        # On a camping's own address the panel is that camping's panel.
+        camping = get_object_or_404(Camping, pk=request.domain_camping_id)
+        if request.user.is_superuser or camping.memberships.filter(user=request.user).exists():
+            return redirect("panel:dashboard", slug=camping.slug)
+        return panel_render(request, "panel/home.html", {"campings": [], "site_camping_denied": camping})
     campings = list(user_campings(request.user))
     if len(campings) == 1 and not request.user.is_superuser:
         return redirect("panel:dashboard", slug=campings[0].slug)
@@ -68,6 +78,14 @@ def setup_checklist(camping):
     return items
 
 
+def web_address(request, camping):
+    """Address to share: the camping's own host, or its page on the platform."""
+    if camping.site_url:
+        return f"{camping.site_url}/"
+    path = reverse("public:camping_detail", urlconf=settings.ROOT_URLCONF, kwargs={"slug": camping.slug})
+    return platform_url(request, path)
+
+
 @camping_view()
 def dashboard(request, camping):
     today = timezone.localdate()
@@ -92,6 +110,7 @@ def dashboard(request, camping):
         },
         "checklist": checklist,
         "progress": round(done * 100 / len(checklist)),
+        "web_address": web_address(request, camping),
         "recent_requests": requests_qs[:6],
         "upcoming": requests_qs.filter(status=BookingRequest.Status.CONFIRMED, departure__gte=today).order_by(
             "arrival"
@@ -151,7 +170,15 @@ def camping_settings(request, camping):
         camping = form.save()
         messages.success(request, _("The settings have been saved."))
         return redirect("panel:settings", slug=camping.slug)
-    return panel_render(request, "panel/settings.html", {"form": form}, section="settings")
+    camping.refresh_from_db()  # the form may have changed the instance
+    platform_path = reverse("public:camping_detail", urlconf=settings.ROOT_URLCONF, kwargs={"slug": "SLUG"})
+    context = {
+        "form": form,
+        "subdomain_suffix": settings.CAMPING_DOMAIN_SUFFIX,
+        "platform_prefix": platform_url(request, platform_path).split("://", 1)[-1].replace("SLUG/", ""),
+        "fly_host": f"{settings.FLY_APP_NAME}.fly.dev" if settings.FLY_APP_NAME else "",
+    }
+    return panel_render(request, "panel/settings.html", context, section="settings")
 
 
 @camping_view()

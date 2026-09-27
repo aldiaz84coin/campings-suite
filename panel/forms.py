@@ -14,10 +14,32 @@ from campings.models import (
     Photo,
     Season,
     Service,
+    domain_validator,
 )
 from core.fields import TranslatedFormMixin
 
 User = get_user_model()
+
+
+class DomainField(forms.CharField):
+    """Accepts what people paste (``https://WWW.Camping.com/``) and keeps ``www.camping.com``."""
+
+    def __init__(self, **kwargs):
+        kwargs.setdefault("max_length", 253)
+        kwargs.setdefault("required", False)
+        kwargs.setdefault("empty_value", None)
+        kwargs.setdefault("validators", [domain_validator])
+        super().__init__(**kwargs)
+
+    def to_python(self, value):
+        value = super().to_python(value)
+        if not value:
+            return value
+        value = value.strip().lower()
+        for prefix in ("https://", "http://"):
+            value = value.removeprefix(prefix)
+        return value.split("/", 1)[0] or None
+
 
 DATE_WIDGET = forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d")
 TIME_WIDGET = forms.TimeInput(attrs={"type": "time"}, format="%H:%M")
@@ -155,6 +177,7 @@ class LocationForm(CampingContentForm):
 
 
 class SettingsForm(forms.ModelForm):
+    custom_domain = DomainField(label=_("Own domain"), help_text=Camping._meta.get_field("custom_domain").help_text)
     languages = forms.MultipleChoiceField(
         label=_("Languages of your page"),
         choices=settings.LANGUAGES,
@@ -173,12 +196,15 @@ class SettingsForm(forms.ModelForm):
             "accepts_booking_requests",
             "notification_email",
             "custom_domain",
+            "show_platform_credit",
         ]
 
     def __init__(self, *args, allow_domain=False, **kwargs):
         super().__init__(*args, **kwargs)
         if not allow_domain:
+            # Own domain and white label are managed by the platform administrators.
             del self.fields["custom_domain"]
+            del self.fields["show_platform_credit"]
 
     def clean_slug(self):
         return self.cleaned_data["slug"].strip().lower()
@@ -412,3 +438,13 @@ class PlatformCampingForm(forms.Form):
     owner_email = forms.EmailField(label=_("Owner's e-mail"))
     owner_name = forms.CharField(label=_("Owner's name"), max_length=150, required=False)
     default_language = forms.ChoiceField(label=_("Main language"), choices=settings.LANGUAGES)
+    custom_domain = DomainField(
+        label=_("Own domain"),
+        help_text=_("Optional, e.g. www.mycamping.com. You can also add it later in the camping's settings."),
+    )
+
+    def clean_custom_domain(self):
+        domain = self.cleaned_data.get("custom_domain")
+        if domain and Camping.objects.filter(custom_domain=domain).exists():
+            raise forms.ValidationError(_("Another camping already uses this domain."))
+        return domain

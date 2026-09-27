@@ -11,8 +11,9 @@ from django.utils.http import urlsafe_base64_encode
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
-from bookings.emails import platform_url, send_templated_email
+from bookings.emails import send_templated_email
 from campings.models import Membership
+from core.urlutils import camping_panel_url
 
 from ..forms import InviteForm
 from ..utils import camping_view, panel_render
@@ -33,8 +34,8 @@ def invite_user(request, camping, email, role, first_name=""):
         user = User.objects.create_user(email=email, password=None, first_name=first_name)
         uid = urlsafe_base64_encode(force_bytes(user.pk))
         token = default_token_generator.make_token(user)
-        set_password_url = platform_url(
-            request, reverse("panel:password_reset_confirm", kwargs={"uidb64": uid, "token": token})
+        set_password_url = camping_panel_url(
+            request, camping, reverse("panel:password_reset_confirm", kwargs={"uidb64": uid, "token": token})
         )
     membership, _created = Membership.objects.get_or_create(user=user, camping=camping, defaults={"role": role})
     send_templated_email(
@@ -44,7 +45,7 @@ def invite_user(request, camping, email, role, first_name=""):
             "camping": camping,
             "platform_name": settings.PLATFORM_NAME,
             "set_password_url": set_password_url,
-            "login_url": platform_url(request, reverse("panel:login")),
+            "login_url": camping_panel_url(request, camping, reverse("panel:login")),
         },
         [user.email],
     )

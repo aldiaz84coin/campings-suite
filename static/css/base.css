@@ -43,6 +43,16 @@
   --focus: 0 0 0 3px color-mix(in srgb, var(--primary) 35%, transparent);
 }
 
+/* Camping pages override --primary/--accent on <body>: derive the tints there
+   too, otherwise they would keep the default colours computed on :root. */
+body {
+  --primary-soft: color-mix(in srgb, var(--primary) 10%, #ffffff);
+  --primary-muted: color-mix(in srgb, var(--primary) 22%, #ffffff);
+  --primary-strong: color-mix(in srgb, var(--primary) 78%, #000000);
+  --accent-soft: color-mix(in srgb, var(--accent) 16%, #ffffff);
+  --focus: 0 0 0 3px color-mix(in srgb, var(--primary) 35%, transparent);
+}
+
 *,
 *::before,
 *::after { box-sizing: border-box; }
@@ -60,7 +70,7 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-h1, h2, h3, h4 { font-family: var(--font-heading); line-height: 1.2; margin: 0 0 .5em; letter-spacing: -0.01em; }
+h1, h2, h3, h4 { font-family: var(--font-heading); line-height: 1.2; margin: 0 0 .5em; letter-spacing: -0.01em; overflow-wrap: break-word; }
 h1 { font-size: clamp(2rem, 4.5vw, 3.1rem); font-weight: 750; }
 h2 { font-size: clamp(1.45rem, 2.6vw, 2rem); font-weight: 700; }
 h3 { font-size: 1.12rem; font-weight: 650; }
@@ -197,7 +207,7 @@ legend { font-weight: 700; font-size: 1.1rem; margin-bottom: 12px; padding: 0; }
 .dropdown-menu a[aria-current="true"] { color: var(--primary); font-weight: 700; }
 
 /* Tables */
-.table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+.table-scroll { position: relative; overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
 .table { width: 100%; border-collapse: collapse; font-size: .95rem; }
 .table th, .table td { padding: 12px 14px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: middle; }
 .table thead th { font-size: .8rem; text-transform: uppercase; letter-spacing: .04em; color: var(--text-muted); background: var(--surface-2); }
@@ -221,3 +231,6 @@ legend { font-weight: 700; font-size: 1.1rem; margin-bottom: 12px; padding: 0; }
 .prose p:last-child { margin-bottom: 0; }
 .plain-list { list-style: none; padding: 0; margin: 0 0 1em; display: grid; gap: 6px; }
 .plain-list .icon { color: var(--primary); }
+
+.pagination { display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 24px; }
+.pagination__status { color: var(--text-muted); font-size: .92rem; }

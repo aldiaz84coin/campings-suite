@@ -1,7 +1,10 @@
-"""URLconf used when a request arrives through a camping's own domain.
+"""URLconf used when a request arrives through a camping's own address.
 
-``core.middleware.HostRoutingMiddleware`` switches to it, so
-``https://www.my-camping.com/es/`` shows that camping's public site directly.
+``core.middleware.HostRoutingMiddleware`` switches to it for the camping's
+own domain (and its ``<slug>.<CAMPING_DOMAIN_SUFFIX>`` subdomain), so
+``https://www.my-camping.com/es/`` is that camping's website and
+``https://www.my-camping.com/es/panel/`` its own back-office, limited to
+that camping (see ``panel.utils``).
 """
 
 from django.conf import settings
@@ -22,5 +25,6 @@ if settings.MEDIA_STORAGE in ("local", "db"):
 
 urlpatterns += i18n_patterns(
     path("", include("public.urls_domain")),
+    path("panel/", include("panel.urls")),
     prefix_default_language=True,
 )

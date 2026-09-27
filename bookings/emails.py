@@ -5,6 +5,7 @@ and never break the request (e-mail is optional, see ``EMAIL_URL``).
 """
 
 import logging
+from email.utils import formataddr, parseaddr
 
 from django.conf import settings
 from django.core.mail import EmailMessage
@@ -12,26 +13,29 @@ from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import translation
 
+from core.urlutils import camping_panel_url
+
 logger = logging.getLogger(__name__)
 
 
-def platform_url(request, path):
-    """Absolute URL on the platform host (not on a camping's own domain)."""
-    if settings.PLATFORM_URL:
-        return f"{settings.PLATFORM_URL}{path}"
-    if request is not None and not getattr(request, "domain_camping_id", None):
-        return request.build_absolute_uri(path)
-    return path
+def sender_for(camping):
+    """``From`` header showing the camping's name with the platform address.
+
+    Guests see e-mails as coming from the camping (replies go to the camping
+    through ``Reply-To``) while the platform address keeps SPF/DKIM valid.
+    """
+    _name, address = parseaddr(settings.DEFAULT_FROM_EMAIL)
+    return formataddr((camping.name, address)) if address else settings.DEFAULT_FROM_EMAIL
 
 
-def send_templated_email(subject, template, context, to, reply_to=None):
+def send_templated_email(subject, template, context, to, reply_to=None, from_email=None):
     if not to:
         return False
     body = render_to_string(template, context)
     message = EmailMessage(
         subject=" ".join(subject.split()),
         body=body,
-        from_email=settings.DEFAULT_FROM_EMAIL,
+        from_email=from_email or settings.DEFAULT_FROM_EMAIL,
         to=to,
         reply_to=reply_to or None,
     )
@@ -50,7 +54,7 @@ def _panel_booking_url(request, booking):
             kwargs={"slug": booking.camping.slug, "pk": booking.pk},
             urlconf=settings.ROOT_URLCONF,
         )
-    return platform_url(request, path)
+    return camping_panel_url(request, booking.camping, path)
 
 
 def send_new_booking_emails(request, booking):
@@ -81,6 +85,7 @@ def send_new_booking_emails(request, booking):
             context,
             [booking.email],
             reply_to=[camping.booking_email] if camping.booking_email else None,
+            from_email=sender_for(camping),
         )
 
 
@@ -103,4 +108,5 @@ def send_status_email(booking):
             context,
             [booking.email],
             reply_to=[camping.booking_email] if camping.booking_email else None,
+            from_email=sender_for(camping),
         )

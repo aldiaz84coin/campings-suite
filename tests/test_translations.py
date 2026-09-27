@@ -20,6 +20,8 @@ class CatalogueTests(SimpleTestCase):
             for entry in polib.pofile(str(po_path)).translated_entries():
                 if entry.msgid_plural:
                     self.assertEqual(compiled.ngettext(entry.msgid, entry.msgid_plural, 1), entry.msgstr_plural[0])
+                elif entry.msgctxt:
+                    self.assertEqual(compiled.pgettext(entry.msgctxt, entry.msgid), entry.msgstr, entry.msgid)
                 else:
                     self.assertEqual(compiled.gettext(entry.msgid), entry.msgstr, f"{po_path}: {entry.msgid}")
 
@@ -31,18 +33,20 @@ class CatalogueTests(SimpleTestCase):
 
 class TranslatedPagesTests(TestCase):
     def test_public_pages_are_translated(self):
-        camping = make_camping("Camping Idiomas")
+        camping = make_camping("Camping Idiomas", languages=["es", "en", "fr", "de", "nl", "it"])
         expectations = {
-            "es": "Encuentra tu sitio bajo las estrellas",
-            "fr": "Trouvez votre place sous les étoiles",
-            "de": "Finden Sie Ihren Platz unter den Sternen",
-            "nl": "Vind jouw plek onder de sterren",
-            "it": "Trova il tuo posto sotto le stelle",
-            "en": "Find your place under the stars",
+            "es": ("Solicitar reserva", "Aviso de privacidad"),
+            "fr": ("Demander une réservation", "Politique de confidentialité"),
+            "de": ("Buchung anfragen", "Datenschutzhinweise"),
+            "nl": ("Boeking aanvragen", "Privacyverklaring"),
+            "it": ("Richiedi una prenotazione", "Informativa sulla privacy"),
+            "en": ("Request a booking", "Privacy notice"),
         }
-        for code, text in expectations.items():
-            self.assertContains(self.client.get(f"/{code}/"), text)
-        self.assertContains(self.client.get(f"/de/camping/{camping.slug}/"), "Buchung anfragen")
+        for code, (book, privacy) in expectations.items():
+            response = self.client.get(f"/{code}/camping/{camping.slug}/")
+            self.assertContains(response, f'lang="{code}"')
+            self.assertContains(response, book)
+            self.assertContains(self.client.get(f"/{code}/privacy/"), privacy)
 
     def test_quote_labels_follow_the_language(self):
         from campings.pricing import nights_label

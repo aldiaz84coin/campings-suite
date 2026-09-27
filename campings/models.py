@@ -22,18 +22,40 @@ domain_validator = RegexValidator(
     _("Enter a domain such as www.mycamping.com (without https://)."),
 )
 
+# The slug is also the camping's subdomain (see CAMPING_DOMAIN_SUFFIX), so it
+# must be a valid DNS label.
+slug_validator = RegexValidator(
+    r"^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+    _("Use lowercase letters, numbers and hyphens (up to 63 characters, not starting or ending with a hyphen)."),
+)
+
 RESERVED_SLUGS = {
     "admin",
     "api",
+    "app",
+    "assets",
+    "blog",
     "camping",
     "campings",
+    "cdn",
+    "docs",
+    "ftp",
+    "help",
+    "imap",
     "login",
     "logout",
+    "mail",
     "media",
     "panel",
+    "pop",
     "signup",
+    "smtp",
     "static",
+    "status",
     "superadmin",
+    "support",
+    "webmail",
+    "www",
 }
 
 NON_NEGATIVE = [MinValueValidator(Decimal("0"))]
@@ -52,8 +74,8 @@ def photo_upload_to(instance, filename):
     return f"campings/{instance.camping_id}/photos/{filename}"
 
 
-def unique_slug(value, model, exclude_pk=None, max_length=70):
-    base = slugify(value)[:max_length].strip("-") or "camping"
+def unique_slug(value, model, exclude_pk=None, max_length=55):
+    base = slugify(value).replace("_", "-")[:max_length].strip("-") or "camping"
     if base in RESERVED_SLUGS:
         base = f"{base}-camping"
     slug, n = base, 2
@@ -72,6 +94,7 @@ class Camping(models.Model):
         _("web address"),
         max_length=80,
         unique=True,
+        validators=[slug_validator],
         help_text=_("Part of the address of your public page. Lowercase letters, numbers and hyphens."),
     )
     tagline = TranslatedField(_("tagline"), max_chars=180, help_text=_("A short sentence shown under the name."))
@@ -168,6 +191,14 @@ class Camping(models.Model):
         validators=[domain_validator],
         help_text=_("Optional, e.g. www.mycamping.com. Point its DNS to the platform first."),
     )
+    # Set on the first secure visit through ``custom_domain``: from then on
+    # links and the platform address lead to the camping's own domain.
+    domain_verified_at = models.DateTimeField(_("domain working since"), null=True, blank=True, editable=False)
+    show_platform_credit = models.BooleanField(
+        _("show the platform credit"),
+        default=True,
+        help_text=_("“Powered by” link in the footer of the camping's website."),
+    )
 
     created_at = models.DateTimeField(_("created"), auto_now_add=True)
     updated_at = models.DateTimeField(_("updated"), auto_now=True)
@@ -202,6 +233,26 @@ class Camping(models.Model):
 
     def get_absolute_url(self):
         return reverse("public:camping_detail", kwargs={"slug": self.slug})
+
+    @property
+    def site_host(self):
+        """Host of the camping's own website, or "" if it lives on the platform."""
+        if self.custom_domain and self.domain_verified_at:
+            return self.custom_domain
+        if settings.CAMPING_DOMAIN_SUFFIX:
+            return f"{self.slug}.{settings.CAMPING_DOMAIN_SUFFIX}"
+        return ""
+
+    @property
+    def site_url(self):
+        """``https://host`` of the camping's own website (no trailing slash) or ""."""
+        host = self.site_host
+        return f"{settings.CAMPING_URL_SCHEME}://{host}" if host else ""
+
+    @property
+    def domain_pending(self):
+        """The own domain is configured but no visit has arrived through it yet."""
+        return bool(self.custom_domain and not self.domain_verified_at)
 
     def t(self, field_name):
         """Translated value of a TranslatedField in the active language."""

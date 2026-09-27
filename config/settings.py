@@ -35,22 +35,34 @@ _default_hosts = ["localhost", "127.0.0.1", "[::1]"]
 if FLY_APP_NAME:
     _default_hosts.append(f"{FLY_APP_NAME}.fly.dev")
 
-# Hosts that serve the whole platform (directory, panel, admin).
+# Hosts of the platform itself: panel for every camping, super-admin and
+# the sites of campings that do not have their own address yet.
 PLATFORM_HOSTS = env.list("ALLOWED_HOSTS", default=_default_hosts)
 if TESTING:
     PLATFORM_HOSTS.append("testserver")
 
-# Campings may point their own domain to the app, so Django's own host check
-# is delegated to core.middleware.HostRoutingMiddleware, which accepts
-# PLATFORM_HOSTS plus the custom domains stored in the database.
+# Every camping is served on its own domain (and optionally on a subdomain),
+# so Django's own host check is delegated to
+# core.middleware.HostRoutingMiddleware, which accepts PLATFORM_HOSTS plus
+# the camping addresses stored in the database.
 ALLOWED_HOSTS = ["*"]
 
 PLATFORM_NAME = env("PLATFORM_NAME", default="Campings Suite")
-# Absolute base URL of the platform, used for links in e-mails and on
-# custom-domain sites (e.g. https://campings-suite.fly.dev).
+# Absolute base URL of the platform, used for links in e-mails
+# (e.g. https://campings-suite.fly.dev).
 PLATFORM_URL = env("PLATFORM_URL", default=f"https://{FLY_APP_NAME}.fly.dev" if FLY_APP_NAME else "").rstrip("/")
+# Where the optional "Powered by" credit on camping websites points to.
+PLATFORM_CREDIT_URL = env("PLATFORM_CREDIT_URL", default=PLATFORM_URL)
 
-SIGNUP_ENABLED = env.bool("SIGNUP_ENABLED", default=True)
+# Optional: give every camping https://<slug>.<CAMPING_DOMAIN_SUFFIX> from day
+# one (needs a wildcard DNS record and certificate, see README). A camping's
+# own domain always takes precedence once it is receiving visits.
+CAMPING_DOMAIN_SUFFIX = env("CAMPING_DOMAIN_SUFFIX", default="").strip().lower().strip(".")
+CAMPING_URL_SCHEME = env("CAMPING_URL_SCHEME", default="http" if DEBUG and not TESTING else "https")
+
+# Campings are sold one by one: the platform administrators create them from
+# the panel. SIGNUP_ENABLED=true lets campings create their own account.
+SIGNUP_ENABLED = env.bool("SIGNUP_ENABLED", default=False)
 SIGNUP_REQUIRES_APPROVAL = env.bool("SIGNUP_REQUIRES_APPROVAL", default=True)
 MAX_PHOTOS_PER_CAMPING = env.int("MAX_PHOTOS_PER_CAMPING", default=80)
 MAX_UPLOAD_MB = env.int("MAX_UPLOAD_MB", default=20)

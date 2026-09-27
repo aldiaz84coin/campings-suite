@@ -1,8 +1,8 @@
 {% extends "panel/auth/base.html" %}
 {% load i18n %}
-{% block title %}{% translate "Sign in" %} · {{ PLATFORM_NAME }}{% endblock %}
+{% block title %}{% translate "Sign in" %} · {{ SITE_NAME }}{% endblock %}
 {% block content %}
-<h1>{% translate "Camping area" %}</h1>
+<h1>{% if site_camping %}{% translate "Staff access" %}{% else %}{% translate "Camping area" %}{% endif %}</h1>
 <p class="muted">{% translate "Sign in to manage your camping's page, prices and booking requests." %}</p>
 {% include "partials/form_errors.html" %}
 <form method="post" novalidate>

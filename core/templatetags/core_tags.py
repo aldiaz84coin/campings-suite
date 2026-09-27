@@ -12,7 +12,7 @@ from django.utils.translation import get_language
 
 from core.formatting import format_money
 from core.i18n import language_name, translate_value
-from core.urlutils import camping_reverse
+from core.urlutils import camping_public_url, camping_reverse
 
 register = template.Library()
 
@@ -58,6 +58,12 @@ def language_links(context):
 @register.simple_tag(takes_context=True)
 def camping_url(context, name, camping, **kwargs):
     return camping_reverse(context.get("request"), name, camping, **kwargs)
+
+
+@register.simple_tag(takes_context=True)
+def public_url(context, camping, name="public:camping_detail", absolute=False, **kwargs):
+    """Link to a camping's website from the panel: its own address when it has one."""
+    return camping_public_url(context.get("request"), camping, name, absolute=absolute, **kwargs)
 
 
 @register.simple_tag(takes_context=True)

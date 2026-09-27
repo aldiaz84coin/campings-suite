@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load i18n static core_tags %}
+{% block title %}{{ camping.name }}{% endblock %}
+{% block styles %}<link rel="stylesheet" href="{% static 'css/site.css' %}">{% endblock %}
+{% block meta %}{% if camping.logo %}<link rel="icon" href="{{ camping.logo.url }}">{% endif %}<meta name="theme-color" content="{{ camping.primary_color }}">{% endblock %}
+{% block body_class %}camping-site font-{{ camping.font_style }}{% endblock %}
+{% block body_attrs %} style="--primary: {{ camping.primary_color }}; --on-primary: {{ camping.primary_color|contrast_text }}; --accent: {{ camping.accent_color }}; --on-accent: {{ camping.accent_color|contrast_text }};"{% endblock %}
+{% block body %}
+<main id="main" class="coming-soon">
+  <div class="coming-soon__card">
+    {% if camping.logo %}<img class="coming-soon__logo" src="{{ camping.logo.url }}" alt="">{% else %}<span class="coming-soon__mark">{% icon "tent" %}</span>{% endif %}
+    <h1>{{ camping.name }}</h1>
+    <p class="coming-soon__lead">{% translate "Our new website is coming soon." %}</p>
+    {% with tagline=camping.tagline|tr %}{% if tagline %}<p>{{ tagline }}</p>{% endif %}{% endwith %}
+    <ul class="contact-list" role="list">
+      {% if camping.phone %}<li><a href="tel:{{ camping.phone|cut:' ' }}">{% icon "phone" %}<span>{{ camping.phone }}</span></a></li>{% endif %}
+      {% if camping.whatsapp %}<li><a href="https://wa.me/{{ camping.whatsapp|digits }}" rel="noopener" target="_blank">{% icon "whatsapp" %}<span>WhatsApp</span></a></li>{% endif %}
+      {% if camping.email %}<li><a href="mailto:{{ camping.email }}">{% icon "mail" %}<span>{{ camping.email }}</span></a></li>{% endif %}
+    </ul>
+    {% if camping.city %}<p class="coming-soon__address">{% icon "map-pin" %} {{ camping.city }}{% if camping.region %}, {{ camping.region }}{% endif %}</p>{% endif %}
+    <div class="coming-soon__foot">
+      {% include "partials/language_switcher.html" %}
+      <a href="{% url 'panel:login' %}">{% translate "Staff access" %}</a>
+    </div>
+  </div>
+</main>
+{% endblock %}

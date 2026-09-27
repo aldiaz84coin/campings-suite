@@ -4,7 +4,7 @@
 {% block content %}
 <div class="page-header">
   <div><h1>{% translate "My campings" %}</h1><p class="muted">{% translate "Choose the camping you want to manage." %}</p></div>
-  {% if user.is_superuser %}<a class="btn btn-primary" href="{% url 'panel:platform_new' %}">{% icon "plus" %}<span>{% translate "New camping" %}</span></a>{% endif %}
+  {% if user.is_superuser and not on_custom_domain %}<a class="btn btn-primary" href="{% url 'panel:platform_new' %}">{% icon "plus" %}<span>{% translate "New camping" %}</span></a>{% endif %}
 </div>
 {% if campings %}
 <div class="tile-grid">
@@ -19,8 +19,14 @@
 {% else %}
 <div class="card empty-state">
   {% icon "tent" "icon-xl" %}
-  <p>{% translate "You don't manage any camping yet." %}</p>
-  {% if SIGNUP_ENABLED %}<p class="small">{% translate "Ask the owner of your camping to invite you from the Team section." %}</p>{% endif %}
+  {% if site_camping_denied %}
+    <p>{% blocktranslate with camping=site_camping_denied.name %}Your account cannot manage {{ camping }}.{% endblocktranslate %}</p>
+    <p class="small">{% translate "Sign in with the account of this camping or ask its owner to invite you from the Team section." %}</p>
+    <form method="post" action="{% url 'panel:logout' %}">{% csrf_token %}<button class="btn btn-outline btn-sm" type="submit">{% icon "log-out" %}<span>{% translate "Sign out" %}</span></button></form>
+  {% else %}
+    <p>{% translate "You don't manage any camping yet." %}</p>
+    <p class="small">{% translate "Ask the owner of your camping to invite you from the Team section." %}</p>
+  {% endif %}
 </div>
 {% endif %}
 {% endblock %}

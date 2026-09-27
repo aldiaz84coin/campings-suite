@@ -36,7 +36,7 @@
     <tbody>
       {% for booking in bookings %}
       <tr data-href="{% url 'panel:booking_detail' slug=camping.slug pk=booking.pk %}">
-        <td><a href="{% url 'panel:booking_detail' slug=camping.slug pk=booking.pk %}"><strong>{{ booking.name }}</strong></a><small class="muted d-block">{{ booking.reference }}{% if booking.source == "manual" %} · {% translate "panel" %}{% endif %}</small></td>
+        <td><a href="{% url 'panel:booking_detail' slug=camping.slug pk=booking.pk %}"><strong>{{ booking.name }}</strong></a><small class="muted d-block">{{ booking.reference }}{% if booking.source == "manual" %} · {% translate "manual" context "booking source" %}{% endif %}</small></td>
         <td class="nowrap">{{ booking.arrival|date:"j M" }} → {{ booking.departure|date:"j M Y" }}<small class="muted d-block">{% blocktranslate count counter=booking.nights %}{{ counter }} night{% plural %}{{ counter }} nights{% endblocktranslate %}</small></td>
         <td>{{ booking.accommodation_name }}{% if booking.units > 1 %} <span class="badge badge--muted">× {{ booking.units }}</span>{% endif %}</td>
         <td class="nowrap">{% icon "users" %} {{ booking.guests }}{% if booking.pets %} · {% icon "dog" %} {{ booking.pets }}{% endif %}</td>

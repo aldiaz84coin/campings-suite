@@ -6,13 +6,11 @@
 {% block body %}
 <header class="site-header">
   <div class="container site-header__inner">
-    <a class="brand" href="{% url 'public:home' %}">
+    <a class="brand" href="{% url 'panel:home' %}">
       <span class="brand__mark">{% icon "tent" %}</span>
       <span class="brand__name">{{ PLATFORM_NAME }}</span>
     </a>
     <nav class="site-nav" aria-label="{% translate 'Main menu' %}">
-      <a class="site-nav__link hide-sm" href="{% url 'public:home' %}#campings">{% translate "Campings" %}</a>
-      {% if SIGNUP_ENABLED and not user.is_authenticated %}<a class="site-nav__link hide-sm" href="{% url 'panel:signup' %}">{% translate "List your camping" %}</a>{% endif %}
       <a class="btn btn-ghost btn-sm" href="{% url 'panel:home' %}">{% icon "log-in" %}<span>{% if user.is_authenticated %}{% translate "My panel" %}{% else %}{% translate "Camping area" %}{% endif %}</span></a>
       {% include "partials/language_switcher.html" %}
     </nav>
@@ -23,13 +21,8 @@
 </main>
 <footer class="site-footer">
   <div class="container site-footer__inner">
-    <div>
-      <a class="brand brand--footer" href="{% url 'public:home' %}"><span class="brand__mark">{% icon "tent" %}</span><span class="brand__name">{{ PLATFORM_NAME }}</span></a>
-      <p class="muted">{% translate "Campings, bungalows and glamping with direct booking requests." %}</p>
-    </div>
+    <a class="brand brand--footer" href="{% url 'panel:home' %}"><span class="brand__mark">{% icon "tent" %}</span><span class="brand__name">{{ PLATFORM_NAME }}</span></a>
     <nav class="site-footer__links" aria-label="{% translate 'Footer' %}">
-      <a href="{% url 'public:home' %}">{% translate "Campings" %}</a>
-      {% if SIGNUP_ENABLED %}<a href="{% url 'panel:signup' %}">{% translate "List your camping" %}</a>{% endif %}
       <a href="{% url 'panel:login' %}">{% translate "Camping area" %}</a>
       <a href="{% url 'public:privacy' %}">{% translate "Privacy" %}</a>
     </nav>

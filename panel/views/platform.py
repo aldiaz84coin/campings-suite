@@ -15,13 +15,14 @@ from bookings.models import BookingRequest
 from campings.models import Camping, Membership
 
 from ..forms import PlatformCampingForm
-from ..utils import panel_render
+from ..utils import panel_render, platform_only
 from .team import invite_user
 
 
 def superuser_required(view):
     @wraps(view)
     def wrapper(request, *args, **kwargs):
+        platform_only(request)
         if not request.user.is_authenticated:
             return redirect_to_login(request.get_full_path())
         if not request.user.is_superuser:
@@ -71,6 +72,7 @@ def platform_new(request):
                 default_language=language,
                 languages=[language, "en"] if language != "en" else ["en", "es"],
                 email=form.cleaned_data["owner_email"],
+                custom_domain=form.cleaned_data["custom_domain"],
                 is_approved=True,
             )
             _membership, link = invite_user(
@@ -85,7 +87,8 @@ def platform_new(request):
             messages.info(
                 request, _("Send this link to the owner so they can choose a password: %(link)s") % {"link": link}
             )
-        return redirect("panel:platform")
+        # Its settings show the web address and, with an own domain, the DNS steps.
+        return redirect("panel:settings", slug=camping.slug)
     return panel_render(request, "panel/platform_new.html", {"form": form}, section="platform")
 
 

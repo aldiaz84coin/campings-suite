@@ -9,7 +9,7 @@
       <p>{% blocktranslate with name=camping.name %}The data you send through the booking form is received by {{ name }}, which is responsible for processing it in order to answer your request and manage your stay.{% endblocktranslate %}</p>
       {% if camping.email %}<p>{% blocktranslate with email=camping.email %}You can exercise your rights of access, rectification and erasure by writing to {{ email }}.{% endblocktranslate %}</p>{% endif %}
     {% else %}
-      <p>{% blocktranslate with platform=PLATFORM_NAME %}{{ platform }} hosts the websites of the campings listed here. When you send a booking request, your data is passed to the camping you contact, which is responsible for processing it.{% endblocktranslate %}</p>
+      <p>{% blocktranslate with platform=PLATFORM_NAME %}{{ platform }} provides the websites and booking tools of the campings that use it. When you send a booking request through a camping's website, your data is passed to that camping, which is responsible for processing it.{% endblocktranslate %}</p>
     {% endif %}
     <h2>{% translate "What data we collect" %}</h2>
     <p>{% translate "Your name, e-mail address, phone number, country, the details of your stay and your message. We only use them to handle your request." %}</p>

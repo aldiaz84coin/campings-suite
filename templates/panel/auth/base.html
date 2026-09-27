@@ -2,10 +2,15 @@
 {% load i18n static core_tags %}
 {% block styles %}<link rel="stylesheet" href="{% static 'css/panel.css' %}">{% endblock %}
 {% block body_class %}auth-page{% endblock %}
+{% block body_attrs %}{% if site_camping %} style="--primary: {{ site_camping.primary_color }}; --on-primary: {{ site_camping.primary_color|contrast_text }}; --accent: {{ site_camping.accent_color }}; --on-accent: {{ site_camping.accent_color|contrast_text }};"{% endif %}{% endblock %}
 {% block body %}
 <div class="auth-shell">
   <header class="auth-header">
-    <a class="brand" href="{% url 'public:home' %}"><span class="brand__mark">{% icon "tent" %}</span><span class="brand__name">{{ PLATFORM_NAME }}</span></a>
+    {% if site_camping %}
+      <a class="brand" href="{% url 'public:home' %}">{% if site_camping.logo %}<img class="brand__logo" src="{{ site_camping.logo.url }}" alt="">{% else %}<span class="brand__mark">{% icon "tent" %}</span>{% endif %}<span class="brand__name">{{ site_camping.name }}</span></a>
+    {% else %}
+      <a class="brand" href="{% url 'public:home' %}"><span class="brand__mark">{% icon "tent" %}</span><span class="brand__name">{{ PLATFORM_NAME }}</span></a>
+    {% endif %}
     {% include "partials/language_switcher.html" %}
   </header>
   <main id="main" class="auth-main">

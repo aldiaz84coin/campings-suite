@@ -12,11 +12,12 @@ from django.urls import reverse, reverse_lazy, translate_url
 from django.utils.translation import get_language
 from django.utils.translation import gettext as _
 
-from bookings.emails import platform_url
+from bookings.emails import sender_for
 from campings.models import Camping, Membership
+from core.urlutils import platform_url, request_camping_id
 
 from ..forms import AccountForm, EmailAuthenticationForm, PanelPasswordResetForm, SignupForm
-from ..utils import panel_render
+from ..utils import panel_render, platform_only
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -36,7 +37,9 @@ class LoginView(auth_views.LoginView):
 
 
 class LogoutView(auth_views.LogoutView):
-    next_page = reverse_lazy("public:home")
+    def get_default_redirect_url(self):
+        # Back to the camping's website on its own address, else to the login.
+        return reverse("public:home" if request_camping_id(self.request) else "panel:login")
 
 
 class PasswordResetView(auth_views.PasswordResetView):
@@ -45,7 +48,13 @@ class PasswordResetView(auth_views.PasswordResetView):
     email_template_name = "emails/password_reset.txt"
     subject_template_name = "emails/password_reset_subject.txt"
     success_url = reverse_lazy("panel:password_reset_done")
-    extra_email_context = {"platform_name": settings.PLATFORM_NAME}
+
+    def form_valid(self, form):
+        camping = Camping.objects.filter(pk=request_camping_id(self.request)).first()
+        self.extra_email_context = {"platform_name": camping.name if camping else settings.PLATFORM_NAME}
+        if camping:
+            self.from_email = sender_for(camping)
+        return super().form_valid(form)
 
 
 class PasswordResetDoneView(auth_views.PasswordResetDoneView):
@@ -74,6 +83,7 @@ class PasswordChangeView(auth_views.PasswordChangeView):
 
 
 def signup(request):
+    platform_only(request)
     if not settings.SIGNUP_ENABLED:
         raise Http404("Sign-up is disabled")
     if request.user.is_authenticated:

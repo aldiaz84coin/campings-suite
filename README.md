@@ -1,57 +1,88 @@
 # Campings Suite
 
-Plataforma para gestionar campings. Cada camping tiene un **área privada** desde
-la que personaliza su **web pública**: fotos, instalaciones, alojamientos,
-precios por temporada, servicios y políticas de reserva. Los visitantes ven un
-presupuesto al instante y envían **solicitudes de reserva** que el camping
-confirma o rechaza desde su panel.
+Web y back-office para campings, pensado para **venderse camping a camping**:
+cada camping cliente tiene **su propia web en su propio dominio**
+(`www.sucamping.com`) y **su propio panel** (`www.sucamping.com/es/panel/`)
+desde el que gestiona fotos, instalaciones, alojamientos, precios por
+temporada, servicios, políticas y reservas. No hay directorio ni buscador
+público: la web de cada camping es independiente y solo muestra ese camping.
 
-Todo es **multiidioma** (español, inglés, francés, alemán, neerlandés e italiano)
-y está preparado para desplegarse en **Fly.io** con una **base de datos
-PostgreSQL gratuita** (Supabase o Neon) y CI/CD con **Buddy**.
+Una sola instalación (una app en **Fly.io** y una base de datos **PostgreSQL
+gratuita**, con CI/CD en **Buddy**) da servicio a todos los campings que
+vendas; cada uno solo ve y gestiona lo suyo. Todo es **multiidioma** (español,
+inglés, francés, alemán, neerlandés e italiano).
+
+## Cómo se da de alta un camping vendido
+
+1. **Crea el camping** en *Panel → Plataforma → Nuevo camping*: nombre, correo
+   del propietario, idioma principal y, si ya lo sabes, su dominio. El
+   propietario recibe un correo con un enlace para elegir su contraseña (el
+   enlace también se muestra en pantalla por si prefieres enviarlo tú).
+2. **Conecta su dirección web** (ver [Direcciones de los campings](#6-direcciones-de-los-campings)):
+   - con **dominio propio**: `fly certs add www.sucamping.com` y el camping (o
+     tú) crea el registro DNS que indican los *Ajustes* del camping;
+   - mientras tanto, o si no tiene dominio: un **subdominio automático**
+     `sucamping.tudominio.com` (si configuras `CAMPING_DOMAIN_SUFFIX`) o la
+     dirección de la plataforma `https://tu-app.fly.dev/es/camping/sucamping/`.
+3. **El camping completa su web** desde el panel (tiene una lista de pasos) y
+   la **publica**. Hasta entonces su dominio muestra una página «Próximamente»
+   con su teléfono y correo.
+4. En cuanto llega la primera visita por su dominio propio, este pasa a ser su
+   dirección oficial: las direcciones anteriores redirigen a él (301), y los
+   enlaces del panel y de los correos lo usan.
+5. Por camping, como administrador puedes además ocultar el crédito «Powered
+   by» (marca blanca) o **suspenderlo** (por ejemplo por impago): su web deja
+   de verse pero su panel sigue funcionando.
 
 ## Qué incluye
 
-**Web pública** (`/es/`, `/en/`, `/fr/`…)
+**Web de cada camping** (en la raíz de su dominio: `/es/`, `/en/`, `/fr/`…)
 
-- Directorio de campings con buscador, filtro por región y por instalaciones.
-- Página de cada camping: portada, galería con visor, alojamientos (capacidad,
-  superficie, equipamiento, fotos), instalaciones por categorías, tabla de
-  precios por temporada, servicios y extras, políticas de reserva, mapa y
-  contacto.
+- Portada, galería con visor, alojamientos (capacidad, superficie,
+  equipamiento, fotos), instalaciones por categorías, tabla de precios por
+  temporada, servicios y extras, políticas de reserva, mapa y contacto, con
+  los colores, logotipo y tipografía del camping.
 - Formulario de solicitud de reserva con **presupuesto en vivo** (temporadas,
   precio por persona, tasa turística, mascotas, extras opcionales, estancia
   mínima, periodo de apertura y disponibilidad).
-- Correos automáticos al camping y al cliente, cada uno en su idioma.
-- SEO: `hreflang`, `sitemap.xml`, `robots.txt`, Open Graph y datos
-  estructurados schema.org `Campground`.
-- **Dominio propio** opcional por camping (`www.micamping.com`).
+- Correos automáticos al camping y al cliente, cada uno en su idioma; los del
+  cliente salen **a nombre del camping** y las respuestas le llegan a él.
+- SEO propio de cada dominio: `sitemap.xml`, `robots.txt`, `hreflang`,
+  `canonical`, Open Graph y datos estructurados schema.org `Campground`.
+- Página «Próximamente» mientras la web no está publicada.
 
-**Área de cada camping** (`/es/panel/`)
+**Panel de cada camping** (`/es/panel/` en su propio dominio; también en el
+dominio de la plataforma)
 
-- Panel con lista de pasos para completar la página y últimas solicitudes.
+- Inicio con la ocupación de hoy (llegadas, salidas, huéspedes), lista de pasos
+  para completar la web y últimas solicitudes.
 - Descripción y contacto, ubicación (mapa) y periodo de apertura.
 - Fotos: subida múltiple desde el móvil (JPG, PNG, WebP, HEIC), conversión
   automática a WebP, orden arrastrando, foto principal y pies de foto por idioma.
 - Apariencia: logotipo, colores (con combinaciones sugeridas) y tipografía,
   con vista previa.
-- Instalaciones (catálogo de 46 + personalizadas), tipos de alojamiento,
-  servicios y extras (siempre cobrados, opcionales o incluidos), temporadas
-  (con copia al año siguiente) y **tabla de precios** por temporada.
+- Instalaciones (catálogo de 46 + personalizadas), tipos de alojamiento (con
+  número de unidades), servicios y extras (siempre cobrados, opcionales o
+  incluidos), temporadas (con copia al año siguiente) y **tabla de precios**
+  por temporada.
 - Políticas de reserva: horarios, estancia mínima/máxima, depósito, formas de
   pago, cancelación, mascotas y normas.
-- Solicitudes de reserva: filtros, detalle, aviso de disponibilidad,
-  confirmar/rechazar con correo al cliente.
+- Reservas: solicitudes de la web (confirmar/rechazar con correo al cliente),
+  **reservas manuales** (teléfono, mostrador…) con precio pactado opcional,
+  varias unidades por reserva, aviso de *overbooking*, **calendario de
+  ocupación** mensual, filtros y **exportación a CSV**.
 - Equipo: invitar personas (propietario o personal) con enlace para elegir
   contraseña.
 - Ajustes: dirección web, idiomas de la página, moneda y avisos de reservas.
 
-**Plataforma**
+**Plataforma** (para ti, en el dominio de la plataforma)
 
-- Registro de campings (opcional, con aprobación previa).
-- Sección *Plataforma* para superusuarios: todos los campings, alta de un
-  camping con su propietario, aprobar/suspender.
+- Sección *Plataforma* para superusuarios: todos los campings con su dirección
+  y estado, alta de campings con su propietario, suspender/reactivar.
+- En los *Ajustes* de cada camping: dominio propio (con su estado y los pasos
+  de DNS) y crédito «Powered by».
 - Administración completa de Django en `/superadmin/`.
+- Registro público de campings desactivado por defecto (`SIGNUP_ENABLED`).
 
 ## Tecnología
 
@@ -74,10 +105,18 @@ python manage.py createsuperuser
 python manage.py runserver
 ```
 
-- Web pública: <http://localhost:8000/es/>
-- Camping de ejemplo: <http://localhost:8000/es/camping/los-pinos-demo/>
-- Área de campings: <http://localhost:8000/es/panel/> (`demo@example.com` / `demo12345`)
+- Web del camping de ejemplo: <http://localhost:8000/es/camping/los-pinos-demo/>
+- Su panel: <http://localhost:8000/es/panel/> (`demo@example.com` / `demo12345`)
 - Superadmin: <http://localhost:8000/superadmin/>
+
+Para probar las direcciones propias en local:
+
+- **Subdominios**: con `CAMPING_DOMAIN_SUFFIX=localhost:8000` en `.env`, el
+  camping de ejemplo está en <http://los-pinos-demo.localhost:8000/es/> (los
+  navegadores resuelven `*.localhost` solos).
+- **Dominio propio**: añade `127.0.0.1 www.micamping.test` a `/etc/hosts`,
+  escribe `www.micamping.test` como dominio en los *Ajustes* del camping (con
+  un superusuario) y abre <http://www.micamping.test:8000/es/>.
 
 Tests (usan SQLite en memoria):
 
@@ -167,17 +206,35 @@ y despliega en Fly.io (`flyctl deploy --remote-only`, el build se hace en Fly):
    variable secreta `FLY_API_TOKEN`.
 3. Haz *push* a `main`.
 
-### 6. Dominios
+### 6. Direcciones de los campings
 
-- **Dominio de la plataforma** (p. ej. `campings.midominio.com`):
-  `fly certs add campings.midominio.com`, crea los registros DNS que indica Fly
-  y define `ALLOWED_HOSTS` y `PLATFORM_URL`:
-  `fly secrets set ALLOWED_HOSTS=campings.midominio.com,tu-app-campings.fly.dev PLATFORM_URL=https://campings.midominio.com`.
-- **Dominio propio de un camping** (p. ej. `www.micamping.com`): un superusuario
-  lo escribe en *Ajustes* del camping, ejecuta `fly certs add www.micamping.com`
-  y el camping crea el registro DNS (CNAME a `tu-app-campings.fly.dev`). La web
-  del camping se sirve entonces en la raíz de su dominio (y
-  `micamping.com` redirige a `www`).
+Todas las direcciones apuntan a la misma app; el middleware
+`core.middleware.HostRoutingMiddleware` decide qué camping sirve cada una.
+
+- **Dominio de la plataforma** (tu panel, p. ej. `app.tuempresa.com`):
+  `fly certs add app.tuempresa.com`, crea los registros DNS que indica Fly y
+  define `ALLOWED_HOSTS` y `PLATFORM_URL`:
+  `fly secrets set ALLOWED_HOSTS=app.tuempresa.com,tu-app-campings.fly.dev PLATFORM_URL=https://app.tuempresa.com`.
+- **Subdominio automático para cada camping** (opcional, p. ej.
+  `sucamping.campings.tuempresa.com`): crea un registro DNS comodín
+  `*.campings.tuempresa.com` de tipo CNAME a `tu-app-campings.fly.dev`, pide el
+  certificado comodín con `fly certs add "*.campings.tuempresa.com"` (Fly te
+  indicará un registro `_acme-challenge` para validarlo) y activa
+  `fly secrets set CAMPING_DOMAIN_SUFFIX=campings.tuempresa.com`. El subdominio
+  de cada camping es su «dirección web» de *Ajustes* (sin guiones bajos).
+- **Dominio propio de un camping** (p. ej. `www.sucamping.com`):
+  1. Escríbelo al crear el camping o en sus *Ajustes* (solo superusuarios).
+  2. `fly certs add www.sucamping.com` (y `fly certs add sucamping.com` si
+     quieres que el dominio sin `www` redirija a `www`).
+  3. El camping crea un CNAME de `www` a `tu-app-campings.fly.dev` (para el
+     dominio sin `www`, los registros A y AAAA que muestra `fly ips list`).
+  4. Cuando `fly certs show www.sucamping.com` indique que el certificado está
+     emitido, abre `https://www.sucamping.com` una vez: esa visita lo activa y
+     desde entonces es la dirección oficial del camping. Sus *Ajustes* muestran
+     en todo momento si está pendiente o funcionando.
+
+Consulta en la documentación de Fly el precio de los certificados si vas a
+gestionar muchos dominios.
 
 ## Variables de entorno
 
@@ -186,12 +243,14 @@ y despliega en Fly.io (`flyctl deploy --remote-only`, el build se hace en Fly):
 | `SECRET_KEY` | — (obligatoria en producción) | Clave secreta de Django. |
 | `DEBUG` | `False` | Solo en local. |
 | `DATABASE_URL` | SQLite `db.sqlite3` | URL de PostgreSQL. |
-| `ALLOWED_HOSTS` | `localhost`, `<app>.fly.dev` | Dominios de la plataforma (separados por comas). |
+| `ALLOWED_HOSTS` | `localhost`, `<app>.fly.dev` | Dominios de la plataforma (separados por comas). Los dominios de los campings no hace falta añadirlos: se leen de la base de datos. |
 | `PLATFORM_URL` | `https://<app>.fly.dev` | URL pública de la plataforma (enlaces en correos). |
-| `PLATFORM_NAME` | `Campings Suite` | Nombre de la plataforma. |
+| `PLATFORM_NAME` | `Campings Suite` | Nombre del producto (panel y crédito «Powered by»). |
+| `PLATFORM_CREDIT_URL` | `PLATFORM_URL` | Adónde enlaza el crédito «Powered by» de las webs de los campings. |
+| `CAMPING_DOMAIN_SUFFIX` | — | Activa los subdominios automáticos `<camping>.<sufijo>`. |
 | `LANGUAGE_CODE` / `TIME_ZONE` | `es` / `Europe/Madrid` | Idioma por defecto y zona horaria. |
-| `SIGNUP_ENABLED` | `True` | Permitir que los campings se registren solos. |
-| `SIGNUP_REQUIRES_APPROVAL` | `True` | Los campings registrados no son públicos hasta que un superusuario los aprueba. |
+| `SIGNUP_ENABLED` | `False` | Permitir que los campings se registren solos (por defecto los creas tú). |
+| `SIGNUP_REQUIRES_APPROVAL` | `True` | Con el registro activado, los campings nuevos no son públicos hasta que un superusuario los aprueba. |
 | `MEDIA_STORAGE` | `db` en producción, `local` con `DEBUG` | `db`, `s3` o `local`. |
 | `BUCKET_NAME` / `AWS_STORAGE_BUCKET_NAME`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_ENDPOINT_URL_S3` / `AWS_S3_ENDPOINT_URL`, `AWS_REGION` / `AWS_S3_REGION_NAME` | — | Bucket S3 compatible. |
 | `MEDIA_PUBLIC_DOMAIN` | — | Dominio (y ruta) públicos del bucket, sin `https://`. |
@@ -230,14 +289,14 @@ y despliega en Fly.io (`flyctl deploy --remote-only`, el build se hace en Fly):
 ## Estructura
 
 ```
-config/     ajustes, URLs (plataforma y dominios propios), WSGI
-core/       campos multiidioma, almacenamiento en BD, imágenes, middleware de dominios
+config/     ajustes, URLs (plataforma y direcciones propias de cada camping), WSGI
+core/       campos multiidioma, almacenamiento en BD, imágenes, middleware de direcciones
 accounts/   usuario con login por correo
 campings/   modelos (camping, fotos, instalaciones, alojamientos, temporadas,
             servicios, políticas), catálogos y motor de precios
 bookings/   solicitudes de reserva, formularios y correos
-public/     web pública, sitemap y robots
-panel/      área privada de cada camping y sección de plataforma
+public/     web de cada camping, sitemap y robots
+panel/      panel de cada camping y sección de plataforma
 templates/  plantillas HTML y de correo
 static/     CSS, JavaScript e iconos (Lucide, Simple Icons)
 locale/     traducciones

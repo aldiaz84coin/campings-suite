@@ -9,7 +9,7 @@
 {% if is_preview %}
 <div class="preview-banner" role="note">
   {% icon "eye" %}<span>{% translate "Preview: this page is not visible to the public yet." %}</span>
-  {% if not on_custom_domain %}<a href="{% url 'panel:dashboard' slug=camping.slug %}">{% translate "Back to the panel" %}</a>{% endif %}
+  <a href="{% url 'panel:dashboard' slug=camping.slug %}">{% translate "Back to the panel" %}</a>
 </div>
 {% endif %}
 <header class="camping-header" data-header>
@@ -54,7 +54,7 @@
   </div>
   <div class="container camping-footer__bottom">
     <a href="{% camping_url 'public:camping_privacy' camping %}">{% translate "Privacy" %}</a>
-    <span>{% if on_custom_domain and PLATFORM_URL %}<a href="{{ PLATFORM_URL }}" rel="noopener">{% blocktranslate with platform=PLATFORM_NAME %}Powered by {{ platform }}{% endblocktranslate %}</a>{% elif on_custom_domain %}{% blocktranslate with platform=PLATFORM_NAME %}Powered by {{ platform }}{% endblocktranslate %}{% else %}<a href="{% url 'public:home' %}">{% blocktranslate with platform=PLATFORM_NAME %}Powered by {{ platform }}{% endblocktranslate %}</a>{% endif %}</span>
+    {% if camping.show_platform_credit %}<span>{% blocktranslate with platform=PLATFORM_NAME asvar credit %}Powered by {{ platform }}{% endblocktranslate %}{% if PLATFORM_CREDIT_URL %}<a href="{{ PLATFORM_CREDIT_URL }}" rel="noopener">{{ credit }}</a>{% else %}{{ credit }}{% endif %}</span>{% endif %}
   </div>
 </footer>
 <dialog class="lightbox" data-lightbox-dialog aria-label="{% translate 'Photo viewer' %}">

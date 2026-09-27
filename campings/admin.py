@@ -46,6 +46,7 @@ class CampingAdmin(admin.ModelAdmin):
     list_editable = ("is_approved",)
     search_fields = ("name", "slug", "city", "region", "email", "custom_domain")
     prepopulated_fields = {"slug": ("name",)}
+    readonly_fields = ("domain_verified_at",)
     inlines = [MembershipInline, BookingPolicyInline]
     actions = ["approve", "suspend"]
 

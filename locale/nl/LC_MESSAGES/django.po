@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: campings-suite\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-27 15:10+0200\n"
+"POT-Creation-Date: 2026-09-27 20:45+0200\n"
 "PO-Revision-Date: 2026-09-27 14:51+0200\n"
 "Last-Translator: campings-suite\n"
 "Language-Team: nl\n"
@@ -76,12 +76,39 @@ msgid "Pets"
 msgstr "Huisdieren"
 
 msgid "I agree that the camping uses my data to answer this request."
-msgstr ""
-"Ik ga ermee akkoord dat de camping mijn gegevens gebruikt om deze aanvraag "
-"te beantwoorden."
+msgstr "Ik ga ermee akkoord dat de camping mijn gegevens gebruikt om deze aanvraag te beantwoorden."
 
 msgid "Leave this field empty"
 msgstr "Laat dit veld leeg"
+
+#, python-format
+msgid "%(name)s (hidden)"
+msgstr "%(name)s (verborgen)"
+
+msgid "Agreed price"
+msgstr "Afgesproken prijs"
+
+msgid "Leave it empty to use the price calculated from your price table."
+msgstr "Laat leeg om de prijs uit je prijstabel te gebruiken."
+
+msgid "Save it even if there are no free units (overbooking)"
+msgstr "Toch opslaan, ook zonder vrije eenheden (overboeking)"
+
+msgid "Language"
+msgstr "Taal"
+
+msgid "Language of the e-mails sent to the guest."
+msgstr "Taal van de e-mails aan de gast."
+
+msgid "Guest name"
+msgstr "Naam van de gast"
+
+msgid "The departure date must be after the arrival date."
+msgstr "De vertrekdatum moet na de aankomstdatum liggen."
+
+#, python-format
+msgid "Only %(free)s unit(s) of “%(name)s” are free for these dates. Tick the overbooking box to save it anyway."
+msgstr "Op deze data zijn maar %(free)s eenheid/eenheden van ‘%(name)s’ vrij. Vink het vakje voor overboeking aan om toch op te slaan."
 
 msgid "Arrival"
 msgstr "Aankomst"
@@ -104,6 +131,12 @@ msgstr "Afgewezen"
 msgid "Cancelled"
 msgstr "Geannuleerd"
 
+msgid "Website"
+msgstr "Website"
+
+msgid "Added in the panel"
+msgstr "Toegevoegd in het beheer"
+
 msgid "reference"
 msgstr "referentie"
 
@@ -112,6 +145,12 @@ msgstr "accommodatie"
 
 msgid "accommodation name"
 msgstr "naam van de accommodatie"
+
+msgid "units"
+msgstr "eenheden"
+
+msgid "How many units of this accommodation the stay takes up."
+msgstr "Hoeveel eenheden van deze accommodatie het verblijf in beslag neemt."
 
 msgid "arrival"
 msgstr "aankomst"
@@ -160,6 +199,9 @@ msgstr "status"
 
 msgid "internal notes"
 msgstr "interne notities"
+
+msgid "source"
+msgstr "herkomst"
 
 msgid "received"
 msgstr "ontvangen"
@@ -353,6 +395,7 @@ msgstr "Tent"
 msgid "Nature"
 msgstr "Natuur"
 
+msgctxt "icon"
 msgid "Sun"
 msgstr "Zon"
 
@@ -569,15 +612,14 @@ msgstr "Gebruik een kleurcode zoals #2f6f4e."
 msgid "Enter a domain such as www.mycamping.com (without https://)."
 msgstr "Voer een domein in zoals www.mijncamping.nl (zonder https://)."
 
+msgid "Use lowercase letters, numbers and hyphens (up to 63 characters, not starting or ending with a hyphen)."
+msgstr "Gebruik kleine letters, cijfers en koppeltekens (maximaal 63 tekens, niet beginnend of eindigend met een koppelteken)."
+
 msgid "web address"
 msgstr "webadres"
 
-msgid ""
-"Part of the address of your public page. Lowercase letters, numbers and "
-"hyphens."
-msgstr ""
-"Deel van het adres van je openbare pagina. Kleine letters, cijfers en "
-"koppeltekens."
+msgid "Part of the address of your public page. Lowercase letters, numbers and hyphens."
+msgstr "Deel van het adres van je openbare pagina. Kleine letters, cijfers en koppeltekens."
 
 msgid "tagline"
 msgstr "slogan"
@@ -672,8 +714,7 @@ msgstr "boekingsaanvragen accepteren"
 msgid "e-mail for booking requests"
 msgstr "e-mail voor boekingsaanvragen"
 
-msgid ""
-"Where new booking requests are notified. Defaults to the contact e-mail."
+msgid "Where new booking requests are notified. Defaults to the contact e-mail."
 msgstr "Waar nieuwe aanvragen worden gemeld. Standaard het contactadres."
 
 msgid "published"
@@ -689,9 +730,16 @@ msgid "own domain"
 msgstr "eigen domein"
 
 msgid "Optional, e.g. www.mycamping.com. Point its DNS to the platform first."
-msgstr ""
-"Optioneel, bv. www.mijncamping.nl. Laat eerst de DNS naar het platform "
-"wijzen."
+msgstr "Optioneel, bv. www.mijncamping.nl. Laat eerst de DNS naar het platform wijzen."
+
+msgid "domain working since"
+msgstr "domein actief sinds"
+
+msgid "show the platform credit"
+msgstr "platformvermelding tonen"
+
+msgid "“Powered by” link in the footer of the camping's website."
+msgstr "‘Powered by’-link onderaan de website van de camping."
 
 msgid "created"
 msgstr "aangemaakt"
@@ -764,8 +812,7 @@ msgid "units available"
 msgstr "beschikbare eenheden"
 
 msgid "How many of these you have. Used to check availability."
-msgstr ""
-"Hoeveel je er hebt. Wordt gebruikt om de beschikbaarheid te controleren."
+msgstr "Hoeveel je er hebt. Wordt gebruikt om de beschikbaarheid te controleren."
 
 msgid "amenities"
 msgstr "voorzieningen"
@@ -884,11 +931,8 @@ msgstr "minimumleeftijd van de boeker"
 msgid "deposit to confirm (%)"
 msgstr "aanbetaling ter bevestiging (%)"
 
-msgid ""
-"Percentage of the total requested to confirm a booking. 0 = no deposit."
-msgstr ""
-"Percentage van het totaal dat nodig is om een boeking te bevestigen. 0 = "
-"geen aanbetaling."
+msgid "Percentage of the total requested to confirm a booking. 0 = no deposit."
+msgstr "Percentage van het totaal dat nodig is om een boeking te bevestigen. 0 = geen aanbetaling."
 
 msgid "cancellations allowed"
 msgstr "annuleren toegestaan"
@@ -949,6 +993,12 @@ msgstr[0] "%(count)s persoon"
 msgstr[1] "%(count)s personen"
 
 #, python-format
+msgid "%(count)s unit"
+msgid_plural "%(count)s units"
+msgstr[0] "%(count)s eenheid"
+msgstr[1] "%(count)s eenheden"
+
+#, python-format
 msgid "%(count)s adult"
 msgid_plural "%(count)s adults"
 msgstr[0] "%(count)s volwassene"
@@ -971,9 +1021,6 @@ msgstr "Kies een accommodatie."
 
 msgid "Please choose your arrival and departure dates."
 msgstr "Kies je aankomst- en vertrekdatum."
-
-msgid "The departure date must be after the arrival date."
-msgstr "De vertrekdatum moet na de aankomstdatum liggen."
 
 msgid "The arrival date cannot be in the past."
 msgstr "De aankomstdatum kan niet in het verleden liggen."
@@ -1070,18 +1117,17 @@ msgstr "De twee wachtwoorden komen niet overeen."
 msgid "Language of the panel when you sign in."
 msgstr "Taal van het beheer wanneer je inlogt."
 
-msgid ""
-"Tip: in Google Maps, right-click on your camping and click the coordinates "
-"to copy them."
-msgstr ""
-"Tip: klik in Google Maps met de rechtermuisknop op je camping en klik op de "
-"coördinaten om ze te kopiëren."
+msgid "Tip: in Google Maps, right-click on your camping and click the coordinates to copy them."
+msgstr "Tip: klik in Google Maps met de rechtermuisknop op je camping en klik op de coördinaten om ze te kopiëren."
 
 msgid "Fill in both dates, or tick “open all year”."
 msgstr "Vul beide datums in of vink ‘het hele jaar open’ aan."
 
 msgid "The closing date must be different from the opening date."
 msgstr "De sluitingsdatum moet verschillen van de openingsdatum."
+
+msgid "Own domain"
+msgstr "Eigen domein"
 
 msgid "Languages of your page"
 msgstr "Talen van je pagina"
@@ -1135,6 +1181,12 @@ msgstr "Naam van de eigenaar"
 msgid "Main language"
 msgstr "Hoofdtaal"
 
+msgid "Optional, e.g. www.mycamping.com. You can also add it later in the camping's settings."
+msgstr "Optioneel, bijv. www.mijncamping.nl. Je kunt het ook later toevoegen in de instellingen van de camping."
+
+msgid "Another camping already uses this domain."
+msgstr "Een andere camping gebruikt dit domein al."
+
 msgid "Your password has been changed."
 msgstr "Je wachtwoord is gewijzigd."
 
@@ -1147,6 +1199,42 @@ msgstr "Je gegevens zijn opgeslagen."
 msgid "All"
 msgstr "Alle"
 
+msgid "Reference"
+msgstr "Referentie"
+
+msgid "Status"
+msgstr "Status"
+
+msgid "Source"
+msgstr "Herkomst"
+
+msgid "Received"
+msgstr "Ontvangen"
+
+msgid "Nights"
+msgstr "Nachten"
+
+msgid "Units"
+msgstr "Eenheden"
+
+msgid "Name"
+msgstr "Naam"
+
+msgid "Phone"
+msgstr "Telefoon"
+
+msgid "Country"
+msgstr "Land"
+
+msgid "Estimated total"
+msgstr "Geschat totaal"
+
+msgid "Message"
+msgstr "Bericht"
+
+msgid "Internal notes"
+msgstr "Interne notities"
+
 #, python-format
 msgid "Status changed to “%(status)s”."
 msgstr "Status gewijzigd naar ‘%(status)s’."
@@ -1156,6 +1244,10 @@ msgstr "We hebben de gast een e-mail gestuurd."
 
 msgid "Notes saved."
 msgstr "Notities opgeslagen."
+
+#, python-format
+msgid "The booking %(reference)s has been saved."
+msgstr "De boeking %(reference)s is opgeslagen."
 
 msgid "Describe your camping and add contact details"
 msgstr "Beschrijf je camping en voeg contactgegevens toe"
@@ -1181,8 +1273,7 @@ msgstr "Publiceer je pagina"
 msgid "Your page is now public."
 msgstr "Je pagina is nu openbaar."
 
-msgid ""
-"Your page will be visible as soon as the platform approves your camping."
+msgid "Your page will be visible as soon as the platform approves your camping."
 msgstr "Je pagina wordt zichtbaar zodra het platform je camping goedkeurt."
 
 msgid "Your page is hidden from the public."
@@ -1290,9 +1381,7 @@ msgstr "Camping ‘%(name)s’ aangemaakt."
 
 #, python-format
 msgid "Send this link to the owner so they can choose a password: %(link)s"
-msgstr ""
-"Stuur deze link naar de eigenaar zodat die een wachtwoord kan kiezen: "
-"%(link)s"
+msgstr "Stuur deze link naar de eigenaar zodat die een wachtwoord kan kiezen: %(link)s"
 
 #, python-format
 msgid "“%(name)s” is approved."
@@ -1341,9 +1430,6 @@ msgstr "De pagina die je zoekt bestaat niet of is niet meer beschikbaar."
 msgid "Skip to content"
 msgstr "Naar de inhoud"
 
-msgid "Reference"
-msgstr "Referentie"
-
 #, python-format
 msgid "%(counter)s night"
 msgid_plural "%(counter)s nights"
@@ -1371,9 +1457,6 @@ msgid_plural "%(counter)s pets"
 msgstr[0] "%(counter)s huisdier"
 msgstr[1] "%(counter)s huisdieren"
 
-msgid "Estimated total"
-msgstr "Geschat totaal"
-
 msgid "Deposit to confirm"
 msgstr "Aanbetaling ter bevestiging"
 
@@ -1384,52 +1467,30 @@ msgstr "%(name)s heeft een boekingsaanvraag gestuurd."
 msgid "Guest"
 msgstr "Gast"
 
-msgid "Phone"
-msgstr "Telefoon"
-
-msgid "Country"
-msgstr "Land"
-
-msgid "Message"
-msgstr "Bericht"
-
 msgid "Confirm or decline it from your panel:"
 msgstr "Bevestig of wijs haar af vanuit je beheer:"
 
 msgid "You can reply to this e-mail to write to the guest directly."
-msgstr ""
-"Je kunt op deze e-mail antwoorden om de gast rechtstreeks te schrijven."
+msgstr "Je kunt op deze e-mail antwoorden om de gast rechtstreeks te schrijven."
 
 #, python-format
 msgid "Hello %(name)s,"
 msgstr "Hallo %(name)s,"
 
 #, python-format
-msgid ""
-"Thank you for your booking request at %(camping)s. This is a summary of what"
-" you sent:"
-msgstr ""
-"Bedankt voor je boekingsaanvraag bij %(camping)s. Dit is een overzicht van "
-"wat je hebt gestuurd:"
+msgid "Thank you for your booking request at %(camping)s. This is a summary of what you sent:"
+msgstr "Bedankt voor je boekingsaanvraag bij %(camping)s. Dit is een overzicht van wat je hebt gestuurd:"
 
-msgid ""
-"The camping will check availability and reply to you as soon as possible. "
-"This e-mail is not a booking confirmation yet."
-msgstr ""
-"De camping controleert de beschikbaarheid en antwoordt je zo snel mogelijk. "
-"Deze e-mail is nog geen boekingsbevestiging."
+msgid "The camping will check availability and reply to you as soon as possible. This e-mail is not a booking confirmation yet."
+msgstr "De camping controleert de beschikbaarheid en antwoordt je zo snel mogelijk. Deze e-mail is nog geen boekingsbevestiging."
 
 #, python-format
 msgid "Good news! %(camping)s has confirmed your booking request."
 msgstr "Goed nieuws! %(camping)s heeft je boekingsaanvraag bevestigd."
 
 #, python-format
-msgid ""
-"We are sorry: %(camping)s cannot accept your booking request for these "
-"dates."
-msgstr ""
-"Het spijt ons: %(camping)s kan je boekingsaanvraag voor deze datums niet "
-"accepteren."
+msgid "We are sorry: %(camping)s cannot accept your booking request for these dates."
+msgstr "Het spijt ons: %(camping)s kan je boekingsaanvraag voor deze datums niet accepteren."
 
 #, python-format
 msgid "Your booking at %(camping)s has been cancelled."
@@ -1440,20 +1501,15 @@ msgid "The status of your booking request at %(camping)s is now: %(status)s."
 msgstr "De status van je boekingsaanvraag bij %(camping)s is nu: %(status)s."
 
 #, python-format
-msgid ""
-"The camping will contact you about the %(percent)s%% deposit needed to "
-"secure the booking."
-msgstr ""
-"De camping neemt contact met je op over de aanbetaling van %(percent)s%% die"
-" nodig is om de boeking vast te leggen."
+msgid "The camping will contact you about the %(percent)s%% deposit needed to secure the booking."
+msgstr "De camping neemt contact met je op over de aanbetaling van %(percent)s%% die nodig is om de boeking vast te leggen."
 
 msgid "If you have any questions, just reply to this e-mail."
 msgstr "Heb je vragen? Beantwoord dan gewoon deze e-mail."
 
 #, python-format
 msgid "You asked to reset your password on %(platform)s."
-msgstr ""
-"Je hebt gevraagd om je wachtwoord op %(platform)s opnieuw in te stellen."
+msgstr "Je hebt gevraagd om je wachtwoord op %(platform)s opnieuw in te stellen."
 
 msgid "Open this link to choose a new password:"
 msgstr "Open deze link om een nieuw wachtwoord te kiezen:"
@@ -1491,14 +1547,8 @@ msgid "Save changes"
 msgstr "Wijzigingen opslaan"
 
 #, python-format
-msgid ""
-"Use the language tabs to write each text in every language of your page. "
-"%(language)s (*) is required; if another language is empty, visitors will "
-"see the %(language)s text."
-msgstr ""
-"Gebruik de taaltabbladen om elke tekst in alle talen van je pagina te "
-"schrijven. %(language)s (*) is verplicht; als een andere taal leeg is, zien "
-"bezoekers de tekst in het %(language)s."
+msgid "Use the language tabs to write each text in every language of your page. %(language)s (*) is required; if another language is empty, visitors will see the %(language)s text."
+msgstr "Gebruik de taaltabbladen om elke tekst in alle talen van je pagina te schrijven. %(language)s (*) is verplicht; als een andere taal leeg is, zien bezoekers de tekst in het %(language)s."
 
 msgid "Choose languages"
 msgstr "Talen kiezen"
@@ -1521,29 +1571,18 @@ msgstr "Capaciteit"
 msgid "Price"
 msgstr "Prijs"
 
-msgid ""
-"Choose the photos of this accommodation. They will be shown on its card."
+msgid "Choose the photos of this accommodation. They will be shown on its card."
 msgstr "Kies de foto's van deze accommodatie. Ze worden op de kaart getoond."
 
 #, python-format
-msgid ""
-"First <a href=\"%(photos_url)s\">upload photos</a> to your gallery, then you"
-" can assign them here."
-msgstr ""
-"<a href=\"%(photos_url)s\">Upload eerst foto's</a> naar je galerij, daarna "
-"kun je ze hier toewijzen."
+msgid "First <a href=\"%(photos_url)s\">upload photos</a> to your gallery, then you can assign them here."
+msgstr "<a href=\"%(photos_url)s\">Upload eerst foto's</a> naar je galerij, daarna kun je ze hier toewijzen."
 
-msgid ""
-"Delete this accommodation type? Its seasonal prices will be deleted too."
-msgstr ""
-"Dit accommodatietype verwijderen? De seizoensprijzen worden ook verwijderd."
+msgid "Delete this accommodation type? Its seasonal prices will be deleted too."
+msgstr "Dit accommodatietype verwijderen? De seizoensprijzen worden ook verwijderd."
 
-msgid ""
-"Pitches, bungalows, mobile homes, glamping… with their capacity and base "
-"price."
-msgstr ""
-"Kampeerplaatsen, bungalows, stacaravans, glamping… met hun capaciteit en "
-"basisprijs."
+msgid "Pitches, bungalows, mobile homes, glamping… with their capacity and base price."
+msgstr "Kampeerplaatsen, bungalows, stacaravans, glamping… met hun capaciteit en basisprijs."
 
 msgid "Hidden"
 msgstr "Verborgen"
@@ -1564,19 +1603,11 @@ msgid "Edit"
 msgstr "Bewerken"
 
 #, python-format
-msgid ""
-"Set different prices for each season in the <a href=\"%(prices_url)s\">price"
-" table</a>."
-msgstr ""
-"Stel per seizoen andere prijzen in via de <a "
-"href=\"%(prices_url)s\">prijstabel</a>."
+msgid "Set different prices for each season in the <a href=\"%(prices_url)s\">price table</a>."
+msgstr "Stel per seizoen andere prijzen in via de <a href=\"%(prices_url)s\">prijstabel</a>."
 
-msgid ""
-"Create your first accommodation type, for example “Pitch with electricity” "
-"or “Bungalow for 4”."
-msgstr ""
-"Maak je eerste accommodatietype aan, bijvoorbeeld ‘Plaats met stroom’ of "
-"‘Bungalow voor 4’."
+msgid "Create your first accommodation type, for example “Pitch with electricity” or “Bungalow for 4”."
+msgstr "Maak je eerste accommodatietype aan, bijvoorbeeld ‘Plaats met stroom’ of ‘Bungalow voor 4’."
 
 msgid "My account"
 msgstr "Mijn account"
@@ -1636,9 +1667,7 @@ msgid "Camping area"
 msgstr "Campingbeheer"
 
 msgid "Sign in to manage your camping's page, prices and booking requests."
-msgstr ""
-"Log in om de pagina van je camping, de prijzen en de boekingsaanvragen te "
-"beheren."
+msgstr "Log in om de pagina van je camping, de prijzen en de boekingsaanvragen te beheren."
 
 msgid "Forgot your password?"
 msgstr "Wachtwoord vergeten?"
@@ -1652,11 +1681,8 @@ msgstr "Maak gratis een pagina aan"
 msgid "Reset your password"
 msgstr "Wachtwoord opnieuw instellen"
 
-msgid ""
-"Enter your e-mail and we will send you a link to choose a new password."
-msgstr ""
-"Vul je e-mailadres in en we sturen je een link om een nieuw wachtwoord te "
-"kiezen."
+msgid "Enter your e-mail and we will send you a link to choose a new password."
+msgstr "Vul je e-mailadres in en we sturen je een link om een nieuw wachtwoord te kiezen."
 
 msgid "Send the link"
 msgstr "Link versturen"
@@ -1679,12 +1705,8 @@ msgstr "Wachtwoord opslaan"
 msgid "This link has expired"
 msgstr "Deze link is verlopen"
 
-msgid ""
-"The link is no longer valid, maybe because it has already been used. You can"
-" ask for a new one."
-msgstr ""
-"De link is niet meer geldig, misschien omdat hij al is gebruikt. Je kunt een"
-" nieuwe aanvragen."
+msgid "The link is no longer valid, maybe because it has already been used. You can ask for a new one."
+msgstr "De link is niet meer geldig, misschien omdat hij al is gebruikt. Je kunt een nieuwe aanvragen."
 
 msgid "Ask for a new link"
 msgstr "Nieuwe link aanvragen"
@@ -1692,22 +1714,14 @@ msgstr "Nieuwe link aanvragen"
 msgid "Check your inbox"
 msgstr "Controleer je inbox"
 
-msgid ""
-"If there is an account with that e-mail, you will receive a link to choose a"
-" new password in a few minutes. Remember to check the spam folder."
-msgstr ""
-"Als er een account met dat e-mailadres bestaat, ontvang je binnen enkele "
-"minuten een link om een nieuw wachtwoord te kiezen. Kijk ook in je spammap."
+msgid "If there is an account with that e-mail, you will receive a link to choose a new password in a few minutes. Remember to check the spam folder."
+msgstr "Als er een account met dat e-mailadres bestaat, ontvang je binnen enkele minuten een link om een nieuw wachtwoord te kiezen. Kijk ook in je spammap."
 
 msgid "Create your camping's page"
 msgstr "Maak de pagina van je camping"
 
-msgid ""
-"In a few minutes you will have a website with photos, prices and booking "
-"requests, in several languages."
-msgstr ""
-"Binnen enkele minuten heb je een website met foto's, prijzen en "
-"boekingsaanvragen, in meerdere talen."
+msgid "In a few minutes you will have a website with photos, prices and booking requests, in several languages."
+msgstr "Binnen enkele minuten heb je een website met foto's, prijzen en boekingsaanvragen, in meerdere talen."
 
 msgid "Create my account"
 msgstr "Account aanmaken"
@@ -1766,6 +1780,9 @@ msgstr "Boekingsvoorwaarden"
 msgid "Booking requests"
 msgstr "Boekingsaanvragen"
 
+msgid "Occupancy calendar"
+msgstr "Bezettingskalender"
+
 msgid "Administration"
 msgstr "Beheer"
 
@@ -1797,8 +1814,15 @@ msgid "Sign out"
 msgstr "Uitloggen"
 
 #, python-format
+msgid "Booking %(reference)s added in the panel on %(date)s"
+msgstr "Boeking %(reference)s op %(date)s toegevoegd in het beheer"
+
+#, python-format
 msgid "Request %(reference)s received on %(date)s"
 msgstr "Aanvraag %(reference)s ontvangen op %(date)s"
+
+msgid "Edit stay"
+msgstr "Verblijf bewerken"
 
 msgid "Write to the guest"
 msgstr "De gast schrijven"
@@ -1806,15 +1830,8 @@ msgstr "De gast schrijven"
 msgid "Stay"
 msgstr "Verblijf"
 
-msgid "Nights"
-msgstr "Nachten"
-
-msgid ""
-"Careful: according to your confirmed bookings there are no free units of "
-"this accommodation for these dates."
-msgstr ""
-"Let op: volgens je bevestigde boekingen zijn er op deze datums geen vrije "
-"eenheden van deze accommodatie."
+msgid "Careful: according to your confirmed bookings there are no free units of this accommodation for these dates."
+msgstr "Let op: volgens je bevestigde boekingen zijn er op deze datums geen vrije eenheden van deze accommodatie."
 
 #, python-format
 msgid "%(counter)s unit still free for these dates."
@@ -1824,12 +1841,6 @@ msgstr[1] "Er zijn nog %(counter)s eenheden vrij op deze datums."
 
 msgid "Price estimate sent to the guest"
 msgstr "Prijsindicatie gestuurd naar de gast"
-
-msgid "Name"
-msgstr "Naam"
-
-msgid "Language"
-msgstr "Taal"
 
 msgid "Manage request"
 msgstr "Aanvraag beheren"
@@ -1846,18 +1857,36 @@ msgstr "Opslaan"
 msgid "Confirmed stays on the same dates"
 msgstr "Bevestigde verblijven op dezelfde datums"
 
-msgid ""
-"Requests sent from your page. Confirm or decline them and the guest receives"
-" an e-mail."
-msgstr ""
-"Aanvragen die via je pagina zijn verstuurd. Bevestig of wijs ze af en de "
-"gast krijgt een e-mail."
+msgid "New booking"
+msgstr "Nieuwe boeking"
+
+msgid "Add stays booked by phone, e-mail or at the reception so that availability is always up to date."
+msgstr "Voeg verblijven toe die telefonisch, per e-mail of aan de receptie zijn geboekt, zodat de beschikbaarheid altijd klopt."
+
+msgid "The price is calculated from your price table when you save."
+msgstr "De prijs wordt bij het opslaan berekend uit je prijstabel."
+
+msgid "Save booking"
+msgstr "Boeking opslaan"
+
+msgid "Requests sent from your page. Confirm or decline them and the guest receives an e-mail."
+msgstr "Aanvragen die via je pagina zijn verstuurd. Bevestig of wijs ze af en de gast krijgt een e-mail."
+
+msgid "Export CSV"
+msgstr "CSV exporteren"
 
 msgid "Search"
 msgstr "Zoeken"
 
-msgid "Name, e-mail or reference"
-msgstr "Naam, e-mail of referentie"
+msgid "Name, e-mail, phone or reference"
+msgstr "Naam, e-mail, telefoon of referentie"
+
+#, python-format
+msgid "Staying on %(date)s"
+msgstr "Aanwezig op %(date)s"
+
+msgid "Clear filters"
+msgstr "Filters wissen"
 
 msgid "Filter by status"
 msgstr "Filteren op status"
@@ -1865,17 +1894,48 @@ msgstr "Filteren op status"
 msgid "Estimate"
 msgstr "Indicatie"
 
-msgid "Status"
-msgstr "Status"
-
-msgid "Received"
-msgstr "Ontvangen"
+msgctxt "booking source"
+msgid "manual"
+msgstr "handmatig"
 
 msgid "No requests match your search."
 msgstr "Geen aanvragen gevonden voor je zoekopdracht."
 
 msgid "There are no requests here."
 msgstr "Er zijn hier geen aanvragen."
+
+msgid "Units taken by confirmed stays each night. Click a day to see its bookings or to add one."
+msgstr "Eenheden bezet door bevestigde verblijven per nacht. Klik op een dag om de boekingen te zien of er een toe te voegen."
+
+msgid "Previous month"
+msgstr "Vorige maand"
+
+msgid "Next month"
+msgstr "Volgende maand"
+
+msgid "Today"
+msgstr "Vandaag"
+
+msgid "Free"
+msgstr "Vrij"
+
+msgid "Partly booked"
+msgstr "Gedeeltelijk bezet"
+
+msgid "Full"
+msgstr "Vol"
+
+msgid "Overbooked"
+msgstr "Overboekt"
+
+msgid "Pending request"
+msgstr "Aanvraag in afwachting"
+
+msgid "Occupancy"
+msgstr "Bezetting"
+
+msgid "Create your accommodation types to see their occupancy here."
+msgstr "Maak je accommodatietypes aan om hier hun bezetting te zien."
 
 #, python-format
 msgid "Hello, %(name)s"
@@ -1897,19 +1957,11 @@ msgstr "Depubliceren"
 msgid "Publish page"
 msgstr "Pagina publiceren"
 
-msgid ""
-"Your page is ready and waiting for approval by the platform. We will review "
-"it shortly."
-msgstr ""
-"Je pagina is klaar en wacht op goedkeuring door het platform. We bekijken "
-"haar binnenkort."
+msgid "Your page is ready and waiting for approval by the platform. We will review it shortly."
+msgstr "Je pagina is klaar en wacht op goedkeuring door het platform. We bekijken haar binnenkort."
 
-msgid ""
-"Your page is a draft. Complete the steps below and publish it when you are "
-"ready."
-msgstr ""
-"Je pagina is een concept. Voltooi de stappen hieronder en publiceer haar "
-"wanneer je klaar bent."
+msgid "Your page is a draft. Complete the steps below and publish it when you are ready."
+msgstr "Je pagina is een concept. Voltooi de stappen hieronder en publiceer haar wanneer je klaar bent."
 
 msgid "Pending requests"
 msgstr "Openstaande aanvragen"
@@ -1920,6 +1972,25 @@ msgstr "Aanvragen deze maand"
 msgid "Accommodation types"
 msgstr "Accommodatietypes"
 
+#, python-format
+msgid "occupancy (%(used)s/%(total)s units)"
+msgstr "bezetting (%(used)s/%(total)s eenheden)"
+
+msgid "guests tonight"
+msgstr "gasten vannacht"
+
+msgid "Arrivals"
+msgstr "Aankomsten"
+
+msgid "No arrivals today."
+msgstr "Vandaag geen aankomsten."
+
+msgid "Departures"
+msgstr "Vertrekken"
+
+msgid "No departures today."
+msgstr "Vandaag geen vertrekken."
+
 msgid "Set up your page"
 msgstr "Stel je pagina in"
 
@@ -1929,12 +2000,8 @@ msgstr "Laatste aanvragen"
 msgid "See all"
 msgstr "Alles bekijken"
 
-msgid ""
-"No booking requests yet. They will appear here as soon as guests send them "
-"from your page."
-msgstr ""
-"Nog geen boekingsaanvragen. Ze verschijnen hier zodra gasten ze via je "
-"pagina versturen."
+msgid "No booking requests yet. They will appear here as soon as guests send them from your page."
+msgstr "Nog geen boekingsaanvragen. Ze verschijnen hier zodra gasten ze via je pagina versturen."
 
 msgid "Upcoming stays"
 msgstr "Komende verblijven"
@@ -1945,18 +2012,17 @@ msgstr "Je webadres"
 msgid "Copy"
 msgstr "Kopiëren"
 
+msgid "Visitors will see your website as soon as you publish it."
+msgstr "Bezoekers zien je website zodra je die publiceert."
+
 #, python-format
-msgid "Also available at https://%(domain)s"
-msgstr "Ook beschikbaar op https://%(domain)s"
+msgid "Your own domain %(domain)s will be used as soon as its DNS points to us."
+msgstr "Je eigen domein %(domain)s wordt gebruikt zodra de DNS naar ons verwijst."
 
 msgid "Share it on your social networks, Google Business profile and e-mails."
-msgstr ""
-"Deel het op je sociale netwerken, je Google Bedrijfsprofiel en in je "
-"e-mails."
+msgstr "Deel het op je sociale netwerken, je Google Bedrijfsprofiel en in je e-mails."
 
-msgid ""
-"Tick everything your camping offers. Mark with € the ones that have an extra"
-" charge."
+msgid "Tick everything your camping offers. Mark with € the ones that have an extra charge."
 msgstr "Vink alles aan wat je camping biedt. Markeer met € wat extra kost."
 
 msgid "Add another facility"
@@ -1974,12 +2040,8 @@ msgstr "Andere faciliteiten"
 msgid "Add"
 msgstr "Toevoegen"
 
-msgid ""
-"Anything special that is not in the list? Add it here (e.g. “Adventure "
-"park”, “Wine tasting”)."
-msgstr ""
-"Iets bijzonders dat niet in de lijst staat? Voeg het hier toe (bv. "
-"‘Avonturenpark’, ‘Wijnproeverij’)."
+msgid "Anything special that is not in the list? Add it here (e.g. “Adventure park”, “Wine tasting”)."
+msgstr "Iets bijzonders dat niet in de lijst staat? Voeg het hier toe (bv. ‘Avonturenpark’, ‘Wijnproeverij’)."
 
 msgid "New facility"
 msgstr "Nieuwe faciliteit"
@@ -1990,13 +2052,18 @@ msgstr "Kies de camping die je wilt beheren."
 msgid "New camping"
 msgstr "Nieuwe camping"
 
+#, python-format
+msgid "Your account cannot manage %(camping)s."
+msgstr "Je account kan %(camping)s niet beheren."
+
+msgid "Sign in with the account of this camping or ask its owner to invite you from the Team section."
+msgstr "Log in met het account van deze camping of vraag de eigenaar je uit te nodigen via het onderdeel Team."
+
 msgid "You don't manage any camping yet."
 msgstr "Je beheert nog geen camping."
 
 msgid "Ask the owner of your camping to invite you from the Team section."
-msgstr ""
-"Vraag de eigenaar van je camping om je uit te nodigen via het onderdeel "
-"Team."
+msgstr "Vraag de eigenaar van je camping om je uit te nodigen via het onderdeel Team."
 
 msgid "Where you are and when you are open."
 msgstr "Waar je bent en wanneer je open bent."
@@ -2020,23 +2087,15 @@ msgid "Edit photo"
 msgstr "Foto bewerken"
 
 #, python-format
-msgid ""
-"The first photo is the main image of your page. Drag the photos to change "
-"their order. Up to %(max)s photos."
-msgstr ""
-"De eerste foto is de hoofdafbeelding van je pagina. Sleep de foto's om de "
-"volgorde te wijzigen. Maximaal %(max)s foto's."
+msgid "The first photo is the main image of your page. Drag the photos to change their order. Up to %(max)s photos."
+msgstr "De eerste foto is de hoofdafbeelding van je pagina. Sleep de foto's om de volgorde te wijzigen. Maximaal %(max)s foto's."
 
 msgid "Drag your photos here"
 msgstr "Sleep je foto's hierheen"
 
 #, python-format
-msgid ""
-"or choose them from your device (JPG, PNG, WebP or HEIC, up to %(mb)s MB "
-"each). We resize and optimise them automatically."
-msgstr ""
-"of kies ze op je apparaat (JPG, PNG, WebP of HEIC, tot %(mb)s MB per stuk). "
-"We verkleinen en optimaliseren ze automatisch."
+msgid "or choose them from your device (JPG, PNG, WebP or HEIC, up to %(mb)s MB each). We resize and optimise them automatically."
+msgstr "of kies ze op je apparaat (JPG, PNG, WebP of HEIC, tot %(mb)s MB per stuk). We verkleinen en optimaliseren ze automatisch."
 
 msgid "Choose photos"
 msgstr "Foto's kiezen"
@@ -2066,8 +2125,7 @@ msgid "Delete this photo?"
 msgstr "Deze foto verwijderen?"
 
 msgid "No photos yet. Pages with good photos receive many more requests!"
-msgstr ""
-"Nog geen foto's. Pagina's met goede foto's krijgen veel meer aanvragen!"
+msgstr "Nog geen foto's. Pagina's met goede foto's krijgen veel meer aanvragen!"
 
 #, python-brace-format
 msgid "Uploading photo {done} of {total}…"
@@ -2089,6 +2147,9 @@ msgstr "Er ging iets mis. Probeer het opnieuw."
 msgid "All the campings on the platform."
 msgstr "Alle campings op het platform."
 
+msgid "Suspended"
+msgstr "Opgeschort"
+
 msgid "Name, town or owner e-mail"
 msgstr "Naam, plaats of e-mail van de eigenaar"
 
@@ -2103,6 +2164,9 @@ msgstr "Eigenaars"
 
 msgid "Created"
 msgstr "Aangemaakt"
+
+msgid "DNS pending"
+msgstr "DNS in afwachting"
 
 msgid "Not approved"
 msgstr "Niet goedgekeurd"
@@ -2122,22 +2186,14 @@ msgstr "Goedkeuren"
 msgid "No campings found."
 msgstr "Geen campings gevonden."
 
-msgid ""
-"Creates the camping and invites its owner by e-mail. If the owner has no "
-"account yet, you will get a link to share with them."
-msgstr ""
-"Maakt de camping aan en nodigt de eigenaar uit per e-mail. Heeft de eigenaar"
-" nog geen account, dan krijg je een link om te delen."
+msgid "Creates the camping and invites its owner by e-mail. If the owner has no account yet, you will get a link to share with them."
+msgstr "Maakt de camping aan en nodigt de eigenaar uit per e-mail. Heeft de eigenaar nog geen account, dan krijg je een link om te delen."
 
 msgid "Create camping"
 msgstr "Camping aanmaken"
 
-msgid ""
-"Clear conditions avoid misunderstandings. They are shown on your page and "
-"during the booking request."
-msgstr ""
-"Duidelijke voorwaarden voorkomen misverstanden. Ze worden getoond op je "
-"pagina en tijdens de boekingsaanvraag."
+msgid "Clear conditions avoid misunderstandings. They are shown on your page and during the booking request."
+msgstr "Duidelijke voorwaarden voorkomen misverstanden. Ze worden getoond op je pagina en tijdens de boekingsaanvraag."
 
 msgid "Arrival and departure"
 msgstr "Aankomst en vertrek"
@@ -2152,22 +2208,14 @@ msgid "Camping rules"
 msgstr "Campingreglement"
 
 #, python-format
-msgid ""
-"All prices in %(currency)s, VAT included. Leave a season empty to use the "
-"base price."
-msgstr ""
-"Alle prijzen in %(currency)s, inclusief btw. Laat een seizoen leeg om de "
-"basisprijs te gebruiken."
+msgid "All prices in %(currency)s, VAT included. Leave a season empty to use the base price."
+msgstr "Alle prijzen in %(currency)s, inclusief btw. Laat een seizoen leeg om de basisprijs te gebruiken."
 
 msgid "Manage seasons"
 msgstr "Seizoenen beheren"
 
-msgid ""
-"First create your accommodation types and services, then set their prices "
-"here."
-msgstr ""
-"Maak eerst je accommodatietypes en diensten aan en stel daarna hier hun "
-"prijzen in."
+msgid "First create your accommodation types and services, then set their prices here."
+msgstr "Maak eerst je accommodatietypes en diensten aan en stel daarna hier hun prijzen in."
 
 msgid "Save prices"
 msgstr "Prijzen opslaan"
@@ -2187,12 +2235,8 @@ msgstr "Nieuw seizoen"
 msgid "Delete this season? Its prices will be deleted too."
 msgstr "Dit seizoen verwijderen? De prijzen worden ook verwijderd."
 
-msgid ""
-"Periods with different prices: low, mid and high season, bank holidays… "
-"Dates cannot overlap."
-msgstr ""
-"Periodes met verschillende prijzen: laag-, midden- en hoogseizoen, "
-"feestdagen… Datums mogen niet overlappen."
+msgid "Periods with different prices: low, mid and high season, bank holidays… Dates cannot overlap."
+msgstr "Periodes met verschillende prijzen: laag-, midden- en hoogseizoen, feestdagen… Datums mogen niet overlappen."
 
 msgid "Copy to next year"
 msgstr "Naar volgend jaar kopiëren"
@@ -2210,53 +2254,29 @@ msgid "Minimum stay"
 msgstr "Minimumverblijf"
 
 #, python-format
-msgid ""
-"Now set the price of each accommodation and service per season in the <a "
-"href=\"%(prices_url)s\">price table</a>. Days outside any season use the "
-"base price."
-msgstr ""
-"Stel nu de prijs van elke accommodatie en dienst per seizoen in via de <a "
-"href=\"%(prices_url)s\">prijstabel</a>. Dagen buiten een seizoen gebruiken "
-"de basisprijs."
+msgid "Now set the price of each accommodation and service per season in the <a href=\"%(prices_url)s\">price table</a>. Days outside any season use the base price."
+msgstr "Stel nu de prijs van elke accommodatie en dienst per seizoen in via de <a href=\"%(prices_url)s\">prijstabel</a>. Dagen buiten een seizoen gebruiken de basisprijs."
 
-msgid ""
-"Without seasons, the base price of each accommodation and service is used "
-"all year."
-msgstr ""
-"Zonder seizoenen geldt het hele jaar de basisprijs van elke accommodatie en "
-"dienst."
+msgid "Without seasons, the base price of each accommodation and service is used all year."
+msgstr "Zonder seizoenen geldt het hele jaar de basisprijs van elke accommodatie en dienst."
 
 msgid "New service"
 msgstr "Nieuwe dienst"
 
-msgid ""
-"Everything that has its own price: adults, children, vehicles, electricity, "
-"pets, tourist tax, bed linen, cleaning…"
-msgstr ""
-"Alles met een eigen prijs: volwassenen, kinderen, voertuigen, elektriciteit,"
-" huisdieren, toeristenbelasting, beddengoed, schoonmaak…"
+msgid "Everything that has its own price: adults, children, vehicles, electricity, pets, tourist tax, bed linen, cleaning…"
+msgstr "Alles met een eigen prijs: volwassenen, kinderen, voertuigen, elektriciteit, huisdieren, toeristenbelasting, beddengoed, schoonmaak…"
 
 msgid "How are services charged?"
 msgstr "Hoe worden diensten berekend?"
 
-msgid ""
-"“Always charged”: added automatically to every quote (e.g. price per adult "
-"on a pitch, tourist tax)."
-msgstr ""
-"‘Altijd in rekening gebracht’: wordt automatisch aan elke prijsindicatie "
-"toegevoegd (bv. prijs per volwassene op een kampeerplaats, "
-"toeristenbelasting)."
+msgid "“Always charged”: added automatically to every quote (e.g. price per adult on a pitch, tourist tax)."
+msgstr "‘Altijd in rekening gebracht’: wordt automatisch aan elke prijsindicatie toegevoegd (bv. prijs per volwassene op een kampeerplaats, toeristenbelasting)."
 
-msgid ""
-"“Optional extra”: the guest can choose it in the booking form (e.g. "
-"electricity, bed linen)."
-msgstr ""
-"‘Optionele extra’: de gast kan het kiezen in het boekingsformulier (bv. "
-"elektriciteit, beddengoed)."
+msgid "“Optional extra”: the guest can choose it in the booking form (e.g. electricity, bed linen)."
+msgstr "‘Optionele extra’: de gast kan het kiezen in het boekingsformulier (bv. elektriciteit, beddengoed)."
 
 msgid "“Included”: shown as included in the price, without cost."
-msgstr ""
-"‘Inbegrepen’: wordt getoond als inbegrepen in de prijs, zonder kosten."
+msgstr "‘Inbegrepen’: wordt getoond als inbegrepen in de prijs, zonder kosten."
 
 msgid "Service"
 msgstr "Dienst"
@@ -2273,12 +2293,8 @@ msgstr "Optionele extra"
 msgid "Included"
 msgstr "Inbegrepen"
 
-msgid ""
-"No services yet. Typical ones: Adult, Child (3–10 years), Car, Electricity, "
-"Dog, Tourist tax."
-msgstr ""
-"Nog geen diensten. Gebruikelijk zijn: Volwassene, Kind (3–10 jaar), Auto, "
-"Elektriciteit, Hond, Toeristenbelasting."
+msgid "No services yet. Typical ones: Adult, Child (3–10 years), Car, Electricity, Dog, Tourist tax."
+msgstr "Nog geen diensten. Gebruikelijk zijn: Volwassene, Kind (3–10 jaar), Auto, Elektriciteit, Hond, Toeristenbelasting."
 
 msgid "Web address, languages, currency and booking requests."
 msgstr "Webadres, talen, valuta en boekingsaanvragen."
@@ -2286,43 +2302,53 @@ msgstr "Webadres, talen, valuta en boekingsaanvragen."
 msgid "Web address"
 msgstr "Webadres"
 
-msgid ""
-"Platform administrators: add the certificate with “fly certs add <domain>” "
-"and ask the camping to create the DNS records Fly shows."
-msgstr ""
-"Platformbeheerders: voeg het certificaat toe met ‘fly certs add <domein>’ en"
-" vraag de camping de DNS-records aan te maken die Fly toont."
+msgid "If you change it, links to the old address stop working."
+msgstr "Als je het wijzigt, werken links naar het oude adres niet meer."
+
+#, python-format
+msgid "%(domain)s is working since %(date)s: links and the platform address lead there."
+msgstr "%(domain)s werkt sinds %(date)s: links en het platformadres leiden daarheen."
+
+#, python-format
+msgid "Waiting for the first visit through https://%(domain)s. Until then the camping keeps its current address."
+msgstr "Wachten op het eerste bezoek via https://%(domain)s. Tot die tijd houdt de camping het huidige adres."
+
+msgid "Add the certificate on Fly.io:"
+msgstr "Voeg het certificaat toe op Fly.io:"
+
+#, python-format
+msgid "Ask the camping to create a CNAME record for %(domain)s pointing to %(host)s (for a root domain without www, the A and AAAA records shown by “fly ips list”)."
+msgstr "Vraag de camping een CNAME-record voor %(domain)s aan te maken dat naar %(host)s verwijst (voor een domein zonder www de A- en AAAA-records die ‘fly ips list’ toont)."
+
+#, python-format
+msgid "Ask the camping to point the DNS of %(domain)s to the app (CNAME to the app's .fly.dev host, or the A and AAAA records shown by “fly ips list”)."
+msgstr "Vraag de camping de DNS van %(domain)s naar de app te laten verwijzen (CNAME naar de .fly.dev-host van de app, of de A- en AAAA-records die ‘fly ips list’ toont)."
+
+#, python-format
+msgid "When “fly certs show %(domain)s” says the certificate is issued, open https://%(domain)s once: from then on it is the camping's address."
+msgstr "Als ‘fly certs show %(domain)s’ meldt dat het certificaat is uitgegeven, open dan één keer https://%(domain)s: vanaf dan is dat het adres van de camping."
 
 #, python-format
 msgid "Own domain: %(domain)s"
 msgstr "Eigen domein: %(domain)s"
 
-msgid ""
-"Would you like to use your own domain (www.yourcamping.com)? Contact the "
-"platform administrator."
-msgstr ""
-"Wil je je eigen domein gebruiken (www.jouwcamping.nl)? Neem contact op met "
-"de platformbeheerder."
+msgid "being activated"
+msgstr "wordt geactiveerd"
+
+msgid "Would you like to use your own domain (www.yourcamping.com)? Contact the platform administrator."
+msgstr "Wil je je eigen domein gebruiken (www.jouwcamping.nl)? Neem contact op met de platformbeheerder."
 
 msgid "Languages and currency"
 msgstr "Talen en valuta"
 
-msgid ""
-"People who can manage this camping. Owners can also change settings and "
-"invite others."
-msgstr ""
-"Mensen die deze camping kunnen beheren. Eigenaars kunnen ook instellingen "
-"wijzigen en anderen uitnodigen."
+msgid "People who can manage this camping. Owners can also change settings and invite others."
+msgstr "Mensen die deze camping kunnen beheren. Eigenaars kunnen ook instellingen wijzigen en anderen uitnodigen."
 
 msgid "Invitation created."
 msgstr "Uitnodiging aangemaakt."
 
-msgid ""
-"We have e-mailed the link below. You can also send it yourself; it is valid "
-"for a few days:"
-msgstr ""
-"We hebben de link hieronder per e-mail gestuurd. Je kunt hem ook zelf "
-"versturen; hij is enkele dagen geldig:"
+msgid "We have e-mailed the link below. You can also send it yourself; it is valid for a few days:"
+msgstr "We hebben de link hieronder per e-mail gestuurd. Je kunt hem ook zelf versturen; hij is enkele dagen geldig:"
 
 msgid "invitation pending"
 msgstr "uitnodiging in afwachting"
@@ -2357,10 +2383,6 @@ msgstr "Pagina %(number)s van %(total)s"
 
 msgid "Next"
 msgstr "Volgende"
-
-#, python-format
-msgid "from <strong>%(price)s</strong> / night"
-msgstr "vanaf <strong>%(price)s</strong> / nacht"
 
 #, python-format
 msgid "Check-in from %(start)s"
@@ -2398,11 +2420,8 @@ msgid "The person booking must be at least %(age)s years old."
 msgstr "De boeker moet minstens %(age)s jaar oud zijn."
 
 #, python-format
-msgid ""
-"A deposit of %(percent)s%% of the total is required to confirm the booking."
-msgstr ""
-"Om de boeking te bevestigen is een aanbetaling van %(percent)s%% van het "
-"totaal nodig."
+msgid "A deposit of %(percent)s%% of the total is required to confirm the booking."
+msgstr "Om de boeking te bevestigen is een aanbetaling van %(percent)s%% van het totaal nodig."
 
 msgid "No deposit is required to confirm the booking."
 msgstr "Er is geen aanbetaling nodig om de boeking te bevestigen."
@@ -2441,14 +2460,8 @@ msgstr "Kies een accommodatie en je datums om de prijs te zien."
 msgid "Main menu"
 msgstr "Hoofdmenu"
 
-msgid "List your camping"
-msgstr "Meld je camping aan"
-
 msgid "My panel"
 msgstr "Mijn beheer"
-
-msgid "Campings, bungalows and glamping with direct booking requests."
-msgstr "Campings, bungalows en glamping met directe boekingsaanvragen."
 
 msgid "Footer"
 msgstr "Voettekst"
@@ -2459,19 +2472,11 @@ msgstr "Privacy"
 msgid "Booking request"
 msgstr "Boekingsaanvraag"
 
-msgid ""
-"Tell us about your stay. The camping will check availability and answer by "
-"e-mail. You do not pay anything now."
-msgstr ""
-"Vertel ons over je verblijf. De camping controleert de beschikbaarheid en "
-"antwoordt per e-mail. Je betaalt nu nog niets."
+msgid "Tell us about your stay. The camping will check availability and answer by e-mail. You do not pay anything now."
+msgstr "Vertel ons over je verblijf. De camping controleert de beschikbaarheid en antwoordt per e-mail. Je betaalt nu nog niets."
 
-msgid ""
-"This camping is not taking booking requests online at the moment. Please "
-"contact them directly."
-msgstr ""
-"Deze camping neemt momenteel geen online boekingsaanvragen aan. Neem "
-"rechtstreeks contact op."
+msgid "This camping is not taking booking requests online at the moment. Please contact them directly."
+msgstr "Deze camping neemt momenteel geen online boekingsaanvragen aan. Neem rechtstreeks contact op."
 
 msgid "Online booking requests will be available soon."
 msgstr "Online boekingsaanvragen zijn binnenkort beschikbaar."
@@ -2494,9 +2499,7 @@ msgstr "Je gegevens"
 
 #, python-format
 msgid "Read our <a href=\"%(privacy_url)s\" target=\"_blank\">privacy notice</a>."
-msgstr ""
-"Lees onze <a href=\"%(privacy_url)s\" "
-"target=\"_blank\">privacyverklaring</a>."
+msgstr "Lees onze <a href=\"%(privacy_url)s\" target=\"_blank\">privacyverklaring</a>."
 
 msgid "Send booking request"
 msgstr "Boekingsaanvraag versturen"
@@ -2504,12 +2507,8 @@ msgstr "Boekingsaanvraag versturen"
 msgid "Price estimate"
 msgstr "Prijsindicatie"
 
-msgid ""
-"Indicative price. The camping confirms the final amount when it accepts your"
-" request."
-msgstr ""
-"Indicatieve prijs. De camping bevestigt het definitieve bedrag wanneer hij "
-"je aanvraag accepteert."
+msgid "Indicative price. The camping confirms the final amount when it accepts your request."
+msgstr "Indicatieve prijs. De camping bevestigt het definitieve bedrag wanneer hij je aanvraag accepteert."
 
 msgid "Good to know"
 msgstr "Goed om te weten"
@@ -2552,12 +2551,8 @@ msgid "Your booking request has been sent to %(camping)s."
 msgstr "Je boekingsaanvraag is verstuurd naar %(camping)s."
 
 #, python-format
-msgid ""
-"We have sent a copy to <strong>%(email)s</strong>. The camping will check "
-"availability and reply to you soon."
-msgstr ""
-"We hebben een kopie gestuurd naar <strong>%(email)s</strong>. De camping "
-"controleert de beschikbaarheid en antwoordt je snel."
+msgid "We have sent a copy to <strong>%(email)s</strong>. The camping will check availability and reply to you soon."
+msgstr "We hebben een kopie gestuurd naar <strong>%(email)s</strong>. De camping controleert de beschikbaarheid en antwoordt je snel."
 
 msgid "Dates"
 msgstr "Datums"
@@ -2573,9 +2568,7 @@ msgstr "Je ontvangt een e-mail met een bevestiging of afwijzing."
 
 #, python-format
 msgid "To secure the booking you will be asked for a %(percent)s%% deposit."
-msgstr ""
-"Om de boeking vast te leggen wordt een aanbetaling van %(percent)s%% "
-"gevraagd."
+msgstr "Om de boeking vast te leggen wordt een aanbetaling van %(percent)s%% gevraagd."
 
 msgid "Back to the camping"
 msgstr "Terug naar de camping"
@@ -2606,9 +2599,6 @@ msgstr "Boeken"
 
 msgid "Menu"
 msgstr "Menu"
-
-msgid "Website"
-msgstr "Website"
 
 #, python-format
 msgid "Powered by %(platform)s"
@@ -2641,8 +2631,7 @@ msgstr "Vanaf <strong>%(price)s</strong> per nacht"
 
 #, python-format
 msgid "Some information on this page is only available in %(language)s."
-msgstr ""
-"Sommige informatie op deze pagina is alleen beschikbaar in het %(language)s."
+msgstr "Sommige informatie op deze pagina is alleen beschikbaar in het %(language)s."
 
 msgid "Key information"
 msgstr "Belangrijke informatie"
@@ -2718,12 +2707,8 @@ msgstr "Inbegrepen in de prijs"
 msgid "Prices on request."
 msgstr "Prijzen op aanvraag."
 
-msgid ""
-"Prices include VAT. The final price is confirmed by the camping when it "
-"accepts your request."
-msgstr ""
-"Prijzen zijn inclusief btw. De camping bevestigt de definitieve prijs "
-"wanneer hij je aanvraag accepteert."
+msgid "Prices include VAT. The final price is confirmed by the camping when it accepts your request."
+msgstr "Prijzen zijn inclusief btw. De camping bevestigt de definitieve prijs wanneer hij je aanvraag accepteert."
 
 msgid "Get directions"
 msgstr "Route plannen"
@@ -2738,164 +2723,47 @@ msgstr "Grotere kaart bekijken"
 msgid "Plan your stay"
 msgstr "Plan je verblijf"
 
-msgid ""
-"Choose your dates and see an instant price estimate. The camping will reply "
-"to your request by e-mail."
-msgstr ""
-"Kies je datums en zie direct een prijsindicatie. De camping beantwoordt je "
-"aanvraag per e-mail."
+msgid "Choose your dates and see an instant price estimate. The camping will reply to your request by e-mail."
+msgstr "Kies je datums en zie direct een prijsindicatie. De camping beantwoordt je aanvraag per e-mail."
 
 msgid "Check price"
 msgstr "Prijs bekijken"
 
-msgid "Campings, bungalows and glamping"
-msgstr "Campings, bungalows en glamping"
+msgid "Our new website is coming soon."
+msgstr "Onze nieuwe website komt binnenkort online."
 
-msgid ""
-"Discover campings, compare accommodation, facilities and prices, and send "
-"your booking request directly to the camping."
-msgstr ""
-"Ontdek campings, vergelijk accommodaties, faciliteiten en prijzen, en stuur "
-"je boekingsaanvraag rechtstreeks naar de camping."
-
-msgid "Find your place under the stars"
-msgstr "Vind jouw plek onder de sterren"
-
-msgid ""
-"Compare facilities, prices and booking conditions, and ask the camping "
-"directly. No middlemen, no booking fees."
-msgstr ""
-"Vergelijk faciliteiten, prijzen en boekingsvoorwaarden en vraag het "
-"rechtstreeks aan de camping. Geen tussenpersonen, geen boekingskosten."
-
-msgid "Camping name, town or region"
-msgstr "Naam van de camping, plaats of regio"
-
-msgid "Region"
-msgstr "Regio"
-
-msgid "All regions"
-msgstr "Alle regio's"
-
-msgid "Filter by facility"
-msgstr "Filteren op faciliteit"
-
-#, python-format
-msgid "%(counter)s camping found"
-msgid_plural "%(counter)s campings found"
-msgstr[0] "%(counter)s camping gevonden"
-msgstr[1] "%(counter)s campings gevonden"
-
-msgid "Clear filters"
-msgstr "Filters wissen"
-
-msgid "No campings match your search."
-msgstr "Geen campings gevonden voor je zoekopdracht."
-
-msgid "The first campings are setting up their pages. Come back soon!"
-msgstr ""
-"De eerste campings zijn hun pagina's aan het inrichten. Kom snel terug!"
-
-msgid "For camping owners"
-msgstr "Voor campings"
-
-msgid "Your camping's website, ready in minutes"
-msgstr "De website van je camping, in enkele minuten klaar"
-
-msgid ""
-"Upload photos, describe your facilities, set prices by season and publish "
-"your booking policies in several languages. Booking requests arrive straight"
-" in your inbox."
-msgstr ""
-"Upload foto's, beschrijf je faciliteiten, stel prijzen per seizoen in en "
-"publiceer je boekingsvoorwaarden in meerdere talen. Boekingsaanvragen komen "
-"direct in je inbox."
-
-msgid "Create my camping's page"
-msgstr "De pagina van mijn camping maken"
-
-msgid "Photo gallery"
-msgstr "Fotogalerij"
-
-msgid "Upload from your phone; every image is optimised automatically."
-msgstr ""
-"Upload vanaf je telefoon; elke afbeelding wordt automatisch geoptimaliseerd."
-
-msgid "Seasonal prices"
-msgstr "Seizoensprijzen"
-
-msgid "Low, mid and high season for pitches, bungalows and extras."
-msgstr ""
-"Laag-, midden- en hoogseizoen voor kampeerplaatsen, bungalows en extra's."
-
-msgid "Multi-language"
-msgstr "Meertalig"
-
-msgid "Your page in Spanish, English, French, German, Dutch and Italian."
-msgstr ""
-"Je pagina in het Spaans, Engels, Frans, Duits, Nederlands en Italiaans."
-
-msgid "Guests get an instant price estimate; you confirm with one click."
-msgstr "Gasten krijgen direct een prijsindicatie; jij bevestigt met één klik."
+msgid "Staff access"
+msgstr "Toegang voor medewerkers"
 
 msgid "Privacy notice"
 msgstr "Privacyverklaring"
 
 #, python-format
-msgid ""
-"The data you send through the booking form is received by %(name)s, which is"
-" responsible for processing it in order to answer your request and manage "
-"your stay."
-msgstr ""
-"De gegevens die je via het boekingsformulier verstuurt, worden ontvangen "
-"door %(name)s, die verantwoordelijk is voor de verwerking ervan om je "
-"aanvraag te beantwoorden en je verblijf te regelen."
+msgid "The data you send through the booking form is received by %(name)s, which is responsible for processing it in order to answer your request and manage your stay."
+msgstr "De gegevens die je via het boekingsformulier verstuurt, worden ontvangen door %(name)s, die verantwoordelijk is voor de verwerking ervan om je aanvraag te beantwoorden en je verblijf te regelen."
 
 #, python-format
-msgid ""
-"You can exercise your rights of access, rectification and erasure by writing"
-" to %(email)s."
-msgstr ""
-"Je kunt je rechten op inzage, rectificatie en verwijdering uitoefenen door "
-"te schrijven naar %(email)s."
+msgid "You can exercise your rights of access, rectification and erasure by writing to %(email)s."
+msgstr "Je kunt je rechten op inzage, rectificatie en verwijdering uitoefenen door te schrijven naar %(email)s."
 
 #, python-format
-msgid ""
-"%(platform)s hosts the websites of the campings listed here. When you send a"
-" booking request, your data is passed to the camping you contact, which is "
-"responsible for processing it."
-msgstr ""
-"%(platform)s host de websites van de campings die hier staan. Als je een "
-"boekingsaanvraag verstuurt, worden je gegevens doorgegeven aan de camping "
-"die je contacteert; die is verantwoordelijk voor de verwerking."
+msgid "%(platform)s provides the websites and booking tools of the campings that use it. When you send a booking request through a camping's website, your data is passed to that camping, which is responsible for processing it."
+msgstr "%(platform)s levert de websites en boekingstools van de campings die het gebruiken. Als je via de website van een camping een boekingsaanvraag stuurt, worden je gegevens doorgegeven aan die camping, die verantwoordelijk is voor de verwerking ervan."
 
 msgid "What data we collect"
 msgstr "Welke gegevens we verzamelen"
 
-msgid ""
-"Your name, e-mail address, phone number, country, the details of your stay "
-"and your message. We only use them to handle your request."
-msgstr ""
-"Je naam, e-mailadres, telefoonnummer, land, de details van je verblijf en je"
-" bericht. We gebruiken ze alleen om je aanvraag af te handelen."
+msgid "Your name, e-mail address, phone number, country, the details of your stay and your message. We only use them to handle your request."
+msgstr "Je naam, e-mailadres, telefoonnummer, land, de details van je verblijf en je bericht. We gebruiken ze alleen om je aanvraag af te handelen."
 
 msgid "How long we keep it"
 msgstr "Hoe lang we ze bewaren"
 
-msgid ""
-"For as long as needed to manage your booking and meet legal obligations."
-msgstr ""
-"Zolang nodig is om je boeking af te handelen en aan wettelijke "
-"verplichtingen te voldoen."
+msgid "For as long as needed to manage your booking and meet legal obligations."
+msgstr "Zolang nodig is om je boeking af te handelen en aan wettelijke verplichtingen te voldoen."
 
 msgid "Cookies"
 msgstr "Cookies"
 
-msgid ""
-"We only use technical cookies that are necessary for the website to work "
-"(language, security and session). We do not use advertising or tracking "
-"cookies."
-msgstr ""
-"We gebruiken alleen technische cookies die nodig zijn om de website te laten"
-" werken (taal, beveiliging en sessie). We gebruiken geen advertentie- of "
-"trackingcookies."
+msgid "We only use technical cookies that are necessary for the website to work (language, security and session). We do not use advertising or tracking cookies."
+msgstr "We gebruiken alleen technische cookies die nodig zijn om de website te laten werken (taal, beveiliging en sessie). We gebruiken geen advertentie- of trackingcookies."

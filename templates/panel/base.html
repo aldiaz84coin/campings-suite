@@ -48,11 +48,11 @@
         {% if is_owner %}{% include "panel/_nav_link.html" with name="settings" icon="settings" label=_("Settings") %}{% endif %}
         {% include "panel/_nav_link.html" with name="team" icon="users" label=_("Team") %}
       </nav>
-      <a class="sidebar__public" href="{% url 'public:camping_detail' slug=camping.slug %}" target="_blank" rel="noopener">{% icon "external-link" %}<span>{% if camping.is_public %}{% translate "View public page" %}{% else %}{% translate "Preview page" %}{% endif %}</span></a>
+      <a class="sidebar__public" href="{% public_url camping %}" target="_blank" rel="noopener">{% icon "external-link" %}<span>{% if camping.is_public %}{% translate "View public page" %}{% else %}{% translate "Preview page" %}{% endif %}</span></a>
     {% else %}
       <nav class="sidebar-nav" aria-label="{% translate 'Panel' %}">
         <a class="sidebar-nav__link{% if section is None %} is-active{% endif %}" href="{% url 'panel:home' %}">{% icon "tent" %}<span>{% translate "My campings" %}</span></a>
-        {% if user.is_superuser %}<a class="sidebar-nav__link{% if section == 'platform' %} is-active{% endif %}" href="{% url 'panel:platform' %}">{% icon "shield-check" %}<span>{% translate "Platform" %}</span></a>{% endif %}
+        {% if user.is_superuser and not on_custom_domain %}<a class="sidebar-nav__link{% if section == 'platform' %} is-active{% endif %}" href="{% url 'panel:platform' %}">{% icon "shield-check" %}<span>{% translate "Platform" %}</span></a>{% endif %}
         <a class="sidebar-nav__link{% if section == 'account' %} is-active{% endif %}" href="{% url 'panel:account' %}">{% icon "user" %}<span>{% translate "My account" %}</span></a>
       </nav>
     {% endif %}

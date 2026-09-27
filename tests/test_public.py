@@ -12,44 +12,37 @@ from campings.models import Photo
 from .factories import future, make_accommodation, make_camping, make_service, make_user
 
 
-class DirectoryTests(TestCase):
+class PlatformRootTests(TestCase):
+    """There is no public directory: each camping has its own website."""
+
     def test_root_redirects_to_a_language(self):
         response = self.client.get("/", HTTP_ACCEPT_LANGUAGE="de")
         self.assertRedirects(response, "/de/", fetch_redirect_response=False)
 
-    def test_only_public_campings_are_listed(self):
+    def test_platform_home_leads_to_the_panel(self):
         make_camping("Visible")
-        make_camping("Draft", is_published=False)
-        make_camping("Suspended", is_approved=False)
-        response = self.client.get("/es/")
-        self.assertContains(response, "Visible")
-        self.assertNotContains(response, "Draft")
-        self.assertNotContains(response, "Suspended")
-
-    def test_search_and_facility_filter(self):
-        pool = make_camping("Camping Piscina", city="Tossa")
-        make_camping("Camping Montaña", city="Jaca")
-        pool.facilities.create(kind="pool")
-        self.assertContains(self.client.get("/es/?q=tossa"), "Camping Piscina")
-        self.assertNotContains(self.client.get("/es/?q=tossa"), "Camping Montaña")
-        response = self.client.get("/es/?facility=pool")
-        self.assertContains(response, "Camping Piscina")
-        self.assertNotContains(response, "Camping Montaña")
-
-    def test_every_language_renders(self):
-        make_camping("Multi")
         for code in ("es", "en", "fr", "de", "nl", "it"):
             response = self.client.get(f"/{code}/")
-            self.assertEqual(response.status_code, 200)
-            self.assertContains(response, f'lang="{code}"')
+            self.assertRedirects(response, f"/{code}/panel/", fetch_redirect_response=False)
+        response = self.client.get("/es/", follow=True)
+        self.assertEqual(response.redirect_chain[-1][0], "/es/panel/login/?next=/es/panel/")
+        self.assertNotContains(response, "Visible")
+
+    def test_platform_privacy_page(self):
+        response = self.client.get("/en/privacy/")
+        self.assertContains(response, "provides the websites and booking tools")
+        self.assertNotContains(response, "List your camping")
 
     def test_seo_endpoints(self):
         camping = make_camping("Sitemap Camping")
+        make_camping("Borrador", is_published=False)
         sitemap = self.client.get("/sitemap.xml")
         self.assertContains(sitemap, f"/es/camping/{camping.slug}/")
         self.assertContains(sitemap, 'hreflang="en"')
+        self.assertNotContains(sitemap, "borrador")
         robots = self.client.get("/robots.txt")
         self.assertContains(robots, "Sitemap:")
+        self.assertContains(robots, "Disallow: /superadmin/")
         self.assertEqual(self.client.get("/healthz").content, b"ok")
 
 
@@ -214,13 +207,39 @@ class CustomDomainTests(TestCase):
     def test_unknown_hosts_are_rejected(self):
         self.assertEqual(self.client.get("/es/", HTTP_HOST="evil.test").status_code, 400)
 
-    def test_panel_is_not_reachable_on_custom_domains(self):
-        self.assertEqual(self.client.get("/es/panel/login/", HTTP_HOST="www.camping-dominio.test").status_code, 404)
+    def test_the_camping_panel_is_on_its_own_domain(self):
+        response = self.client.get("/es/panel/login/", HTTP_HOST="www.camping-dominio.test")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Camping Dominio")
+        # No platform administration or sign-up there.
+        self.assertEqual(self.client.get("/superadmin/", HTTP_HOST="www.camping-dominio.test").status_code, 404)
+        self.assertEqual(self.client.get("/es/panel/signup/", HTTP_HOST="www.camping-dominio.test").status_code, 404)
 
-    def test_unpublished_camping_domain_is_rejected(self):
+    def test_unpublished_camping_domain_shows_coming_soon(self):
+        self.camping.is_published = False
+        self.camping.phone = "+34 600 111 222"
+        self.camping.save()
+        response = self.client.get("/es/", HTTP_HOST="www.camping-dominio.test")
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "public/coming_soon.html")
+        self.assertContains(response, "+34 600 111 222")
+        self.assertContains(response, '<meta name="robots" content="noindex">')
+        self.assertEqual(self.client.get("/es/book/", HTTP_HOST="www.camping-dominio.test").status_code, 404)
+
+    def test_members_preview_the_unpublished_site_on_its_domain(self):
         self.camping.is_published = False
         self.camping.save()
-        self.assertEqual(self.client.get("/es/", HTTP_HOST="www.camping-dominio.test").status_code, 400)
+        owner = make_user()
+        self.camping.memberships.create(user=owner, role="owner")
+        self.client.force_login(owner)
+        response = self.client.get("/es/", HTTP_HOST="www.camping-dominio.test")
+        self.assertTemplateUsed(response, "public/camping_detail.html")
+        self.assertContains(response, "preview-banner")
+
+    def test_robots_on_custom_domain(self):
+        response = self.client.get("/robots.txt", HTTP_HOST="www.camping-dominio.test")
+        self.assertContains(response, "Disallow: /*/book/")
+        self.assertNotContains(response, "superadmin")
 
     def test_sitemap_lists_only_that_camping(self):
         make_camping("Otro")

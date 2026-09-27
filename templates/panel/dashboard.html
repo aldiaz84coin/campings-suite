@@ -8,7 +8,7 @@
     <p class="muted">{% blocktranslate with camping=camping.name %}This is the control panel of {{ camping }}.{% endblocktranslate %}</p>
   </div>
   <div class="page-header__actions">
-    <a class="btn btn-outline" href="{% url 'public:camping_detail' slug=camping.slug %}" target="_blank" rel="noopener">{% icon "eye" %}<span>{% if camping.is_public %}{% translate "View page" %}{% else %}{% translate "Preview" %}{% endif %}</span></a>
+    <a class="btn btn-outline" href="{% public_url camping %}" target="_blank" rel="noopener">{% icon "eye" %}<span>{% if camping.is_public %}{% translate "View page" %}{% else %}{% translate "Preview" %}{% endif %}</span></a>
     {% if is_owner %}
     <form method="post" action="{% url 'panel:publish' slug=camping.slug %}">
       {% csrf_token %}
@@ -102,9 +102,9 @@
 
   <section class="card card-pad share-card">
     <div class="card-head"><h2>{% translate "Your web address" %}</h2></div>
-    {% url 'public:camping_detail' slug=camping.slug as public_path %}
-    <div class="copy-field"><input type="text" readonly value="{{ request.scheme }}://{{ request.get_host }}{{ public_path }}" data-copy-source><button class="btn btn-outline btn-sm" type="button" data-copy>{% icon "copy" %}<span>{% translate "Copy" %}</span></button></div>
-    {% if camping.custom_domain %}<p class="small muted">{% blocktranslate with domain=camping.custom_domain %}Also available at https://{{ domain }}{% endblocktranslate %}</p>{% endif %}
+    <div class="copy-field"><input type="text" readonly value="{{ web_address }}" data-copy-source><button class="btn btn-outline btn-sm" type="button" data-copy>{% icon "copy" %}<span>{% translate "Copy" %}</span></button></div>
+    {% if not camping.is_public %}<p class="small muted">{% translate "Visitors will see your website as soon as you publish it." %}</p>{% endif %}
+    {% if camping.domain_pending %}<p class="small muted">{% blocktranslate with domain=camping.custom_domain %}Your own domain {{ domain }} will be used as soon as its DNS points to us.{% endblocktranslate %}</p>{% endif %}
     <p class="small muted">{% translate "Share it on your social networks, Google Business profile and e-mails." %}</p>
   </section>
 </div>

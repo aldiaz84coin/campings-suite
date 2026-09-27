@@ -287,7 +287,18 @@
     refresh();
   }
 
+  // Occupancy calendar: bring today's column into view (after the sticky names).
+  function setupCalendarScroll() {
+    var scroller = $(".calendar-scroll");
+    var today = scroller && $("thead th.is-today", scroller);
+    if (!today) return;
+    var names = $(".occupancy__corner", scroller);
+    var offset = today.offsetLeft - (names ? names.offsetWidth : 0) - today.offsetWidth * 2;
+    scroller.scrollLeft = Math.max(offset, 0);
+  }
+
   document.addEventListener("DOMContentLoaded", function () {
+    setupCalendarScroll();
     setupDropdowns();
     setupSidebar();
     setupTranslatedFields();

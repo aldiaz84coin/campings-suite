@@ -8,18 +8,33 @@
   {% include "partials/form_errors.html" %}
   <section class="card card-pad">
     <h2>{% translate "Web address" %}</h2>
-    {% url 'public:camping_detail' slug='SLUG' as sample_path %}
     <div class="field{% if form.slug.errors %} has-error{% endif %}">
       <label class="field__label" for="{{ form.slug.id_for_label }}">{{ form.slug.label }}</label>
-      <div class="input-affix"><span class="input-affix__prefix">{{ request.get_host }}{{ sample_path|cut:'SLUG/' }}</span>{{ form.slug }}</div>
-      <p class="field__help">{{ form.slug.help_text }}</p>
+      {% if subdomain_suffix %}
+        <div class="input-affix"><span class="input-affix__prefix">https://</span>{{ form.slug }}<span class="input-affix__suffix">.{{ subdomain_suffix }}</span></div>
+      {% else %}
+        <div class="input-affix"><span class="input-affix__prefix">{{ platform_prefix }}</span>{{ form.slug }}</div>
+      {% endif %}
+      <p class="field__help">{{ form.slug.help_text }} {% translate "If you change it, links to the old address stop working." %}</p>
       {% for error in form.slug.errors %}<p class="field__error">{{ error }}</p>{% endfor %}
     </div>
     {% if form.custom_domain %}
       {% include "partials/field.html" with field=form.custom_domain %}
-      <p class="field__help">{% translate "Platform administrators: add the certificate with “fly certs add <domain>” and ask the camping to create the DNS records Fly shows." %}</p>
+      {% if camping.custom_domain %}
+        {% if camping.domain_verified_at %}
+          <p class="domain-status domain-status--ok">{% icon "circle-check" %}<span>{% blocktranslate with domain=camping.custom_domain date=camping.domain_verified_at|date:"DATE_FORMAT" %}{{ domain }} is working since {{ date }}: links and the platform address lead there.{% endblocktranslate %}</span></p>
+        {% else %}
+          <p class="domain-status domain-status--pending">{% icon "hourglass" %}<span>{% blocktranslate with domain=camping.custom_domain %}Waiting for the first visit through https://{{ domain }}. Until then the camping keeps its current address.{% endblocktranslate %}</span></p>
+          <ol class="steps">
+            <li>{% translate "Add the certificate on Fly.io:" %} <code>fly certs add {{ camping.custom_domain }}</code></li>
+            <li>{% if fly_host %}{% blocktranslate with domain=camping.custom_domain host=fly_host %}Ask the camping to create a CNAME record for {{ domain }} pointing to {{ host }} (for a root domain without www, the A and AAAA records shown by “fly ips list”).{% endblocktranslate %}{% else %}{% blocktranslate with domain=camping.custom_domain %}Ask the camping to point the DNS of {{ domain }} to the app (CNAME to the app's .fly.dev host, or the A and AAAA records shown by “fly ips list”).{% endblocktranslate %}{% endif %}</li>
+            <li>{% blocktranslate with domain=camping.custom_domain %}When “fly certs show {{ domain }}” says the certificate is issued, open https://{{ domain }} once: from then on it is the camping's address.{% endblocktranslate %}</li>
+          </ol>
+        {% endif %}
+      {% endif %}
+      {% include "partials/field.html" with field=form.show_platform_credit %}
     {% elif camping.custom_domain %}
-      <p class="muted">{% blocktranslate with domain=camping.custom_domain %}Own domain: {{ domain }}{% endblocktranslate %}</p>
+      <p class="muted">{% blocktranslate with domain=camping.custom_domain %}Own domain: {{ domain }}{% endblocktranslate %}{% if camping.domain_pending %} · {% translate "being activated" %}{% endif %}</p>
     {% else %}
       <p class="muted small">{% translate "Would you like to use your own domain (www.yourcamping.com)? Contact the platform administrator." %}</p>
     {% endif %}

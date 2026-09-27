@@ -11,6 +11,7 @@
     {% include "partials/field.html" with field=form.owner_email %}
     {% include "partials/field.html" with field=form.owner_name %}
     {% include "partials/field.html" with field=form.default_language %}
+    {% include "partials/field.html" with field=form.custom_domain %}
   </section>
   {% url 'panel:platform' as cancel_url %}
   {% include "panel/_form_actions.html" with cancel_url=cancel_url label=_("Create camping") %}

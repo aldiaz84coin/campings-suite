@@ -2,7 +2,7 @@ import json
 from decimal import Decimal
 
 from django.core import mail
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import translation
 
@@ -436,6 +436,11 @@ class BookingManagementTests(TestCase):
 
 
 class SignupAndTeamTests(TestCase):
+    def test_signup_is_disabled_by_default(self):
+        self.assertEqual(self.client.get("/es/panel/signup/").status_code, 404)
+        self.assertNotContains(self.client.get("/es/panel/login/"), "/panel/signup/")
+
+    @override_settings(SIGNUP_ENABLED=True)
     def test_signup_creates_user_camping_and_membership(self):
         response = self.client.post(
             "/fr/panel/signup/",
@@ -454,6 +459,7 @@ class SignupAndTeamTests(TestCase):
         self.assertEqual(camping.default_language, "fr")
         self.assertTrue(camping.memberships.filter(user__email="luc@example.com", role="owner").exists())
 
+    @override_settings(SIGNUP_ENABLED=True)
     def test_signup_rejects_duplicate_email(self):
         make_user("taken@example.com")
         response = self.client.post(
@@ -501,12 +507,39 @@ class SignupAndTeamTests(TestCase):
         admin = make_user("admin@example.com", is_superuser=True, is_staff=True)
         self.client.force_login(admin)
         response = self.client.post(
-            "/es/panel/platform/new/", {"name": "Nuevo", "owner_email": "own@example.com", "default_language": "es"}
+            "/es/panel/platform/new/",
+            {
+                "name": "Nuevo",
+                "owner_email": "own@example.com",
+                "default_language": "es",
+                "custom_domain": "WWW.Camping-Nuevo.test",
+            },
         )
-        self.assertEqual(response.status_code, 302)
         camping = Camping.objects.get(name="Nuevo")
+        self.assertRedirects(response, f"/es/panel/c/{camping.slug}/settings/", fetch_redirect_response=False)
         self.assertTrue(camping.is_approved)
+        self.assertEqual(camping.custom_domain, "www.camping-nuevo.test")
+        self.assertTrue(camping.domain_pending)
         self.assertTrue(camping.memberships.filter(user__email="own@example.com", role="owner").exists())
+        # The settings page explains how to connect the domain.
+        response = self.client.get(f"/es/panel/c/{camping.slug}/settings/")
+        self.assertContains(response, "fly certs add www.camping-nuevo.test")
+
+    def test_platform_rejects_a_domain_already_in_use(self):
+        admin = make_user("admin@example.com", is_superuser=True, is_staff=True)
+        make_camping("Existente", custom_domain="www.ocupado.test")
+        self.client.force_login(admin)
+        response = self.client.post(
+            "/es/panel/platform/new/",
+            {
+                "name": "Nuevo",
+                "owner_email": "own@example.com",
+                "default_language": "es",
+                "custom_domain": "www.ocupado.test",
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("custom_domain", response.context["form"].errors)
 
     def test_platform_approval_toggle(self):
         admin = make_user("admin@example.com", is_superuser=True, is_staff=True)

@@ -1,12 +1,9 @@
 import logging
 
-from django.conf import settings
 from django.core.cache import cache
-from django.core.paginator import Paginator
-from django.db.models import Prefetch, Q
-from django.http import Http404, HttpResponse, JsonResponse
+from django.db.models import Prefetch
+from django.http import Http404, HttpResponse, HttpResponsePermanentRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse
 from django.utils import timezone, translation
 from django.utils.text import Truncator
 from django.utils.translation import get_language
@@ -17,12 +14,11 @@ from bookings.emails import send_new_booking_emails
 from bookings.forms import BookingRequestForm, QuoteForm, StaySearchForm
 from bookings.models import BookingRequest
 from campings import catalog
-from campings.models import AccommodationType, Camping, Photo
-from core.urlutils import camping_reverse
+from campings.models import Camping, Photo
+from core.urlutils import camping_reverse, camping_site_url, request_camping_id
 
 logger = logging.getLogger(__name__)
 
-HOME_FACILITY_FILTERS = ["pool", "beach", "pets", "wifi", "restaurant", "playground", "mountain", "motorhome_service"]
 BOOKING_RATE_LIMIT = 6  # requests per IP and hour
 
 
@@ -35,14 +31,27 @@ def can_preview(user, camping):
 
 
 def get_camping(request, slug=None):
-    """Camping for this request: by custom domain or slug, public or preview."""
-    if getattr(request, "domain_camping_id", None):
+    """Camping for this request: by its own host or slug, public or preview."""
+    if request_camping_id(request):
         camping = get_object_or_404(Camping, pk=request.domain_camping_id)
     else:
         camping = get_object_or_404(Camping, slug=slug)
     if not camping.is_public and not can_preview(request.user, camping):
         raise Http404("Camping not found")
     return camping
+
+
+def canonical_redirect(request, camping):
+    """301 from the platform address to the camping's own website, if it has one."""
+    if request_camping_id(request) or request.method not in ("GET", "HEAD"):
+        return None
+    if not camping.is_public or not camping.site_url:
+        return None
+    match = request.resolver_match
+    kwargs = {key: value for key, value in match.kwargs.items() if key != "slug"}
+    url = camping_site_url(camping, match.view_name, **kwargs)
+    query = request.META.get("QUERY_STRING", "")
+    return HttpResponsePermanentRedirect(f"{url}?{query}" if query else url)
 
 
 def client_ip(request):
@@ -57,56 +66,12 @@ def absolute(request, url):
     return request.build_absolute_uri(url) if url and not url.startswith("http") else url
 
 
-# --- Directory -----------------------------------------------------------------
-
-
 def home(request):
-    q = request.GET.get("q", "").strip()
-    region = request.GET.get("region", "").strip()
-    facility = request.GET.get("facility", "").strip()
+    """Root of the platform host: there is no public directory, only the panel.
 
-    campings = public_campings()
-    if q:
-        campings = campings.filter(
-            Q(name__icontains=q) | Q(city__icontains=q) | Q(region__icontains=q) | Q(country__icontains=q)
-        )
-    if region:
-        campings = campings.filter(region__iexact=region)
-    if facility in catalog.FACILITY_MAP:
-        campings = campings.filter(facilities__kind=facility).distinct()
-    campings = campings.prefetch_related(
-        Prefetch("photos", queryset=Photo.objects.order_by("position", "id")),
-        "facilities",
-        Prefetch("accommodations", queryset=AccommodationType.objects.filter(is_active=True).prefetch_related("rates")),
-    ).order_by("name")
-
-    page = Paginator(campings, 12).get_page(request.GET.get("page"))
-    regions = public_campings().exclude(region="").order_by("region").values_list("region", flat=True).distinct()
-    facility_filters = [(key, catalog.FACILITY_MAP[key]) for key in HOME_FACILITY_FILTERS]
-    alternates = []
-    for code, _name in settings.LANGUAGES:
-        with translation.override(code):
-            alternates.append((code, absolute(request, reverse("public:home"))))
-    with translation.override(settings.LANGUAGE_CODE):
-        alternates.append(("x-default", absolute(request, reverse("public:home"))))
-    return render(
-        request,
-        "public/home.html",
-        {
-            "page": page,
-            "campings": page.object_list,
-            "total": page.paginator.count,
-            "q": q,
-            "region": region,
-            "facility": facility,
-            "regions": regions,
-            "facility_filters": facility_filters,
-            "is_filtered": bool(q or region or facility),
-            "alternates": alternates,
-            "canonical": dict(alternates).get(get_language()),
-            "noindex": bool(q or region or facility or page.number > 1),
-        },
-    )
+    On a camping's own host the root is its website (see ``urls_domain``).
+    """
+    return redirect("panel:home")
 
 
 # --- Camping page --------------------------------------------------------------
@@ -191,8 +156,21 @@ def _alternates(request, camping, name="public:camping_detail", **kwargs):
     return links
 
 
+def coming_soon(request):
+    """Home of a camping's own host while its website is not public."""
+    camping = get_object_or_404(Camping, pk=request.domain_camping_id)
+    return render(request, "public/coming_soon.html", {"camping": camping, "noindex": True})
+
+
 def camping_detail(request, slug=None):
-    camping = get_camping(request, slug)
+    if request_camping_id(request):
+        camping = get_object_or_404(Camping, pk=request.domain_camping_id)
+        if not camping.is_public and not can_preview(request.user, camping):
+            return coming_soon(request)
+    else:
+        camping = get_camping(request, slug)
+        if response := canonical_redirect(request, camping):
+            return response
     today = timezone.localdate()
 
     photos = list(camping.photos.all())
@@ -279,6 +257,8 @@ def _rate_limited(request, camping):
 
 def booking(request, slug=None):
     camping = get_camping(request, slug)
+    if response := canonical_redirect(request, camping):
+        return response
     accommodations = list(
         camping.accommodations.filter(is_active=True).prefetch_related(
             "rates", Prefetch("photos", queryset=Photo.objects.order_by("position", "id"))
@@ -327,6 +307,8 @@ def booking(request, slug=None):
 
 def booking_done(request, token, slug=None):
     camping = get_camping(request, slug)
+    if response := canonical_redirect(request, camping):
+        return response
     booking_request = get_object_or_404(BookingRequest, token=token, camping=camping)
     return render(
         request,
@@ -353,7 +335,11 @@ def quote(request, slug=None):
 
 
 def privacy(request, slug=None):
-    camping = get_camping(request, slug) if (slug or getattr(request, "domain_camping_id", None)) else None
+    camping = None
+    if slug or request_camping_id(request):
+        camping = get_camping(request, slug)
+        if response := canonical_redirect(request, camping):
+            return response
     return render(request, "public/privacy.html", {"camping": camping})
 
 
@@ -363,30 +349,27 @@ def privacy(request, slug=None):
 @require_GET
 def robots_txt(request):
     sitemap = request.build_absolute_uri("/sitemap.xml")
-    lines = [
-        "User-agent: *",
-        "Disallow: /*/panel/",
-        "Disallow: /superadmin/",
-        "Disallow: /*/camping/*/book/",
-        f"Sitemap: {sitemap}",
-        "",
-    ]
+    if request_camping_id(request):
+        rules = ["Disallow: /*/panel/", "Disallow: /*/book/"]
+    else:
+        rules = ["Disallow: /*/panel/", "Disallow: /superadmin/", "Disallow: /*/camping/*/book/"]
+    lines = ["User-agent: *", *rules, f"Sitemap: {sitemap}", ""]
     return HttpResponse("\n".join(lines), content_type="text/plain")
 
 
 @require_GET
 def sitemap_xml(request):
-    entries = []
-    if getattr(request, "domain_camping_id", None):
-        campings = Camping.objects.filter(pk=request.domain_camping_id)
-    else:
-        campings = public_campings().order_by("pk")
-        home_links = []
-        for code, _name in settings.LANGUAGES:
-            with translation.override(code):
-                home_links.append((code, absolute(request, reverse("public:home"))))
-        entries.extend({"loc": url, "alternates": home_links, "lastmod": None} for _code, url in home_links)
+    """Pages served on this host.
 
+    A camping's own host lists its pages; the platform host only lists the
+    public campings that do not have an address of their own yet.
+    """
+    if request_camping_id(request):
+        campings = public_campings().filter(pk=request.domain_camping_id)
+    else:
+        campings = [camping for camping in public_campings().order_by("pk") if not camping.site_url]
+
+    entries = []
     for camping in campings:
         alternates = _alternates(request, camping)
         entries.extend(
