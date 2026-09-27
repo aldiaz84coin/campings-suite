@@ -39,9 +39,7 @@ class StayFieldsMixin:
 
 class BookingRequestForm(StayFieldsMixin, forms.ModelForm):
     accommodation = AccommodationChoiceField(queryset=None, label=_("Accommodation"))
-    extras = ExtrasField(
-        queryset=None, required=False, widget=forms.CheckboxSelectMultiple, label=_("Extras")
-    )
+    extras = ExtrasField(queryset=None, required=False, widget=forms.CheckboxSelectMultiple, label=_("Extras"))
     adults = forms.IntegerField(label=_("Adults"), min_value=1, max_value=30, initial=2)
     children = forms.IntegerField(label=_("Children"), min_value=0, max_value=30, initial=0, required=False)
     pets = forms.IntegerField(label=_("Pets"), min_value=0, max_value=10, initial=0, required=False)

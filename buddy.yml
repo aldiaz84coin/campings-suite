@@ -1,0 +1,39 @@
+# Buddy.Works pipeline (free plan): runs the tests on every push to `main`
+# and, if they pass, deploys to Fly.io with a remote build.
+#
+# One-time setup in Buddy:
+#   1. Create a project from this GitHub repository (Buddy detects buddy.yml).
+#   2. Add a secret variable FLY_API_TOKEN with the output of
+#      `fly tokens create deploy` (Project > Variables > Settable/Encrypted).
+- pipeline: "Test and deploy to Fly.io"
+  on: "EVENT"
+  events:
+  - type: "PUSH"
+    refs:
+    - "refs/heads/main"
+  priority: "NORMAL"
+  fail_on_prepare_env_warning: true
+  actions:
+  - action: "Run tests"
+    type: "BUILD"
+    docker_image_name: "library/python"
+    docker_image_tag: "3.12"
+    execute_commands:
+    - "pip install -r requirements.txt"
+    - "python manage.py check"
+    - "python manage.py makemigrations --check --dry-run"
+    - "python manage.py test tests"
+    cached_dirs:
+    - "/root/.cache/pip"
+    shell: "BASH"
+  - action: "Deploy to Fly.io"
+    type: "BUILD"
+    docker_image_name: "library/debian"
+    docker_image_tag: "bookworm-slim"
+    setup_commands:
+    - "apt-get update && apt-get install -y --no-install-recommends curl ca-certificates"
+    - "curl -L https://fly.io/install.sh | sh"
+    - "ln -sf /root/.fly/bin/flyctl /usr/local/bin/flyctl"
+    execute_commands:
+    - "flyctl deploy --remote-only"
+    shell: "BASH"

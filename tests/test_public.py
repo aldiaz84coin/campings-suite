@@ -88,7 +88,12 @@ class CampingPageTests(TestCase):
     def test_quote_endpoint(self):
         response = self.client.get(
             f"/en/camping/{self.camping.slug}/quote/",
-            {"accommodation": self.acc.pk, "arrival": future(10).isoformat(), "departure": future(12).isoformat(), "adults": 2},
+            {
+                "accommodation": self.acc.pk,
+                "arrival": future(10).isoformat(),
+                "departure": future(12).isoformat(),
+                "adults": 2,
+            },
         )
         data = response.json()
         self.assertTrue(data["ok"], data)

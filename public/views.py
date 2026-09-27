@@ -31,9 +31,7 @@ def public_campings():
 
 
 def can_preview(user, camping):
-    return user.is_authenticated and (
-        user.is_superuser or camping.memberships.filter(user_id=user.pk).exists()
-    )
+    return user.is_authenticated and (user.is_superuser or camping.memberships.filter(user_id=user.pk).exists())
 
 
 def get_camping(request, slug=None):
@@ -83,9 +81,7 @@ def home(request):
     ).order_by("name")
 
     page = Paginator(campings, 12).get_page(request.GET.get("page"))
-    regions = (
-        public_campings().exclude(region="").order_by("region").values_list("region", flat=True).distinct()
-    )
+    regions = public_campings().exclude(region="").order_by("region").values_list("region", flat=True).distinct()
     facility_filters = [(key, catalog.FACILITY_MAP[key]) for key in HOME_FACILITY_FILTERS]
     alternates = []
     for code, _name in settings.LANGUAGES:
@@ -164,7 +160,11 @@ def _json_ld(request, camping, photos, facilities, starting_price):
             "addressCountry": camping.country,
         }
     if camping.latitude is not None and camping.longitude is not None:
-        data["geo"] = {"@type": "GeoCoordinates", "latitude": float(camping.latitude), "longitude": float(camping.longitude)}
+        data["geo"] = {
+            "@type": "GeoCoordinates",
+            "latitude": float(camping.latitude),
+            "longitude": float(camping.longitude),
+        }
     if camping.phone:
         data["telephone"] = camping.phone
     if camping.email:
@@ -297,9 +297,7 @@ def booking(request, slug=None):
             else:
                 booking_request = form.save()
                 send_new_booking_emails(request, booking_request)
-                return redirect(
-                    camping_reverse(request, "public:booking_done", camping, token=booking_request.token)
-                )
+                return redirect(camping_reverse(request, "public:booking_done", camping, token=booking_request.token))
         quote = form.quote
     else:
         initial = _booking_initial(request, camping)
@@ -365,7 +363,14 @@ def privacy(request, slug=None):
 @require_GET
 def robots_txt(request):
     sitemap = request.build_absolute_uri("/sitemap.xml")
-    lines = ["User-agent: *", "Disallow: /*/panel/", "Disallow: /superadmin/", "Disallow: /*/camping/*/book/", f"Sitemap: {sitemap}", ""]
+    lines = [
+        "User-agent: *",
+        "Disallow: /*/panel/",
+        "Disallow: /superadmin/",
+        "Disallow: /*/camping/*/book/",
+        f"Sitemap: {sitemap}",
+        "",
+    ]
     return HttpResponse("\n".join(lines), content_type="text/plain")
 
 

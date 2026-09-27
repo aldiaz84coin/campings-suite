@@ -6,8 +6,8 @@ from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
 from bookings.models import BookingRequest
-from core.images import ImageProcessingError, process_logo
 from core.i18n import has_translation
+from core.images import ImageProcessingError, process_logo
 
 from ..forms import AppearanceForm, LocationForm, ProfileForm, SettingsForm
 from ..utils import camping_view, panel_render, user_campings
@@ -28,7 +28,8 @@ def setup_checklist(camping):
     accommodations = list(camping.accommodations.all())
     items = [
         {
-            "done": has_translation(camping.description, camping.default_language) and bool(camping.phone or camping.email),
+            "done": has_translation(camping.description, camping.default_language)
+            and bool(camping.phone or camping.email),
             "label": _("Describe your camping and add contact details"),
             "url_name": "panel:profile",
         },
@@ -98,9 +99,7 @@ def toggle_publish(request, camping):
         if camping.is_approved:
             messages.success(request, _("Your page is now public."))
         else:
-            messages.warning(
-                request, _("Your page will be visible as soon as the platform approves your camping.")
-            )
+            messages.warning(request, _("Your page will be visible as soon as the platform approves your camping."))
     else:
         messages.info(request, _("Your page is hidden from the public."))
     return redirect("panel:dashboard", slug=camping.slug)

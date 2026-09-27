@@ -23,11 +23,36 @@ from .models import (
 )
 
 PALETTES = {
-    "day": {"sky": ((125, 190, 235), (228, 243, 250)), "far": (120, 160, 140), "near": (58, 110, 80), "sun": (255, 236, 170)},
-    "sunset": {"sky": ((247, 145, 92), (252, 214, 150)), "far": (150, 104, 110), "near": (80, 62, 80), "sun": (255, 244, 200)},
-    "dawn": {"sky": ((164, 186, 226), (250, 214, 196)), "far": (126, 142, 170), "near": (72, 96, 120), "sun": (255, 232, 205)},
-    "sea": {"sky": ((96, 176, 230), (205, 236, 250)), "far": (46, 128, 170), "near": (230, 208, 160), "sun": (255, 250, 220)},
-    "forest": {"sky": ((170, 210, 200), (236, 246, 230)), "far": (84, 140, 100), "near": (36, 86, 58), "sun": (250, 248, 220)},
+    "day": {
+        "sky": ((125, 190, 235), (228, 243, 250)),
+        "far": (120, 160, 140),
+        "near": (58, 110, 80),
+        "sun": (255, 236, 170),
+    },
+    "sunset": {
+        "sky": ((247, 145, 92), (252, 214, 150)),
+        "far": (150, 104, 110),
+        "near": (80, 62, 80),
+        "sun": (255, 244, 200),
+    },
+    "dawn": {
+        "sky": ((164, 186, 226), (250, 214, 196)),
+        "far": (126, 142, 170),
+        "near": (72, 96, 120),
+        "sun": (255, 232, 205),
+    },
+    "sea": {
+        "sky": ((96, 176, 230), (205, 236, 250)),
+        "far": (46, 128, 170),
+        "near": (230, 208, 160),
+        "sun": (255, 250, 220),
+    },
+    "forest": {
+        "sky": ((170, 210, 200), (236, 246, 230)),
+        "far": (84, 140, 100),
+        "near": (36, 86, 58),
+        "sun": (250, 248, 220),
+    },
     "night": {"sky": ((24, 34, 70), (70, 80, 130)), "far": (44, 52, 90), "near": (22, 28, 50), "sun": (250, 246, 220)},
 }
 
@@ -71,7 +96,9 @@ def generate_scene(kind="day", subject="tent", seed=1, size=(1600, 1066)):
     if kind == "sea":
         draw.rectangle([0, int(height * 0.6), width, height], fill=(52, 140, 190))
         for y in range(int(height * 0.62), height, 14):
-            draw.line([(rng.randint(0, width // 3), y), (rng.randint(width // 2, width), y)], fill=(120, 190, 225), width=2)
+            draw.line(
+                [(rng.randint(0, width // 3), y), (rng.randint(width // 2, width), y)], fill=(120, 190, 225), width=2
+            )
         draw.polygon([(0, height * 0.82), (width, height * 0.74), (width, height), (0, height)], fill=palette["near"])
     else:
         near = _ridge(rng, width, height * 0.8, height * 0.14)
@@ -92,16 +119,25 @@ def generate_scene(kind="day", subject="tent", seed=1, size=(1600, 1066)):
     elif subject == "cabin":
         w, h = width // 4, height // 5
         draw.rectangle([cx - w // 2, ground_y - h, cx + w // 2, ground_y], fill=(150, 98, 60))
-        draw.polygon([(cx - w // 2 - 20, ground_y - h), (cx, ground_y - h - h // 2), (cx + w // 2 + 20, ground_y - h)], fill=(90, 56, 40))
+        draw.polygon(
+            [(cx - w // 2 - 20, ground_y - h), (cx, ground_y - h - h // 2), (cx + w // 2 + 20, ground_y - h)],
+            fill=(90, 56, 40),
+        )
         draw.rectangle([cx - w // 8, ground_y - h // 2, cx + w // 8, ground_y], fill=(70, 44, 30))
-        draw.rectangle([cx + w // 5, ground_y - h * 3 // 4, cx + w // 5 + w // 8, ground_y - h // 2], fill=(255, 220, 140))
+        draw.rectangle(
+            [cx + w // 5, ground_y - h * 3 // 4, cx + w // 5 + w // 8, ground_y - h // 2], fill=(255, 220, 140)
+        )
     elif subject == "caravan":
         w, h = width // 4, height // 7
-        draw.rounded_rectangle([cx - w // 2, ground_y - h - 20, cx + w // 2, ground_y - 20], radius=30, fill=(245, 245, 240))
+        draw.rounded_rectangle(
+            [cx - w // 2, ground_y - h - 20, cx + w // 2, ground_y - 20], radius=30, fill=(245, 245, 240)
+        )
         draw.rectangle([cx - w // 3, ground_y - h, cx - w // 3 + w // 5, ground_y - h + h // 2], fill=(110, 170, 210))
         draw.ellipse([cx - 30, ground_y - 50, cx + 30, ground_y + 10], fill=(40, 40, 40))
     elif subject == "pool":
-        draw.rounded_rectangle([width // 6, int(height * 0.8), 5 * width // 6, height - 20], radius=40, fill=(90, 200, 230))
+        draw.rounded_rectangle(
+            [width // 6, int(height * 0.8), 5 * width // 6, height - 20], radius=40, fill=(90, 200, 230)
+        )
         for y in range(int(height * 0.82), height - 30, 18):
             draw.line([(width // 5, y), (4 * width // 5, y)], fill=(170, 230, 245), width=3)
     return image.filter(ImageFilter.SMOOTH)
@@ -220,8 +256,21 @@ def create_demo_camping(slug="los-pinos-demo", year=None, with_photos=True):
     )
 
     pitch = AccommodationType.objects.create(
-        camping=camping, kind="pitch", position=0, max_guests=6, size_m2=90, units=40, base_price=Decimal("16"),
-        name=T("Parcela con electricidad", "Pitch with electricity", "Emplacement avec électricité", "Stellplatz mit Strom", "Plaats met stroom", "Piazzola con elettricità"),
+        camping=camping,
+        kind="pitch",
+        position=0,
+        max_guests=6,
+        size_m2=90,
+        units=40,
+        base_price=Decimal("16"),
+        name=T(
+            "Parcela con electricidad",
+            "Pitch with electricity",
+            "Emplacement avec électricité",
+            "Stellplatz mit Strom",
+            "Plaats met stroom",
+            "Piazzola con elettricità",
+        ),
         description=T(
             "Parcela sombreada de 80-100 m² con toma eléctrica de 10 A. Incluye un vehículo y una tienda o caravana.",
             "Shaded 80-100 m² pitch with a 10 A electrical hook-up. Includes one vehicle and one tent or caravan.",
@@ -231,7 +280,14 @@ def create_demo_camping(slug="los-pinos-demo", year=None, with_photos=True):
         amenities=["electricity", "shade", "water", "car_space", "pets"],
     )
     bungalow = AccommodationType.objects.create(
-        camping=camping, kind="bungalow", position=1, max_guests=5, size_m2=32, bedrooms=2, units=12, base_price=Decimal("75"),
+        camping=camping,
+        kind="bungalow",
+        position=1,
+        max_guests=5,
+        size_m2=32,
+        bedrooms=2,
+        units=12,
+        base_price=Decimal("75"),
         name=T("Bungalow Pino", "Pine bungalow", "Bungalow Pin", "Bungalow Pinie", "Bungalow Den", "Bungalow Pino"),
         description=T(
             "Bungalow de madera con dos habitaciones, baño, cocina equipada, aire acondicionado y terraza cubierta.",
@@ -242,8 +298,22 @@ def create_demo_camping(slug="los-pinos-demo", year=None, with_photos=True):
         amenities=["private_bathroom", "kitchen", "air_conditioning", "terrace", "tv", "wifi", "bed_linen"],
     )
     glamping = AccommodationType.objects.create(
-        camping=camping, kind="glamping", position=2, max_guests=2, size_m2=24, bedrooms=1, units=4, base_price=Decimal("95"),
-        name=T("Tienda Glamping Luna", "Moon glamping tent", "Tente glamping Lune", "Glamping-Zelt Mond", "Glampingtent Maan", "Tenda glamping Luna"),
+        camping=camping,
+        kind="glamping",
+        position=2,
+        max_guests=2,
+        size_m2=24,
+        bedrooms=1,
+        units=4,
+        base_price=Decimal("95"),
+        name=T(
+            "Tienda Glamping Luna",
+            "Moon glamping tent",
+            "Tente glamping Lune",
+            "Glamping-Zelt Mond",
+            "Glampingtent Maan",
+            "Tenda glamping Luna",
+        ),
         description=T(
             "Tienda safari con cama de matrimonio, baño privado y terraza con vistas al pinar.",
             "Safari tent with a double bed, private bathroom and a terrace overlooking the pine forest.",
@@ -253,10 +323,34 @@ def create_demo_camping(slug="los-pinos-demo", year=None, with_photos=True):
         amenities=["private_bathroom", "terrace", "bed_linen", "towels", "wifi"],
     )
     season_names = [
-        (T("Temporada baja", "Low season", "Basse saison", "Nebensaison", "Laagseizoen", "Bassa stagione"), (3, 15), (6, 14), "#3f8f6b", None),
-        (T("Temporada media", "Mid season", "Moyenne saison", "Zwischensaison", "Middenseizoen", "Media stagione"), (6, 15), (7, 14), "#e9a23b", 3),
-        (T("Temporada alta", "High season", "Haute saison", "Hauptsaison", "Hoogseizoen", "Alta stagione"), (7, 15), (8, 31), "#d4553a", 5),
-        (T("Septiembre", "September", "Septembre", "September", "September", "Settembre"), (9, 1), (10, 31), "#3b82a6", None),
+        (
+            T("Temporada baja", "Low season", "Basse saison", "Nebensaison", "Laagseizoen", "Bassa stagione"),
+            (3, 15),
+            (6, 14),
+            "#3f8f6b",
+            None,
+        ),
+        (
+            T("Temporada media", "Mid season", "Moyenne saison", "Zwischensaison", "Middenseizoen", "Media stagione"),
+            (6, 15),
+            (7, 14),
+            "#e9a23b",
+            3,
+        ),
+        (
+            T("Temporada alta", "High season", "Haute saison", "Hauptsaison", "Hoogseizoen", "Alta stagione"),
+            (7, 15),
+            (8, 31),
+            "#d4553a",
+            5,
+        ),
+        (
+            T("Septiembre", "September", "Septembre", "September", "September", "Settembre"),
+            (9, 1),
+            (10, 31),
+            "#3b82a6",
+            None,
+        ),
     ]
     prices = {pitch: (14, 20, 29, 16), bungalow: (65, 95, 140, 70), glamping: (85, 110, 150, 90)}
     seasons_by_year = {}
@@ -265,58 +359,212 @@ def create_demo_camping(slug="los-pinos-demo", year=None, with_photos=True):
         for name, (m1, d1), (m2, d2), color, min_nights in season_names:
             created.append(
                 Season.objects.create(
-                    camping=camping, name=name, start_date=date(season_year, m1, d1), end_date=date(season_year, m2, d2),
-                    color=color, min_nights=min_nights,
+                    camping=camping,
+                    name=name,
+                    start_date=date(season_year, m1, d1),
+                    end_date=date(season_year, m2, d2),
+                    color=color,
+                    min_nights=min_nights,
                 )
             )
         seasons_by_year[season_year] = created
         for accommodation, values in prices.items():
-            for season, price in zip(created, values):
+            for season, price in zip(created, values, strict=True):
                 AccommodationRate.objects.create(accommodation=accommodation, season=season, price=Decimal(price))
-    adult = Service.objects.create(camping=camping, position=0, icon="user", unit="adult_night", mode="mandatory", price=Decimal("6.5"),
-                                   name=T("Adulto", "Adult", "Adulte", "Erwachsener", "Volwassene", "Adulto"))
-    child = Service.objects.create(camping=camping, position=1, icon="baby", unit="child_night", mode="mandatory", price=Decimal("4.5"),
-                                   name=T("Niño (3-10 años)", "Child (3-10 years)", "Enfant (3-10 ans)", "Kind (3-10 Jahre)", "Kind (3-10 jaar)", "Bambino (3-10 anni)"))
+    adult = Service.objects.create(
+        camping=camping,
+        position=0,
+        icon="user",
+        unit="adult_night",
+        mode="mandatory",
+        price=Decimal("6.5"),
+        name=T("Adulto", "Adult", "Adulte", "Erwachsener", "Volwassene", "Adulto"),
+    )
+    child = Service.objects.create(
+        camping=camping,
+        position=1,
+        icon="baby",
+        unit="child_night",
+        mode="mandatory",
+        price=Decimal("4.5"),
+        name=T(
+            "Niño (3-10 años)",
+            "Child (3-10 years)",
+            "Enfant (3-10 ans)",
+            "Kind (3-10 Jahre)",
+            "Kind (3-10 jaar)",
+            "Bambino (3-10 anni)",
+        ),
+    )
     for service in (adult, child):
         service.accommodations.add(pitch)
-    Service.objects.create(camping=camping, position=2, icon="receipt", unit="adult_night", mode="mandatory", price=Decimal("1"),
-                           name=T("Tasa turística", "Tourist tax", "Taxe de séjour", "Kurtaxe", "Toeristenbelasting", "Tassa di soggiorno"))
-    dog = Service.objects.create(camping=camping, position=3, icon="dog", unit="pet_night", mode="mandatory", price=Decimal("3"),
-                                 name=T("Perro", "Dog", "Chien", "Hund", "Hond", "Cane"))
-    Service.objects.create(camping=camping, position=4, icon="bed", unit="stay", mode="optional", price=Decimal("12"),
-                           name=T("Ropa de cama", "Bed linen", "Linge de lit", "Bettwäsche", "Beddengoed", "Biancheria da letto"))
-    Service.objects.create(camping=camping, position=5, icon="spray-can", unit="stay", mode="optional", price=Decimal("40"),
-                           name=T("Limpieza final", "Final cleaning", "Ménage de fin de séjour", "Endreinigung", "Eindschoonmaak", "Pulizia finale")).accommodations.add(bungalow)
-    Service.objects.create(camping=camping, position=6, icon="wifi", unit="stay", mode="included", price=Decimal("0"),
-                           name=T("Wi-Fi", "Wi-Fi", "Wi-Fi", "WLAN", "Wifi", "Wi-Fi"))
+    Service.objects.create(
+        camping=camping,
+        position=2,
+        icon="receipt",
+        unit="adult_night",
+        mode="mandatory",
+        price=Decimal("1"),
+        name=T(
+            "Tasa turística", "Tourist tax", "Taxe de séjour", "Kurtaxe", "Toeristenbelasting", "Tassa di soggiorno"
+        ),
+    )
+    dog = Service.objects.create(
+        camping=camping,
+        position=3,
+        icon="dog",
+        unit="pet_night",
+        mode="mandatory",
+        price=Decimal("3"),
+        name=T("Perro", "Dog", "Chien", "Hund", "Hond", "Cane"),
+    )
+    Service.objects.create(
+        camping=camping,
+        position=4,
+        icon="bed",
+        unit="stay",
+        mode="optional",
+        price=Decimal("12"),
+        name=T("Ropa de cama", "Bed linen", "Linge de lit", "Bettwäsche", "Beddengoed", "Biancheria da letto"),
+    )
+    Service.objects.create(
+        camping=camping,
+        position=5,
+        icon="spray-can",
+        unit="stay",
+        mode="optional",
+        price=Decimal("40"),
+        name=T(
+            "Limpieza final",
+            "Final cleaning",
+            "Ménage de fin de séjour",
+            "Endreinigung",
+            "Eindschoonmaak",
+            "Pulizia finale",
+        ),
+    ).accommodations.add(bungalow)
+    Service.objects.create(
+        camping=camping,
+        position=6,
+        icon="wifi",
+        unit="stay",
+        mode="included",
+        price=Decimal("0"),
+        name=T("Wi-Fi", "Wi-Fi", "Wi-Fi", "WLAN", "Wifi", "Wi-Fi"),
+    )
     for created in seasons_by_year.values():
         high = created[2]
         ServiceRate.objects.create(service=adult, season=high, price=Decimal("8.5"))
         ServiceRate.objects.create(service=dog, season=high, price=Decimal("4"))
 
     for position, kind in enumerate(
-        ["reception_24h", "wifi", "restaurant", "bar", "supermarket", "bakery", "laundry", "pool", "kids_pool",
-         "playground", "entertainment", "sports_ground", "bbq", "hot_showers", "toilets", "accessible", "baby_room",
-         "electricity", "motorhome_service", "shade", "pets", "beach", "hiking", "town"]
+        [
+            "reception_24h",
+            "wifi",
+            "restaurant",
+            "bar",
+            "supermarket",
+            "bakery",
+            "laundry",
+            "pool",
+            "kids_pool",
+            "playground",
+            "entertainment",
+            "sports_ground",
+            "bbq",
+            "hot_showers",
+            "toilets",
+            "accessible",
+            "baby_room",
+            "electricity",
+            "motorhome_service",
+            "shade",
+            "pets",
+            "beach",
+            "hiking",
+            "town",
+        ]
     ):
         Facility.objects.create(camping=camping, kind=kind, position=position, is_paid=kind in {"laundry"})
     Facility.objects.create(
-        camping=camping, kind="custom", icon="ticket", position=50,
-        name=T("Excursiones en kayak", "Kayak excursions", "Excursions en kayak", "Kajak-Ausflüge", "Kajaktochten", "Escursioni in kayak"),
-        description=T("Salidas guiadas a las calas cada mañana en verano.", "Guided trips to the coves every morning in summer."),
+        camping=camping,
+        kind="custom",
+        icon="ticket",
+        position=50,
+        name=T(
+            "Excursiones en kayak",
+            "Kayak excursions",
+            "Excursions en kayak",
+            "Kajak-Ausflüge",
+            "Kajaktochten",
+            "Escursioni in kayak",
+        ),
+        description=T(
+            "Salidas guiadas a las calas cada mañana en verano.", "Guided trips to the coves every morning in summer."
+        ),
         is_paid=True,
     )
 
     if with_photos:
         shots = [
-            ("pinos", T("El pinar al atardecer", "The pine forest at sunset", "La pinède au coucher du soleil", "Der Pinienwald bei Sonnenuntergang"), None, {"kind": "sunset", "subject": "tent"}),
-            ("playa", T("La cala a 300 metros", "The cove 300 metres away", "La crique à 300 mètres", "Die Bucht in 300 Metern"), None, {"kind": "sea", "subject": "none"}),
-            ("piscina", T("Piscina con zona infantil", "Pool with children's area", "Piscine avec espace enfants", "Pool mit Kinderbereich"), None, {"kind": "day", "subject": "pool"}),
-            ("parcela", T("Parcelas con sombra", "Shaded pitches", "Emplacements ombragés", "Schattige Stellplätze"), pitch, {"kind": "forest", "subject": "tent"}),
+            (
+                "pinos",
+                T(
+                    "El pinar al atardecer",
+                    "The pine forest at sunset",
+                    "La pinède au coucher du soleil",
+                    "Der Pinienwald bei Sonnenuntergang",
+                ),
+                None,
+                {"kind": "sunset", "subject": "tent"},
+            ),
+            (
+                "playa",
+                T(
+                    "La cala a 300 metros",
+                    "The cove 300 metres away",
+                    "La crique à 300 mètres",
+                    "Die Bucht in 300 Metern",
+                ),
+                None,
+                {"kind": "sea", "subject": "none"},
+            ),
+            (
+                "piscina",
+                T(
+                    "Piscina con zona infantil",
+                    "Pool with children's area",
+                    "Piscine avec espace enfants",
+                    "Pool mit Kinderbereich",
+                ),
+                None,
+                {"kind": "day", "subject": "pool"},
+            ),
+            (
+                "parcela",
+                T("Parcelas con sombra", "Shaded pitches", "Emplacements ombragés", "Schattige Stellplätze"),
+                pitch,
+                {"kind": "forest", "subject": "tent"},
+            ),
             ("bungalow", T("Bungalow Pino", "Pine bungalow"), bungalow, {"kind": "dawn", "subject": "cabin"}),
-            ("glamping", T("Tienda Glamping Luna", "Moon glamping tent"), glamping, {"kind": "night", "subject": "tent"}),
-            ("caravana", T("Zona de autocaravanas", "Motorhome area", "Aire de camping-cars", "Wohnmobilbereich"), pitch, {"kind": "day", "subject": "caravan"}),
-            ("bungalow-2", T("Terraza del bungalow", "Bungalow terrace"), bungalow, {"kind": "sunset", "subject": "cabin"}),
+            (
+                "glamping",
+                T("Tienda Glamping Luna", "Moon glamping tent"),
+                glamping,
+                {"kind": "night", "subject": "tent"},
+            ),
+            (
+                "caravana",
+                T("Zona de autocaravanas", "Motorhome area", "Aire de camping-cars", "Wohnmobilbereich"),
+                pitch,
+                {"kind": "day", "subject": "caravan"},
+            ),
+            (
+                "bungalow-2",
+                T("Terraza del bungalow", "Bungalow terrace"),
+                bungalow,
+                {"kind": "sunset", "subject": "cabin"},
+            ),
         ]
         for position, (name, caption, accommodation, scene) in enumerate(shots):
             add_photo(camping, name, position, caption, accommodation, seed=position + 7, **scene)

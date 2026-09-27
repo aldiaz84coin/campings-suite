@@ -40,7 +40,9 @@ def platform(request):
         photo_count=Count("photos", distinct=True),
     ).prefetch_related("memberships__user")
     if q:
-        campings = campings.filter(Q(name__icontains=q) | Q(city__icontains=q) | Q(memberships__user__email__icontains=q)).distinct()
+        campings = campings.filter(
+            Q(name__icontains=q) | Q(city__icontains=q) | Q(memberships__user__email__icontains=q)
+        ).distinct()
     if show == "pending":
         campings = campings.filter(is_approved=False)
     page = Paginator(campings.order_by("-created_at"), 30).get_page(request.GET.get("page"))
@@ -51,7 +53,9 @@ def platform(request):
         "requests": BookingRequest.objects.count(),
     }
     return panel_render(
-        request, "panel/platform.html", {"page": page, "campings": page.object_list, "q": q, "show": show, "stats": stats},
+        request,
+        "panel/platform.html",
+        {"page": page, "campings": page.object_list, "q": q, "show": show, "stats": stats},
         section="platform",
     )
 
@@ -70,12 +74,17 @@ def platform_new(request):
                 is_approved=True,
             )
             _membership, link = invite_user(
-                request, camping, form.cleaned_data["owner_email"], Membership.Role.OWNER,
+                request,
+                camping,
+                form.cleaned_data["owner_email"],
+                Membership.Role.OWNER,
                 first_name=form.cleaned_data.get("owner_name", ""),
             )
         messages.success(request, _("Camping “%(name)s” created.") % {"name": camping.name})
         if link:
-            messages.info(request, _("Send this link to the owner so they can choose a password: %(link)s") % {"link": link})
+            messages.info(
+                request, _("Send this link to the owner so they can choose a password: %(link)s") % {"link": link}
+            )
         return redirect("panel:platform")
     return panel_render(request, "panel/platform_new.html", {"form": form}, section="platform")
 

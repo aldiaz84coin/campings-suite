@@ -37,7 +37,7 @@ class TranslatedWidget(forms.MultiWidget):
 
     def get_context(self, name, value, attrs):
         context = super().get_context(name, value, attrs)
-        for subwidget, code in zip(context["widget"]["subwidgets"], self.languages):
+        for subwidget, code in zip(context["widget"]["subwidgets"], self.languages, strict=False):
             subwidget["lang_code"] = code
             subwidget["lang_name"] = language_name(code)
             subwidget["is_required_language"] = code == self.required_language
@@ -94,7 +94,7 @@ class TranslatedFormField(forms.MultiValueField):
 
     def compress(self, data_list):
         result = {}
-        for code, text in zip(self.languages, data_list or []):
+        for code, text in zip(self.languages, data_list or [], strict=False):
             text = (text or "").strip()
             if text:
                 result[code] = text
@@ -112,7 +112,7 @@ class TranslatedFormField(forms.MultiValueField):
         if not isinstance(initial, dict):
             initial = {}
         data = data or []
-        for code, text in zip(self.languages, data):
+        for code, text in zip(self.languages, data, strict=False):
             if (initial.get(code) or "") != (text or "").strip():
                 return True
         return False

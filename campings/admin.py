@@ -32,7 +32,16 @@ class BookingPolicyInline(admin.StackedInline):
 
 @admin.register(Camping)
 class CampingAdmin(admin.ModelAdmin):
-    list_display = ("name", "city", "region", "is_published", "is_approved", "custom_domain", "created_at", "public_link")
+    list_display = (
+        "name",
+        "city",
+        "region",
+        "is_published",
+        "is_approved",
+        "custom_domain",
+        "created_at",
+        "public_link",
+    )
     list_filter = ("is_published", "is_approved", "region")
     list_editable = ("is_approved",)
     search_fields = ("name", "slug", "city", "region", "email", "custom_domain")

@@ -1,0 +1,2901 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: campings-suite\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-27 14:51+0200\n"
+"PO-Revision-Date: 2026-09-27 14:51+0200\n"
+"Last-Translator: campings-suite\n"
+"Language-Team: de\n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Personal info"
+msgstr "Persönliche Daten"
+
+msgid "Permissions"
+msgstr "Berechtigungen"
+
+msgid "Important dates"
+msgstr "Wichtige Daten"
+
+msgid "Accounts"
+msgstr "Konten"
+
+msgid "e-mail address"
+msgstr "E-Mail-Adresse"
+
+msgid "preferred language"
+msgstr "bevorzugte Sprache"
+
+msgid "user"
+msgstr "Benutzer"
+
+msgid "users"
+msgstr "Benutzer"
+
+msgid "Bookings"
+msgstr "Buchungen"
+
+#, python-format
+msgid "New booking request %(reference)s"
+msgstr "Neue Buchungsanfrage %(reference)s"
+
+#, python-format
+msgid "We have received your booking request at %(camping)s"
+msgstr "Wir haben Ihre Buchungsanfrage für %(camping)s erhalten"
+
+#, python-format
+msgid "Your booking request %(reference)s at %(camping)s: %(status)s"
+msgstr "Ihre Buchungsanfrage %(reference)s für %(camping)s: %(status)s"
+
+msgid "Choose…"
+msgstr "Bitte wählen…"
+
+msgid "Accommodation"
+msgstr "Unterkunft"
+
+msgid "Extras"
+msgstr "Extras"
+
+msgid "Adults"
+msgstr "Erwachsene"
+
+msgid "Children"
+msgstr "Kinder"
+
+msgid "Pets"
+msgstr "Haustiere"
+
+msgid "I agree that the camping uses my data to answer this request."
+msgstr ""
+"Ich bin damit einverstanden, dass der Campingplatz meine Daten zur "
+"Beantwortung dieser Anfrage verwendet."
+
+msgid "Leave this field empty"
+msgstr "Dieses Feld leer lassen"
+
+msgid "Arrival"
+msgstr "Anreise"
+
+msgid "Departure"
+msgstr "Abreise"
+
+msgid "Send an e-mail to the guest about this change"
+msgstr "Den Gast per E-Mail über diese Änderung informieren"
+
+msgid "Pending"
+msgstr "Offen"
+
+msgid "Confirmed"
+msgstr "Bestätigt"
+
+msgid "Declined"
+msgstr "Abgelehnt"
+
+msgid "Cancelled"
+msgstr "Storniert"
+
+msgid "reference"
+msgstr "Referenz"
+
+msgid "accommodation"
+msgstr "Unterkunft"
+
+msgid "accommodation name"
+msgstr "Name der Unterkunft"
+
+msgid "arrival"
+msgstr "Anreise"
+
+msgid "departure"
+msgstr "Abreise"
+
+msgid "adults"
+msgstr "Erwachsene"
+
+msgid "children"
+msgstr "Kinder"
+
+msgid "pets"
+msgstr "Haustiere"
+
+msgid "extras"
+msgstr "Extras"
+
+msgid "name"
+msgstr "Name"
+
+msgid "e-mail"
+msgstr "E-Mail"
+
+msgid "phone"
+msgstr "Telefon"
+
+msgid "country"
+msgstr "Land"
+
+msgid "message"
+msgstr "Nachricht"
+
+msgid "language"
+msgstr "Sprache"
+
+msgid "price estimate"
+msgstr "Preisschätzung"
+
+msgid "estimated total"
+msgstr "geschätzter Gesamtpreis"
+
+msgid "status"
+msgstr "Status"
+
+msgid "internal notes"
+msgstr "interne Notizen"
+
+msgid "received"
+msgstr "eingegangen"
+
+msgid "updated"
+msgstr "aktualisiert"
+
+msgid "booking request"
+msgstr "Buchungsanfrage"
+
+msgid "booking requests"
+msgstr "Buchungsanfragen"
+
+msgid "public page"
+msgstr "öffentliche Seite"
+
+msgid "View"
+msgstr "Ansehen"
+
+msgid "Approve selected campings"
+msgstr "Ausgewählte Campingplätze freigeben"
+
+msgid "Suspend selected campings"
+msgstr "Ausgewählte Campingplätze sperren"
+
+msgid "preview"
+msgstr "Vorschau"
+
+msgid "Campings"
+msgstr "Campingplätze"
+
+msgid "Services"
+msgstr "Service"
+
+msgid "Leisure & sports"
+msgstr "Freizeit & Sport"
+
+msgid "Sanitary facilities"
+msgstr "Sanitäranlagen"
+
+msgid "Pitches & vehicles"
+msgstr "Stellplätze & Fahrzeuge"
+
+msgid "Surroundings"
+msgstr "Umgebung"
+
+msgid "24-hour reception"
+msgstr "24-Stunden-Rezeption"
+
+msgid "Wi-Fi"
+msgstr "WLAN"
+
+msgid "Restaurant"
+msgstr "Restaurant"
+
+msgid "Bar"
+msgstr "Bar"
+
+msgid "Supermarket"
+msgstr "Supermarkt"
+
+msgid "Fresh bread"
+msgstr "Frische Brötchen"
+
+msgid "Takeaway food"
+msgstr "Essen zum Mitnehmen"
+
+msgid "Laundry"
+msgstr "Waschsalon"
+
+msgid "Fridge rental"
+msgstr "Kühlschrankvermietung"
+
+msgid "Safe deposit boxes"
+msgstr "Schließfächer"
+
+msgid "Cash machine"
+msgstr "Geldautomat"
+
+msgid "First aid"
+msgstr "Erste Hilfe"
+
+msgid "Swimming pool"
+msgstr "Schwimmbad"
+
+msgid "Children's pool"
+msgstr "Kinderbecken"
+
+msgid "Heated indoor pool"
+msgstr "Beheiztes Hallenbad"
+
+msgid "Playground"
+msgstr "Spielplatz"
+
+msgid "Kids club"
+msgstr "Kinderclub"
+
+msgid "Entertainment programme"
+msgstr "Animationsprogramm"
+
+msgid "Sports ground"
+msgstr "Sportplatz"
+
+msgid "Tennis / padel"
+msgstr "Tennis / Padel"
+
+msgid "Gym"
+msgstr "Fitnessraum"
+
+msgid "Spa & wellness"
+msgstr "Spa & Wellness"
+
+msgid "Games room"
+msgstr "Spielraum"
+
+msgid "Bike rental"
+msgstr "Fahrradverleih"
+
+msgid "Water sports"
+msgstr "Wassersport"
+
+msgid "Barbecue area"
+msgstr "Grillplatz"
+
+msgid "Hot showers"
+msgstr "Warme Duschen"
+
+msgid "Toilet blocks"
+msgstr "Sanitärgebäude"
+
+msgid "Accessible facilities"
+msgstr "Barrierefreie Einrichtungen"
+
+msgid "Baby changing room"
+msgstr "Babywickelraum"
+
+msgid "Dishwashing area"
+msgstr "Spülbereich"
+
+msgid "Electrical hook-up"
+msgstr "Stromanschluss"
+
+msgid "Drinking water points"
+msgstr "Trinkwasserstellen"
+
+msgid "Motorhome service area"
+msgstr "Wohnmobil-Servicestation"
+
+msgid "Chemical toilet disposal"
+msgstr "Chemietoiletten-Entsorgung"
+
+msgid "Shaded pitches"
+msgstr "Schattige Stellplätze"
+
+msgid "Parking"
+msgstr "Parkplatz"
+
+msgid "EV charging point"
+msgstr "Ladestation für E-Autos"
+
+msgid "Pets welcome"
+msgstr "Haustiere willkommen"
+
+msgid "Dog park / dog shower"
+msgstr "Hundewiese / Hundedusche"
+
+msgid "Beach nearby"
+msgstr "Strand in der Nähe"
+
+msgid "River or lake"
+msgstr "Fluss oder See"
+
+msgid "Mountain setting"
+msgstr "Bergkulisse"
+
+msgid "Hiking trails"
+msgstr "Wanderwege"
+
+msgid "Town nearby"
+msgstr "Ort in der Nähe"
+
+msgid "Public transport"
+msgstr "Öffentliche Verkehrsmittel"
+
+msgid "Generic"
+msgstr "Allgemein"
+
+msgid "Tent"
+msgstr "Zelt"
+
+msgid "Nature"
+msgstr "Natur"
+
+msgid "Sun"
+msgstr "Sonne"
+
+msgid "Food"
+msgstr "Essen"
+
+msgid "Music"
+msgstr "Musik"
+
+msgid "Activities"
+msgstr "Aktivitäten"
+
+msgid "Wellness"
+msgstr "Wellness"
+
+msgid "Excursions"
+msgstr "Ausflüge"
+
+msgid "Shop"
+msgstr "Laden"
+
+msgid "Wine & drinks"
+msgstr "Wein & Getränke"
+
+msgid "Walks"
+msgstr "Spaziergänge"
+
+msgid "Pitch"
+msgstr "Stellplatz"
+
+msgid "Bungalow"
+msgstr "Bungalow"
+
+msgid "Mobile home"
+msgstr "Mobilheim"
+
+msgid "Wooden cabin"
+msgstr "Holzhütte"
+
+msgid "Glamping tent"
+msgstr "Glamping-Zelt"
+
+msgid "Rental tent"
+msgstr "Mietzelt"
+
+msgid "Rental caravan"
+msgstr "Mietwohnwagen"
+
+msgid "Apartment"
+msgstr "Apartment"
+
+msgid "Room"
+msgstr "Zimmer"
+
+msgid "Other"
+msgstr "Sonstiges"
+
+msgid "Electricity"
+msgstr "Strom"
+
+msgid "Water connection"
+msgstr "Wasseranschluss"
+
+msgid "Drainage"
+msgstr "Abwasseranschluss"
+
+msgid "Shade"
+msgstr "Schatten"
+
+msgid "Private bathroom"
+msgstr "Eigenes Bad"
+
+msgid "Kitchen"
+msgstr "Küche"
+
+msgid "Air conditioning"
+msgstr "Klimaanlage"
+
+msgid "Heating"
+msgstr "Heizung"
+
+msgid "Terrace"
+msgstr "Terrasse"
+
+msgid "Barbecue"
+msgstr "Grill"
+
+msgid "TV"
+msgstr "TV"
+
+msgid "Bed linen included"
+msgstr "Bettwäsche inklusive"
+
+msgid "Towels included"
+msgstr "Handtücher inklusive"
+
+msgid "Pets allowed"
+msgstr "Haustiere erlaubt"
+
+msgid "Sea view"
+msgstr "Meerblick"
+
+msgid "Car space"
+msgstr "Autostellplatz"
+
+msgid "Accessible"
+msgstr "Barrierefrei"
+
+msgid "per night"
+msgstr "pro Nacht"
+
+msgid "per person / night"
+msgstr "pro Person / Nacht"
+
+msgid "per stay"
+msgstr "pro Aufenthalt"
+
+msgid "per adult / night"
+msgstr "pro Erwachsenem / Nacht"
+
+msgid "per child / night"
+msgstr "pro Kind / Nacht"
+
+msgid "per person / stay"
+msgstr "pro Person / Aufenthalt"
+
+msgid "per pet / night"
+msgstr "pro Haustier / Nacht"
+
+msgid "Optional extra (the guest chooses it)"
+msgstr "Optionales Extra (der Gast wählt es)"
+
+msgid "Always charged (e.g. people, tourist tax)"
+msgstr "Wird immer berechnet (z. B. Personen, Kurtaxe)"
+
+msgid "Included / information only"
+msgstr "Inklusive / nur zur Information"
+
+msgid "Adult"
+msgstr "Erwachsener"
+
+msgid "Child"
+msgstr "Kind"
+
+msgid "Pet"
+msgstr "Haustier"
+
+msgid "Car"
+msgstr "Auto"
+
+msgid "Motorbike"
+msgstr "Motorrad"
+
+msgid "Caravan"
+msgstr "Wohnwagen"
+
+msgid "Camper van / motorhome"
+msgstr "Campervan / Wohnmobil"
+
+msgid "Tax"
+msgstr "Steuer"
+
+msgid "Bed linen"
+msgstr "Bettwäsche"
+
+msgid "Towels"
+msgstr "Handtücher"
+
+msgid "Cleaning"
+msgstr "Reinigung"
+
+msgid "Breakfast"
+msgstr "Frühstück"
+
+msgid "Late check-out"
+msgstr "Später Check-out"
+
+msgid "Bike"
+msgstr "Fahrrad"
+
+msgid "Visitor"
+msgstr "Besucher"
+
+msgid "Fridge"
+msgstr "Kühlschrank"
+
+msgid "Cash"
+msgstr "Bargeld"
+
+msgid "Credit / debit card"
+msgstr "Kredit- / Debitkarte"
+
+msgid "Bank transfer"
+msgstr "Banküberweisung"
+
+msgid "Bizum"
+msgstr "Bizum"
+
+msgid "PayPal"
+msgstr "PayPal"
+
+msgid "Modern (sans-serif)"
+msgstr "Modern (serifenlos)"
+
+msgid "Classic (serif)"
+msgstr "Klassisch (Serifen)"
+
+msgid "Friendly (rounded)"
+msgstr "Freundlich (abgerundet)"
+
+msgid "Use a colour code like #2f6f4e."
+msgstr "Verwenden Sie einen Farbcode wie #2f6f4e."
+
+msgid "Enter a domain such as www.mycamping.com (without https://)."
+msgstr "Geben Sie eine Domain wie www.meincamping.de ein (ohne https://)."
+
+msgid "web address"
+msgstr "Webadresse"
+
+msgid ""
+"Part of the address of your public page. Lowercase letters, numbers and "
+"hyphens."
+msgstr ""
+"Teil der Adresse Ihrer öffentlichen Seite. Kleinbuchstaben, Zahlen und "
+"Bindestriche."
+
+msgid "tagline"
+msgstr "Slogan"
+
+msgid "A short sentence shown under the name."
+msgstr "Ein kurzer Satz, der unter dem Namen angezeigt wird."
+
+msgid "description"
+msgstr "Beschreibung"
+
+msgid "location and how to get there"
+msgstr "Lage und Anfahrt"
+
+msgid "Surroundings, distances, directions, public transport..."
+msgstr "Umgebung, Entfernungen, Anfahrt, öffentliche Verkehrsmittel..."
+
+msgid "category (stars)"
+msgstr "Kategorie (Sterne)"
+
+msgid "WhatsApp"
+msgstr "WhatsApp"
+
+msgid "International format, e.g. +34600111222."
+msgstr "Internationales Format, z. B. +34600111222."
+
+msgid "website"
+msgstr "Website"
+
+msgid "Instagram"
+msgstr "Instagram"
+
+msgid "Facebook"
+msgstr "Facebook"
+
+msgid "address"
+msgstr "Adresse"
+
+msgid "postal code"
+msgstr "Postleitzahl"
+
+msgid "town / city"
+msgstr "Ort"
+
+msgid "region / province"
+msgstr "Region / Provinz"
+
+msgid "latitude"
+msgstr "Breitengrad"
+
+msgid "longitude"
+msgstr "Längengrad"
+
+msgid "open all year"
+msgstr "ganzjährig geöffnet"
+
+msgid "opening date"
+msgstr "Öffnungsdatum"
+
+msgid "Only the day and month are used: it repeats every year."
+msgstr "Nur Tag und Monat zählen: Es wiederholt sich jedes Jahr."
+
+msgid "closing date"
+msgstr "Schließungsdatum"
+
+msgid "Last day of departure. It repeats every year."
+msgstr "Letzter Abreisetag. Wiederholt sich jedes Jahr."
+
+msgid "main language"
+msgstr "Hauptsprache"
+
+msgid "content languages"
+msgstr "Inhaltssprachen"
+
+msgid "currency"
+msgstr "Währung"
+
+msgid "main colour"
+msgstr "Hauptfarbe"
+
+msgid "accent colour"
+msgstr "Akzentfarbe"
+
+msgid "typography"
+msgstr "Typografie"
+
+msgid "logo"
+msgstr "Logo"
+
+msgid "accept booking requests"
+msgstr "Buchungsanfragen annehmen"
+
+msgid "e-mail for booking requests"
+msgstr "E-Mail für Buchungsanfragen"
+
+msgid ""
+"Where new booking requests are notified. Defaults to the contact e-mail."
+msgstr ""
+"Hierhin werden neue Anfragen gemeldet. Standardmäßig die Kontakt-E-Mail."
+
+msgid "published"
+msgstr "veröffentlicht"
+
+msgid "approved by the platform"
+msgstr "von der Plattform freigegeben"
+
+msgid "Only approved campings can be seen by the public."
+msgstr "Nur freigegebene Campingplätze sind öffentlich sichtbar."
+
+msgid "own domain"
+msgstr "eigene Domain"
+
+msgid "Optional, e.g. www.mycamping.com. Point its DNS to the platform first."
+msgstr ""
+"Optional, z. B. www.meincamping.de. Richten Sie zuerst den DNS auf die "
+"Plattform."
+
+msgid "created"
+msgstr "erstellt"
+
+msgid "camping"
+msgstr "Campingplatz"
+
+msgid "campings"
+msgstr "Campingplätze"
+
+msgid "This address is reserved, please choose another one."
+msgstr "Diese Adresse ist reserviert, bitte wählen Sie eine andere."
+
+msgid "Owner"
+msgstr "Inhaber"
+
+msgid "Staff"
+msgstr "Mitarbeiter"
+
+msgid "role"
+msgstr "Rolle"
+
+msgid "member"
+msgstr "Mitglied"
+
+msgid "members"
+msgstr "Mitglieder"
+
+msgid "from"
+msgstr "von"
+
+msgid "to (inclusive)"
+msgstr "bis (einschließlich)"
+
+msgid "minimum nights"
+msgstr "Mindestanzahl Nächte"
+
+msgid "Optional minimum stay for arrivals in this season."
+msgstr "Optionaler Mindestaufenthalt für Anreisen in dieser Saison."
+
+msgid "colour"
+msgstr "Farbe"
+
+msgid "season"
+msgstr "Saison"
+
+msgid "seasons"
+msgstr "Saisons"
+
+msgid "The end date must be on or after the start date."
+msgstr "Das Enddatum muss am oder nach dem Startdatum liegen."
+
+#, python-format
+msgid "These dates overlap with the season “%(season)s”."
+msgstr "Diese Daten überschneiden sich mit der Saison „%(season)s“."
+
+msgid "type"
+msgstr "Art"
+
+msgid "maximum guests"
+msgstr "maximale Gästezahl"
+
+msgid "size (m²)"
+msgstr "Größe (m²)"
+
+msgid "bedrooms"
+msgstr "Schlafzimmer"
+
+msgid "units available"
+msgstr "verfügbare Einheiten"
+
+msgid "How many of these you have. Used to check availability."
+msgstr ""
+"Wie viele Sie davon haben. Wird für die Verfügbarkeitsprüfung verwendet."
+
+msgid "amenities"
+msgstr "Ausstattung"
+
+msgid "base price"
+msgstr "Grundpreis"
+
+msgid "Used when no seasonal price is defined."
+msgstr "Wird verwendet, wenn kein Saisonpreis festgelegt ist."
+
+msgid "price applies"
+msgstr "Preis gilt"
+
+msgid "visible"
+msgstr "sichtbar"
+
+msgid "order"
+msgstr "Reihenfolge"
+
+msgid "accommodation type"
+msgstr "Unterkunftsart"
+
+msgid "accommodation types"
+msgstr "Unterkunftsarten"
+
+msgid "price"
+msgstr "Preis"
+
+msgid "seasonal price"
+msgstr "Saisonpreis"
+
+msgid "seasonal prices"
+msgstr "Saisonpreise"
+
+msgid "icon"
+msgstr "Symbol"
+
+msgid "price unit"
+msgstr "Preiseinheit"
+
+msgid "how it is charged"
+msgstr "Abrechnungsart"
+
+msgid "applies to"
+msgstr "gilt für"
+
+msgid "Leave empty to apply it to every accommodation type."
+msgstr "Leer lassen, um es für alle Unterkunftsarten anzuwenden."
+
+msgid "service"
+msgstr "Leistung"
+
+msgid "services and extras"
+msgstr "Leistungen und Extras"
+
+msgid "seasonal service price"
+msgstr "Saisonpreis der Leistung"
+
+msgid "seasonal service prices"
+msgstr "Saisonpreise der Leistungen"
+
+msgid "facility"
+msgstr "Einrichtung"
+
+msgid "Custom"
+msgstr "Eigene"
+
+msgid "details"
+msgstr "Details"
+
+msgid "Opening hours, season, conditions..."
+msgstr "Öffnungszeiten, Saison, Bedingungen..."
+
+msgid "extra charge"
+msgstr "gegen Aufpreis"
+
+msgid "facilities"
+msgstr "Einrichtungen"
+
+msgid "Facility"
+msgstr "Einrichtung"
+
+msgid "image"
+msgstr "Bild"
+
+msgid "thumbnail"
+msgstr "Vorschaubild"
+
+msgid "caption"
+msgstr "Bildunterschrift"
+
+msgid "Show this photo on an accommodation type as well."
+msgstr "Dieses Foto auch bei einer Unterkunftsart anzeigen."
+
+msgid "photo"
+msgstr "Foto"
+
+msgid "photos"
+msgstr "Fotos"
+
+msgid "check-in from"
+msgstr "Anreise ab"
+
+msgid "check-in until"
+msgstr "Anreise bis"
+
+msgid "check-out until"
+msgstr "Abreise bis"
+
+msgid "maximum nights"
+msgstr "maximale Anzahl Nächte"
+
+msgid "minimum age of the person booking"
+msgstr "Mindestalter der buchenden Person"
+
+msgid "deposit to confirm (%)"
+msgstr "Anzahlung zur Bestätigung (%)"
+
+msgid ""
+"Percentage of the total requested to confirm a booking. 0 = no deposit."
+msgstr ""
+"Prozentsatz des Gesamtbetrags zur Bestätigung einer Buchung. 0 = keine "
+"Anzahlung."
+
+msgid "cancellations allowed"
+msgstr "Stornierung möglich"
+
+msgid "free cancellation until (days before arrival)"
+msgstr "kostenlose Stornierung bis (Tage vor Anreise)"
+
+msgid "fee for later cancellations (%)"
+msgstr "Gebühr bei späterer Stornierung (%)"
+
+msgid "pets allowed"
+msgstr "Haustiere erlaubt"
+
+msgid "quiet hours from"
+msgstr "Nachtruhe ab"
+
+msgid "quiet hours until"
+msgstr "Nachtruhe bis"
+
+msgid "payment methods"
+msgstr "Zahlungsarten"
+
+msgid "cancellation details"
+msgstr "Stornierungsdetails"
+
+msgid "payment details"
+msgstr "Zahlungsdetails"
+
+msgid "pet policy"
+msgstr "Haustierregelung"
+
+msgid "camping rules"
+msgstr "Platzordnung"
+
+msgid "booking policy"
+msgstr "Buchungsbedingungen"
+
+msgid "booking policies"
+msgstr "Buchungsbedingungen"
+
+#, python-format
+msgid "Booking policy of %(camping)s"
+msgstr "Buchungsbedingungen von %(camping)s"
+
+msgid "The maximum stay cannot be shorter than the minimum stay."
+msgstr ""
+"Der Höchstaufenthalt darf nicht kürzer als der Mindestaufenthalt sein."
+
+#, python-format
+msgid "%(count)s night"
+msgid_plural "%(count)s nights"
+msgstr[0] "%(count)s Nacht"
+msgstr[1] "%(count)s Nächte"
+
+#, python-format
+msgid "%(count)s person"
+msgid_plural "%(count)s people"
+msgstr[0] "%(count)s Person"
+msgstr[1] "%(count)s Personen"
+
+#, python-format
+msgid "%(count)s adult"
+msgid_plural "%(count)s adults"
+msgstr[0] "%(count)s Erwachsener"
+msgstr[1] "%(count)s Erwachsene"
+
+#, python-format
+msgid "%(count)s child"
+msgid_plural "%(count)s children"
+msgstr[0] "%(count)s Kind"
+msgstr[1] "%(count)s Kinder"
+
+#, python-format
+msgid "%(count)s pet"
+msgid_plural "%(count)s pets"
+msgstr[0] "%(count)s Haustier"
+msgstr[1] "%(count)s Haustiere"
+
+msgid "Please choose an accommodation."
+msgstr "Bitte wählen Sie eine Unterkunft."
+
+msgid "Please choose your arrival and departure dates."
+msgstr "Bitte wählen Sie Ihr An- und Abreisedatum."
+
+msgid "The departure date must be after the arrival date."
+msgstr "Das Abreisedatum muss nach dem Anreisedatum liegen."
+
+msgid "The arrival date cannot be in the past."
+msgstr "Das Anreisedatum darf nicht in der Vergangenheit liegen."
+
+#, python-format
+msgid "The camping is open from %(start)s to %(end)s."
+msgstr "Der Campingplatz ist vom %(start)s bis %(end)s geöffnet."
+
+#, python-format
+msgid "The minimum stay for these dates is %(nights)s."
+msgstr "Der Mindestaufenthalt für diese Daten beträgt %(nights)s."
+
+#, python-format
+msgid "The maximum stay is %(nights)s."
+msgstr "Der Höchstaufenthalt beträgt %(nights)s."
+
+msgid "At least one adult is required."
+msgstr "Mindestens ein Erwachsener ist erforderlich."
+
+msgid "Sorry, pets are not allowed."
+msgstr "Leider sind Haustiere nicht erlaubt."
+
+#, python-format
+msgid "This accommodation is for up to %(count)s guest."
+msgid_plural "This accommodation is for up to %(count)s guests."
+msgstr[0] "Diese Unterkunft ist für höchstens %(count)s Person."
+msgstr[1] "Diese Unterkunft ist für höchstens %(count)s Personen."
+
+msgid "Sorry, this accommodation is fully booked for these dates."
+msgstr "Leider ist diese Unterkunft für diese Daten ausgebucht."
+
+msgid "Platform administration"
+msgstr "Plattformverwaltung"
+
+#, python-format
+msgid "This field is required in %(language)s."
+msgstr "Dieses Feld ist auf %(language)s erforderlich."
+
+msgid "Text in several languages"
+msgstr "Text in mehreren Sprachen"
+
+#, python-format
+msgid "The file is too large (maximum %(mb)s MB)."
+msgstr "Die Datei ist zu groß (maximal %(mb)s MB)."
+
+msgid "The file is not a valid image."
+msgstr "Die Datei ist kein gültiges Bild."
+
+msgid "content"
+msgstr "Inhalt"
+
+msgid "content type"
+msgstr "Inhaltstyp"
+
+msgid "size"
+msgstr "Größe"
+
+msgid "stored file"
+msgstr "gespeicherte Datei"
+
+msgid "stored files"
+msgstr "gespeicherte Dateien"
+
+msgid "Camping panel"
+msgstr "Campingplatz-Bereich"
+
+msgid "Lower numbers are shown first."
+msgstr "Niedrigere Zahlen werden zuerst angezeigt."
+
+msgid "E-mail"
+msgstr "E-Mail"
+
+msgid "Name of your camping"
+msgstr "Name Ihres Campingplatzes"
+
+msgid "Your name"
+msgstr "Ihr Name"
+
+msgid "Password"
+msgstr "Passwort"
+
+msgid "Repeat the password"
+msgstr "Passwort wiederholen"
+
+msgid "I accept the terms of use and the privacy policy."
+msgstr "Ich akzeptiere die Nutzungsbedingungen und die Datenschutzerklärung."
+
+msgid "There is already an account with this e-mail. Please sign in."
+msgstr ""
+"Mit dieser E-Mail gibt es bereits ein Konto. Bitte melden Sie sich an."
+
+msgid "The two passwords do not match."
+msgstr "Die beiden Passwörter stimmen nicht überein."
+
+msgid "Language of the panel when you sign in."
+msgstr "Sprache des Bereichs bei der Anmeldung."
+
+msgid ""
+"Tip: in Google Maps, right-click on your camping and click the coordinates "
+"to copy them."
+msgstr ""
+"Tipp: Klicken Sie in Google Maps mit der rechten Maustaste auf Ihren "
+"Campingplatz und dann auf die Koordinaten, um sie zu kopieren."
+
+msgid "Fill in both dates, or tick “open all year”."
+msgstr "Füllen Sie beide Daten aus oder wählen Sie „ganzjährig geöffnet“."
+
+msgid "The closing date must be different from the opening date."
+msgstr "Das Schließungsdatum muss sich vom Öffnungsdatum unterscheiden."
+
+msgid "Languages of your page"
+msgstr "Sprachen Ihrer Seite"
+
+msgid "You will be able to write your texts in each of these languages."
+msgstr "Sie können Ihre Texte in jeder dieser Sprachen verfassen."
+
+msgid "Logo"
+msgstr "Logo"
+
+msgid "PNG with transparent background works best."
+msgstr "Ein PNG mit transparentem Hintergrund eignet sich am besten."
+
+msgid "Remove the current logo"
+msgstr "Aktuelles Logo entfernen"
+
+msgid "Photos"
+msgstr "Fotos"
+
+msgid "— Only in the general gallery —"
+msgstr "— Nur in der allgemeinen Galerie —"
+
+#, python-format
+msgid "Optional: leave empty to use the standard name “%(name)s”."
+msgstr "Optional: leer lassen, um den Standardnamen „%(name)s“ zu verwenden."
+
+msgid "Amenities"
+msgstr "Ausstattung"
+
+msgid "Applies to"
+msgstr "Gilt für"
+
+msgid "Accepted payment methods"
+msgstr "Akzeptierte Zahlungsarten"
+
+msgid "Role"
+msgstr "Rolle"
+
+msgid "This person is already a member of the team."
+msgstr "Diese Person ist bereits Teil des Teams."
+
+msgid "Camping name"
+msgstr "Name des Campingplatzes"
+
+msgid "Owner's e-mail"
+msgstr "E-Mail des Inhabers"
+
+msgid "Owner's name"
+msgstr "Name des Inhabers"
+
+msgid "Main language"
+msgstr "Hauptsprache"
+
+msgid "Your password has been changed."
+msgstr "Ihr Passwort wurde geändert."
+
+msgid "Welcome! Your camping has been created. Let's complete its page."
+msgstr ""
+"Willkommen! Ihr Campingplatz wurde angelegt. Vervollständigen wir jetzt "
+"seine Seite."
+
+msgid "Your details have been saved."
+msgstr "Ihre Daten wurden gespeichert."
+
+msgid "All"
+msgstr "Alle"
+
+#, python-format
+msgid "Status changed to “%(status)s”."
+msgstr "Status geändert zu „%(status)s“."
+
+msgid "We have sent an e-mail to the guest."
+msgstr "Wir haben dem Gast eine E-Mail gesendet."
+
+msgid "Notes saved."
+msgstr "Notizen gespeichert."
+
+msgid "Describe your camping and add contact details"
+msgstr "Beschreiben Sie Ihren Campingplatz und fügen Sie Kontaktdaten hinzu"
+
+msgid "Add the address and map location"
+msgstr "Fügen Sie Adresse und Kartenposition hinzu"
+
+msgid "Upload at least 3 photos"
+msgstr "Laden Sie mindestens 3 Fotos hoch"
+
+msgid "Tick your facilities"
+msgstr "Wählen Sie Ihre Einrichtungen aus"
+
+msgid "Create your accommodation types with prices"
+msgstr "Legen Sie Ihre Unterkunftsarten mit Preisen an"
+
+msgid "Define seasons or services and extras"
+msgstr "Legen Sie Saisons oder Leistungen und Extras fest"
+
+msgid "Publish your page"
+msgstr "Veröffentlichen Sie Ihre Seite"
+
+msgid "Your page is now public."
+msgstr "Ihre Seite ist jetzt öffentlich."
+
+msgid ""
+"Your page will be visible as soon as the platform approves your camping."
+msgstr ""
+"Ihre Seite wird sichtbar, sobald die Plattform Ihren Campingplatz freigibt."
+
+msgid "Your page is hidden from the public."
+msgstr "Ihre Seite ist für die Öffentlichkeit ausgeblendet."
+
+msgid "The camping details have been saved."
+msgstr "Die Angaben zum Campingplatz wurden gespeichert."
+
+msgid "The location has been saved."
+msgstr "Der Standort wurde gespeichert."
+
+msgid "The settings have been saved."
+msgstr "Die Einstellungen wurden gespeichert."
+
+msgid "The appearance has been saved."
+msgstr "Das Erscheinungsbild wurde gespeichert."
+
+msgid "Your facilities have been saved."
+msgstr "Ihre Einrichtungen wurden gespeichert."
+
+msgid "The facility has been added."
+msgstr "Die Einrichtung wurde hinzugefügt."
+
+msgid "The facility has been saved."
+msgstr "Die Einrichtung wurde gespeichert."
+
+msgid "The facility has been removed."
+msgstr "Die Einrichtung wurde entfernt."
+
+msgid "The accommodation type has been created."
+msgstr "Die Unterkunftsart wurde angelegt."
+
+msgid "The accommodation type has been saved."
+msgstr "Die Unterkunftsart wurde gespeichert."
+
+msgid "The accommodation type has been deleted."
+msgstr "Die Unterkunftsart wurde gelöscht."
+
+msgid "The service has been created."
+msgstr "Die Leistung wurde angelegt."
+
+msgid "The service has been saved."
+msgstr "Die Leistung wurde gespeichert."
+
+msgid "The service has been deleted."
+msgstr "Die Leistung wurde gelöscht."
+
+msgid "The season has been created."
+msgstr "Die Saison wurde angelegt."
+
+msgid "The season has been saved."
+msgstr "Die Saison wurde gespeichert."
+
+msgid "The season has been deleted."
+msgstr "Die Saison wurde gelöscht."
+
+msgid "There are no seasons to copy yet."
+msgstr "Es gibt noch keine Saisons zum Kopieren."
+
+#, python-format
+msgid "%(count)s season(s) copied to %(year)s with their prices."
+msgstr "%(count)s Saison(s) mit ihren Preisen nach %(year)s kopiert."
+
+#, python-format
+msgid "The seasons of %(year)s already exist."
+msgstr "Die Saisons für %(year)s existieren bereits."
+
+#, python-format
+msgid "Invalid price for %(item)s."
+msgstr "Ungültiger Preis für %(item)s."
+
+#, python-format
+msgid "Invalid price for %(item)s in %(season)s."
+msgstr "Ungültiger Preis für %(item)s in %(season)s."
+
+msgid "Prices saved."
+msgstr "Preise gespeichert."
+
+msgid "Your booking policies have been saved."
+msgstr "Ihre Buchungsbedingungen wurden gespeichert."
+
+msgid "Choose at least one image."
+msgstr "Wählen Sie mindestens ein Bild."
+
+#, python-format
+msgid "You have reached the limit of %(max)s photos."
+msgstr "Sie haben das Limit von %(max)s Fotos erreicht."
+
+#, python-format
+msgid "%(count)s photo(s) uploaded."
+msgstr "%(count)s Foto(s) hochgeladen."
+
+msgid "The photo has been saved."
+msgstr "Das Foto wurde gespeichert."
+
+msgid "The photo has been deleted."
+msgstr "Das Foto wurde gelöscht."
+
+msgid "This photo is now the main photo of your page."
+msgstr "Dieses Foto ist jetzt das Hauptfoto Ihrer Seite."
+
+#, python-format
+msgid "Camping “%(name)s” created."
+msgstr "Campingplatz „%(name)s“ angelegt."
+
+#, python-format
+msgid "Send this link to the owner so they can choose a password: %(link)s"
+msgstr ""
+"Senden Sie diesen Link an den Inhaber, damit er ein Passwort wählen kann: "
+"%(link)s"
+
+#, python-format
+msgid "“%(name)s” is approved."
+msgstr "„%(name)s“ ist freigegeben."
+
+#, python-format
+msgid "“%(name)s” is suspended and hidden from the public."
+msgstr "„%(name)s“ ist gesperrt und öffentlich ausgeblendet."
+
+#, python-format
+msgid "You have been invited to manage %(camping)s"
+msgstr "Sie wurden eingeladen, %(camping)s zu verwalten"
+
+msgid "Only owners can invite people."
+msgstr "Nur Inhaber können Personen einladen."
+
+#, python-format
+msgid "%(email)s has been added to the team."
+msgstr "%(email)s wurde dem Team hinzugefügt."
+
+msgid "A camping needs at least one owner."
+msgstr "Ein Campingplatz braucht mindestens einen Inhaber."
+
+#, python-format
+msgid "%(email)s no longer has access."
+msgstr "%(email)s hat keinen Zugang mehr."
+
+msgid "Public website"
+msgstr "Öffentliche Website"
+
+msgid "Too many requests from your connection. Please try again later."
+msgstr ""
+"Zu viele Anfragen von Ihrer Verbindung. Bitte versuchen Sie es später "
+"erneut."
+
+msgid "Skip to content"
+msgstr "Zum Inhalt springen"
+
+msgid "Reference"
+msgstr "Referenz"
+
+#, python-format
+msgid "%(counter)s night"
+msgid_plural "%(counter)s nights"
+msgstr[0] "%(counter)s Nacht"
+msgstr[1] "%(counter)s Nächte"
+
+msgid "Guests"
+msgstr "Gäste"
+
+#, python-format
+msgid "%(counter)s adult"
+msgid_plural "%(counter)s adults"
+msgstr[0] "%(counter)s Erwachsener"
+msgstr[1] "%(counter)s Erwachsene"
+
+#, python-format
+msgid "%(counter)s child"
+msgid_plural "%(counter)s children"
+msgstr[0] "%(counter)s Kind"
+msgstr[1] "%(counter)s Kinder"
+
+#, python-format
+msgid "%(counter)s pet"
+msgid_plural "%(counter)s pets"
+msgstr[0] "%(counter)s Haustier"
+msgstr[1] "%(counter)s Haustiere"
+
+msgid "Estimated total"
+msgstr "Geschätzter Gesamtpreis"
+
+msgid "Deposit to confirm"
+msgstr "Anzahlung zur Bestätigung"
+
+#, python-format
+msgid "%(name)s has sent a booking request."
+msgstr "%(name)s hat eine Buchungsanfrage gesendet."
+
+msgid "Guest"
+msgstr "Gast"
+
+msgid "Phone"
+msgstr "Telefon"
+
+msgid "Country"
+msgstr "Land"
+
+msgid "Message"
+msgstr "Nachricht"
+
+msgid "Confirm or decline it from your panel:"
+msgstr "Bestätigen oder lehnen Sie sie in Ihrem Bereich ab:"
+
+msgid "You can reply to this e-mail to write to the guest directly."
+msgstr ""
+"Sie können auf diese E-Mail antworten, um dem Gast direkt zu schreiben."
+
+#, python-format
+msgid "Hello %(name)s,"
+msgstr "Hallo %(name)s,"
+
+#, python-format
+msgid ""
+"Thank you for your booking request at %(camping)s. This is a summary of what"
+" you sent:"
+msgstr ""
+"Vielen Dank für Ihre Buchungsanfrage bei %(camping)s. Hier eine "
+"Zusammenfassung Ihrer Angaben:"
+
+msgid ""
+"The camping will check availability and reply to you as soon as possible. "
+"This e-mail is not a booking confirmation yet."
+msgstr ""
+"Der Campingplatz prüft die Verfügbarkeit und antwortet Ihnen so schnell wie "
+"möglich. Diese E-Mail ist noch keine Buchungsbestätigung."
+
+#, python-format
+msgid "Good news! %(camping)s has confirmed your booking request."
+msgstr "Gute Nachrichten! %(camping)s hat Ihre Buchungsanfrage bestätigt."
+
+#, python-format
+msgid ""
+"We are sorry: %(camping)s cannot accept your booking request for these "
+"dates."
+msgstr ""
+"Es tut uns leid: %(camping)s kann Ihre Buchungsanfrage für diese Daten nicht"
+" annehmen."
+
+#, python-format
+msgid "Your booking at %(camping)s has been cancelled."
+msgstr "Ihre Buchung bei %(camping)s wurde storniert."
+
+#, python-format
+msgid "The status of your booking request at %(camping)s is now: %(status)s."
+msgstr ""
+"Der Status Ihrer Buchungsanfrage bei %(camping)s lautet jetzt: %(status)s."
+
+#, python-format
+msgid ""
+"The camping will contact you about the %(percent)s%% deposit needed to "
+"secure the booking."
+msgstr ""
+"Der Campingplatz kontaktiert Sie wegen der Anzahlung von %(percent)s %%, die"
+" zur Sicherung der Buchung nötig ist."
+
+msgid "If you have any questions, just reply to this e-mail."
+msgstr "Bei Fragen antworten Sie einfach auf diese E-Mail."
+
+#, python-format
+msgid "You asked to reset your password on %(platform)s."
+msgstr ""
+"Sie haben das Zurücksetzen Ihres Passworts bei %(platform)s angefordert."
+
+msgid "Open this link to choose a new password:"
+msgstr "Öffnen Sie diesen Link, um ein neues Passwort zu wählen:"
+
+msgid "If you did not ask for this, you can ignore this e-mail."
+msgstr ""
+"Wenn Sie dies nicht angefordert haben, können Sie diese E-Mail ignorieren."
+
+#, python-format
+msgid "Reset your password on %(platform)s"
+msgstr "Setzen Sie Ihr Passwort bei %(platform)s zurück"
+
+#, python-format
+msgid "You have been invited to manage %(camping)s on %(platform)s."
+msgstr "Sie wurden eingeladen, %(camping)s auf %(platform)s zu verwalten."
+
+msgid "Choose your password here to get started:"
+msgstr "Wählen Sie hier Ihr Passwort, um loszulegen:"
+
+msgid "Sign in with your usual account:"
+msgstr "Melden Sie sich mit Ihrem üblichen Konto an:"
+
+msgid "Are you sure? This cannot be undone."
+msgstr "Sind Sie sicher? Dies kann nicht rückgängig gemacht werden."
+
+msgid "Delete"
+msgstr "Löschen"
+
+msgid "Cancel"
+msgstr "Abbrechen"
+
+msgid "Save changes"
+msgstr "Änderungen speichern"
+
+#, python-format
+msgid ""
+"Use the language tabs to write each text in every language of your page. "
+"%(language)s (*) is required; if another language is empty, visitors will "
+"see the %(language)s text."
+msgstr ""
+"Verwenden Sie die Sprach-Reiter, um jeden Text in allen Sprachen Ihrer Seite"
+" zu verfassen. %(language)s (*) ist Pflicht; ist eine andere Sprache leer, "
+"sehen Besucher den Text auf %(language)s."
+
+msgid "Choose languages"
+msgstr "Sprachen wählen"
+
+msgid "Item"
+msgstr "Posten"
+
+msgid "Base price"
+msgstr "Grundpreis"
+
+msgid "New accommodation type"
+msgstr "Neue Unterkunftsart"
+
+msgid "Description"
+msgstr "Beschreibung"
+
+msgid "Capacity"
+msgstr "Kapazität"
+
+msgid "Price"
+msgstr "Preis"
+
+msgid ""
+"Choose the photos of this accommodation. They will be shown on its card."
+msgstr ""
+"Wählen Sie die Fotos dieser Unterkunft. Sie werden auf ihrer Karte "
+"angezeigt."
+
+#, python-format
+msgid ""
+"First <a href=\"%(photos_url)s\">upload photos</a> to your gallery, then you"
+" can assign them here."
+msgstr ""
+"<a href=\"%(photos_url)s\">Laden Sie zuerst Fotos</a> in Ihre Galerie hoch, "
+"dann können Sie sie hier zuordnen."
+
+msgid ""
+"Delete this accommodation type? Its seasonal prices will be deleted too."
+msgstr ""
+"Diese Unterkunftsart löschen? Ihre Saisonpreise werden ebenfalls gelöscht."
+
+msgid ""
+"Pitches, bungalows, mobile homes, glamping… with their capacity and base "
+"price."
+msgstr ""
+"Stellplätze, Bungalows, Mobilheime, Glamping… mit Kapazität und Grundpreis."
+
+msgid "Hidden"
+msgstr "Ausgeblendet"
+
+#, python-format
+msgid "%(counter)s unit"
+msgid_plural "%(counter)s units"
+msgstr[0] "%(counter)s Einheit"
+msgstr[1] "%(counter)s Einheiten"
+
+#, python-format
+msgid "%(counter)s seasonal price"
+msgid_plural "%(counter)s seasonal prices"
+msgstr[0] "%(counter)s Saisonpreis"
+msgstr[1] "%(counter)s Saisonpreise"
+
+msgid "Edit"
+msgstr "Bearbeiten"
+
+#, python-format
+msgid ""
+"Set different prices for each season in the <a href=\"%(prices_url)s\">price"
+" table</a>."
+msgstr ""
+"Legen Sie in der <a href=\"%(prices_url)s\">Preistabelle</a> "
+"unterschiedliche Preise je Saison fest."
+
+msgid ""
+"Create your first accommodation type, for example “Pitch with electricity” "
+"or “Bungalow for 4”."
+msgstr ""
+"Legen Sie Ihre erste Unterkunftsart an, zum Beispiel „Stellplatz mit Strom“ "
+"oder „Bungalow für 4“."
+
+msgid "My account"
+msgstr "Mein Konto"
+
+msgid "Use a long password that you do not use on other websites."
+msgstr ""
+"Verwenden Sie ein langes Passwort, das Sie nicht auf anderen Websites "
+"nutzen."
+
+msgid "Change password"
+msgstr "Passwort ändern"
+
+msgid "Appearance"
+msgstr "Erscheinungsbild"
+
+msgid "Adapt your page to your brand: logo, colours and typography."
+msgstr "Passen Sie Ihre Seite an Ihre Marke an: Logo, Farben und Schrift."
+
+msgid "Current logo"
+msgstr "Aktuelles Logo"
+
+msgid "Colours"
+msgstr "Farben"
+
+msgid "Suggested combinations:"
+msgstr "Vorgeschlagene Kombinationen:"
+
+msgid "Forest"
+msgstr "Wald"
+
+msgid "Sea"
+msgstr "Meer"
+
+msgid "Earth"
+msgstr "Erde"
+
+msgid "Sunset"
+msgstr "Sonnenuntergang"
+
+msgid "Lagoon"
+msgstr "Lagune"
+
+msgid "Graphite"
+msgstr "Graphit"
+
+msgid "Typography"
+msgstr "Schrift"
+
+msgid "Preview"
+msgstr "Vorschau"
+
+msgid "Request a booking"
+msgstr "Buchung anfragen"
+
+msgid "Sign in"
+msgstr "Anmelden"
+
+msgid "Camping area"
+msgstr "Bereich für Campingplätze"
+
+msgid "Sign in to manage your camping's page, prices and booking requests."
+msgstr ""
+"Melden Sie sich an, um die Seite Ihres Campingplatzes, Preise und "
+"Buchungsanfragen zu verwalten."
+
+msgid "Forgot your password?"
+msgstr "Passwort vergessen?"
+
+msgid "Is your camping not listed yet?"
+msgstr "Ihr Campingplatz ist noch nicht dabei?"
+
+msgid "Create its page for free"
+msgstr "Erstellen Sie seine Seite kostenlos"
+
+msgid "Reset your password"
+msgstr "Passwort zurücksetzen"
+
+msgid ""
+"Enter your e-mail and we will send you a link to choose a new password."
+msgstr ""
+"Geben Sie Ihre E-Mail ein und wir senden Ihnen einen Link, um ein neues "
+"Passwort zu wählen."
+
+msgid "Send the link"
+msgstr "Link senden"
+
+msgid "Back to sign in"
+msgstr "Zurück zur Anmeldung"
+
+msgid "Password saved"
+msgstr "Passwort gespeichert"
+
+msgid "You can now sign in with your new password."
+msgstr "Sie können sich jetzt mit Ihrem neuen Passwort anmelden."
+
+msgid "Choose a password"
+msgstr "Passwort wählen"
+
+msgid "Save password"
+msgstr "Passwort speichern"
+
+msgid "This link has expired"
+msgstr "Dieser Link ist abgelaufen"
+
+msgid ""
+"The link is no longer valid, maybe because it has already been used. You can"
+" ask for a new one."
+msgstr ""
+"Der Link ist nicht mehr gültig, vielleicht wurde er bereits verwendet. Sie "
+"können einen neuen anfordern."
+
+msgid "Ask for a new link"
+msgstr "Neuen Link anfordern"
+
+msgid "Check your inbox"
+msgstr "Prüfen Sie Ihren Posteingang"
+
+msgid ""
+"If there is an account with that e-mail, you will receive a link to choose a"
+" new password in a few minutes. Remember to check the spam folder."
+msgstr ""
+"Wenn es ein Konto mit dieser E-Mail gibt, erhalten Sie in wenigen Minuten "
+"einen Link zum Festlegen eines neuen Passworts. Prüfen Sie auch den Spam-"
+"Ordner."
+
+msgid "Create your camping's page"
+msgstr "Erstellen Sie die Seite Ihres Campingplatzes"
+
+msgid ""
+"In a few minutes you will have a website with photos, prices and booking "
+"requests, in several languages."
+msgstr ""
+"In wenigen Minuten haben Sie eine Website mit Fotos, Preisen und "
+"Buchungsanfragen in mehreren Sprachen."
+
+msgid "Create my account"
+msgstr "Konto erstellen"
+
+msgid "Already have an account?"
+msgstr "Sie haben bereits ein Konto?"
+
+msgid "Panel"
+msgstr "Bereich"
+
+msgid "Close menu"
+msgstr "Menü schließen"
+
+msgid "Public"
+msgstr "Öffentlich"
+
+msgid "Waiting for approval"
+msgstr "Wartet auf Freigabe"
+
+msgid "Draft"
+msgstr "Entwurf"
+
+msgid "All campings"
+msgstr "Alle Campingplätze"
+
+msgid "Dashboard"
+msgstr "Übersicht"
+
+msgid "Your page"
+msgstr "Ihre Seite"
+
+msgid "Description & contact"
+msgstr "Beschreibung & Kontakt"
+
+msgid "Location & season"
+msgstr "Lage & Saison"
+
+msgid "Your offer"
+msgstr "Ihr Angebot"
+
+msgid "Facilities"
+msgstr "Einrichtungen"
+
+msgid "Services & extras"
+msgstr "Leistungen & Extras"
+
+msgid "Seasons"
+msgstr "Saisons"
+
+msgid "Price table"
+msgstr "Preistabelle"
+
+msgid "Booking policies"
+msgstr "Buchungsbedingungen"
+
+msgid "Booking requests"
+msgstr "Buchungsanfragen"
+
+msgid "Administration"
+msgstr "Verwaltung"
+
+msgid "Settings"
+msgstr "Einstellungen"
+
+msgid "Team"
+msgstr "Team"
+
+msgid "View public page"
+msgstr "Öffentliche Seite ansehen"
+
+msgid "Preview page"
+msgstr "Seitenvorschau"
+
+msgid "My campings"
+msgstr "Meine Campingplätze"
+
+msgid "Platform"
+msgstr "Plattform"
+
+msgid "Open menu"
+msgstr "Menü öffnen"
+
+msgid "Superadmin"
+msgstr "Superadmin"
+
+msgid "Sign out"
+msgstr "Abmelden"
+
+#, python-format
+msgid "Request %(reference)s received on %(date)s"
+msgstr "Anfrage %(reference)s eingegangen am %(date)s"
+
+msgid "Write to the guest"
+msgstr "Dem Gast schreiben"
+
+msgid "Stay"
+msgstr "Aufenthalt"
+
+msgid "Nights"
+msgstr "Nächte"
+
+msgid ""
+"Careful: according to your confirmed bookings there are no free units of "
+"this accommodation for these dates."
+msgstr ""
+"Achtung: Laut Ihren bestätigten Buchungen gibt es für diese Daten keine "
+"freien Einheiten dieser Unterkunft."
+
+#, python-format
+msgid "%(counter)s unit still free for these dates."
+msgid_plural "%(counter)s units still free for these dates."
+msgstr[0] "Für diese Daten ist noch %(counter)s Einheit frei."
+msgstr[1] "Für diese Daten sind noch %(counter)s Einheiten frei."
+
+msgid "Price estimate sent to the guest"
+msgstr "An den Gast gesendete Preisschätzung"
+
+msgid "Name"
+msgstr "Name"
+
+msgid "Language"
+msgstr "Sprache"
+
+msgid "Manage request"
+msgstr "Anfrage bearbeiten"
+
+msgid "Confirm"
+msgstr "Bestätigen"
+
+msgid "Decline"
+msgstr "Ablehnen"
+
+msgid "Save"
+msgstr "Speichern"
+
+msgid "Confirmed stays on the same dates"
+msgstr "Bestätigte Aufenthalte zu denselben Daten"
+
+msgid ""
+"Requests sent from your page. Confirm or decline them and the guest receives"
+" an e-mail."
+msgstr ""
+"Über Ihre Seite gesendete Anfragen. Bestätigen oder lehnen Sie sie ab, und "
+"der Gast erhält eine E-Mail."
+
+msgid "Search"
+msgstr "Suchen"
+
+msgid "Name, e-mail or reference"
+msgstr "Name, E-Mail oder Referenz"
+
+msgid "Filter by status"
+msgstr "Nach Status filtern"
+
+msgid "Estimate"
+msgstr "Schätzung"
+
+msgid "Status"
+msgstr "Status"
+
+msgid "Received"
+msgstr "Eingegangen"
+
+msgid "No requests match your search."
+msgstr "Keine Anfrage entspricht Ihrer Suche."
+
+msgid "There are no requests here."
+msgstr "Hier gibt es keine Anfragen."
+
+#, python-format
+msgid "Hello, %(name)s"
+msgstr "Hallo, %(name)s"
+
+#, python-format
+msgid "This is the control panel of %(camping)s."
+msgstr "Dies ist die Verwaltung von %(camping)s."
+
+msgid "View page"
+msgstr "Seite ansehen"
+
+msgid "Hide your page from the public?"
+msgstr "Ihre Seite für die Öffentlichkeit ausblenden?"
+
+msgid "Unpublish"
+msgstr "Nicht mehr veröffentlichen"
+
+msgid "Publish page"
+msgstr "Seite veröffentlichen"
+
+msgid ""
+"Your page is ready and waiting for approval by the platform. We will review "
+"it shortly."
+msgstr ""
+"Ihre Seite ist fertig und wartet auf die Freigabe durch die Plattform. Wir "
+"prüfen sie in Kürze."
+
+msgid ""
+"Your page is a draft. Complete the steps below and publish it when you are "
+"ready."
+msgstr ""
+"Ihre Seite ist ein Entwurf. Erledigen Sie die Schritte unten und "
+"veröffentlichen Sie sie, wenn Sie so weit sind."
+
+msgid "Pending requests"
+msgstr "Offene Anfragen"
+
+msgid "Requests this month"
+msgstr "Anfragen diesen Monat"
+
+msgid "Accommodation types"
+msgstr "Unterkunftsarten"
+
+msgid "Set up your page"
+msgstr "Richten Sie Ihre Seite ein"
+
+msgid "Latest requests"
+msgstr "Neueste Anfragen"
+
+msgid "See all"
+msgstr "Alle ansehen"
+
+msgid ""
+"No booking requests yet. They will appear here as soon as guests send them "
+"from your page."
+msgstr ""
+"Noch keine Buchungsanfragen. Sie erscheinen hier, sobald Gäste sie über Ihre"
+" Seite senden."
+
+msgid "Upcoming stays"
+msgstr "Bevorstehende Aufenthalte"
+
+msgid "Your web address"
+msgstr "Ihre Webadresse"
+
+msgid "Copy"
+msgstr "Kopieren"
+
+#, python-format
+msgid "Also available at https://%(domain)s"
+msgstr "Auch erreichbar unter https://%(domain)s"
+
+msgid "Share it on your social networks, Google Business profile and e-mails."
+msgstr ""
+"Teilen Sie sie in sozialen Netzwerken, Ihrem Google-Unternehmensprofil und "
+"Ihren E-Mails."
+
+msgid ""
+"Tick everything your camping offers. Mark with € the ones that have an extra"
+" charge."
+msgstr ""
+"Wählen Sie alles, was Ihr Campingplatz bietet. Markieren Sie mit € das, was "
+"extra kostet."
+
+msgid "Add another facility"
+msgstr "Weitere Einrichtung hinzufügen"
+
+msgid "Extra charge"
+msgstr "Gegen Aufpreis"
+
+msgid "Add details"
+msgstr "Details hinzufügen"
+
+msgid "Other facilities"
+msgstr "Weitere Einrichtungen"
+
+msgid "Add"
+msgstr "Hinzufügen"
+
+msgid ""
+"Anything special that is not in the list? Add it here (e.g. “Adventure "
+"park”, “Wine tasting”)."
+msgstr ""
+"Etwas Besonderes, das nicht in der Liste steht? Fügen Sie es hier hinzu (z. "
+"B. „Kletterpark“, „Weinprobe“)."
+
+msgid "New facility"
+msgstr "Neue Einrichtung"
+
+msgid "Choose the camping you want to manage."
+msgstr "Wählen Sie den Campingplatz, den Sie verwalten möchten."
+
+msgid "New camping"
+msgstr "Neuer Campingplatz"
+
+msgid "You don't manage any camping yet."
+msgstr "Sie verwalten noch keinen Campingplatz."
+
+msgid "Ask the owner of your camping to invite you from the Team section."
+msgstr ""
+"Bitten Sie den Inhaber Ihres Campingplatzes, Sie im Bereich Team einzuladen."
+
+msgid "Where you are and when you are open."
+msgstr "Wo Sie sind und wann Sie geöffnet haben."
+
+msgid "Address"
+msgstr "Adresse"
+
+msgid "Map"
+msgstr "Karte"
+
+msgid "Map preview"
+msgstr "Kartenvorschau"
+
+msgid "Opening period"
+msgstr "Öffnungszeitraum"
+
+msgid "Booking requests outside these dates are not accepted."
+msgstr "Buchungsanfragen außerhalb dieser Daten werden nicht angenommen."
+
+msgid "Edit photo"
+msgstr "Foto bearbeiten"
+
+#, python-format
+msgid ""
+"The first photo is the main image of your page. Drag the photos to change "
+"their order. Up to %(max)s photos."
+msgstr ""
+"Das erste Foto ist das Hauptbild Ihrer Seite. Ziehen Sie die Fotos, um die "
+"Reihenfolge zu ändern. Bis zu %(max)s Fotos."
+
+msgid "Drag your photos here"
+msgstr "Ziehen Sie Ihre Fotos hierher"
+
+#, python-format
+msgid ""
+"or choose them from your device (JPG, PNG, WebP or HEIC, up to %(mb)s MB "
+"each). We resize and optimise them automatically."
+msgstr ""
+"oder wählen Sie sie auf Ihrem Gerät aus (JPG, PNG, WebP oder HEIC, bis zu "
+"%(mb)s MB pro Foto). Wir passen die Größe an und optimieren sie automatisch."
+
+msgid "Choose photos"
+msgstr "Fotos auswählen"
+
+msgid "Upload"
+msgstr "Hochladen"
+
+msgid "Main photo"
+msgstr "Hauptfoto"
+
+msgid "Drag to reorder"
+msgstr "Zum Sortieren ziehen"
+
+msgid "Edit caption"
+msgstr "Bildunterschrift bearbeiten"
+
+msgid "Make main photo"
+msgstr "Als Hauptfoto festlegen"
+
+msgid "Move up"
+msgstr "Nach vorne"
+
+msgid "Move down"
+msgstr "Nach hinten"
+
+msgid "Delete this photo?"
+msgstr "Dieses Foto löschen?"
+
+msgid "No photos yet. Pages with good photos receive many more requests!"
+msgstr "Noch keine Fotos. Seiten mit guten Fotos erhalten viel mehr Anfragen!"
+
+#, python-brace-format
+msgid "Uploading photo {done} of {total}…"
+msgstr "Foto {done} von {total} wird hochgeladen…"
+
+msgid "Done! Reloading…"
+msgstr "Fertig! Wird neu geladen…"
+
+#, python-format, python-brace-format
+msgid "{name} is larger than %(mb)s MB."
+msgstr "{name} ist größer als %(mb)s MB."
+
+msgid "Order saved."
+msgstr "Reihenfolge gespeichert."
+
+msgid "Something went wrong. Please try again."
+msgstr "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut."
+
+msgid "All the campings on the platform."
+msgstr "Alle Campingplätze der Plattform."
+
+msgid "Name, town or owner e-mail"
+msgstr "Name, Ort oder E-Mail des Inhabers"
+
+msgid "Clear"
+msgstr "Zurücksetzen"
+
+msgid "Camping"
+msgstr "Campingplatz"
+
+msgid "Owners"
+msgstr "Inhaber"
+
+msgid "Created"
+msgstr "Erstellt"
+
+msgid "Not approved"
+msgstr "Nicht freigegeben"
+
+msgid "Manage"
+msgstr "Verwalten"
+
+msgid "Suspend this camping? Its page will be hidden."
+msgstr "Diesen Campingplatz sperren? Seine Seite wird ausgeblendet."
+
+msgid "Suspend"
+msgstr "Sperren"
+
+msgid "Approve"
+msgstr "Freigeben"
+
+msgid "No campings found."
+msgstr "Keine Campingplätze gefunden."
+
+msgid ""
+"Creates the camping and invites its owner by e-mail. If the owner has no "
+"account yet, you will get a link to share with them."
+msgstr ""
+"Legt den Campingplatz an und lädt den Inhaber per E-Mail ein. Hat er noch "
+"kein Konto, erhalten Sie einen Link zum Weitergeben."
+
+msgid "Create camping"
+msgstr "Campingplatz anlegen"
+
+msgid ""
+"Clear conditions avoid misunderstandings. They are shown on your page and "
+"during the booking request."
+msgstr ""
+"Klare Bedingungen vermeiden Missverständnisse. Sie werden auf Ihrer Seite "
+"und bei der Buchungsanfrage angezeigt."
+
+msgid "Arrival and departure"
+msgstr "An- und Abreise"
+
+msgid "Deposit and payment"
+msgstr "Anzahlung und Zahlung"
+
+msgid "Cancellation"
+msgstr "Stornierung"
+
+msgid "Camping rules"
+msgstr "Platzordnung"
+
+#, python-format
+msgid ""
+"All prices in %(currency)s, VAT included. Leave a season empty to use the "
+"base price."
+msgstr ""
+"Alle Preise in %(currency)s inkl. MwSt. Lassen Sie eine Saison leer, um den "
+"Grundpreis zu verwenden."
+
+msgid "Manage seasons"
+msgstr "Saisons verwalten"
+
+msgid ""
+"First create your accommodation types and services, then set their prices "
+"here."
+msgstr ""
+"Legen Sie zuerst Ihre Unterkunftsarten und Leistungen an und bestimmen Sie "
+"dann hier die Preise."
+
+msgid "Save prices"
+msgstr "Preise speichern"
+
+msgid "What visitors read about your camping and how they can reach you."
+msgstr "Was Besucher über Ihren Campingplatz lesen und wie sie Sie erreichen."
+
+msgid "Presentation"
+msgstr "Präsentation"
+
+msgid "Contact"
+msgstr "Kontakt"
+
+msgid "New season"
+msgstr "Neue Saison"
+
+msgid "Delete this season? Its prices will be deleted too."
+msgstr "Diese Saison löschen? Ihre Preise werden ebenfalls gelöscht."
+
+msgid ""
+"Periods with different prices: low, mid and high season, bank holidays… "
+"Dates cannot overlap."
+msgstr ""
+"Zeiträume mit unterschiedlichen Preisen: Neben-, Zwischen- und Hauptsaison, "
+"Feiertage… Die Daten dürfen sich nicht überschneiden."
+
+msgid "Copy to next year"
+msgstr "Ins nächste Jahr kopieren"
+
+msgid "Season"
+msgstr "Saison"
+
+msgid "From"
+msgstr "Von"
+
+msgid "To"
+msgstr "Bis"
+
+msgid "Minimum stay"
+msgstr "Mindestaufenthalt"
+
+#, python-format
+msgid ""
+"Now set the price of each accommodation and service per season in the <a "
+"href=\"%(prices_url)s\">price table</a>. Days outside any season use the "
+"base price."
+msgstr ""
+"Legen Sie nun in der <a href=\"%(prices_url)s\">Preistabelle</a> den Preis "
+"jeder Unterkunft und Leistung pro Saison fest. Tage außerhalb einer Saison "
+"nutzen den Grundpreis."
+
+msgid ""
+"Without seasons, the base price of each accommodation and service is used "
+"all year."
+msgstr ""
+"Ohne Saisons gilt das ganze Jahr der Grundpreis jeder Unterkunft und "
+"Leistung."
+
+msgid "New service"
+msgstr "Neue Leistung"
+
+msgid ""
+"Everything that has its own price: adults, children, vehicles, electricity, "
+"pets, tourist tax, bed linen, cleaning…"
+msgstr ""
+"Alles mit eigenem Preis: Erwachsene, Kinder, Fahrzeuge, Strom, Haustiere, "
+"Kurtaxe, Bettwäsche, Reinigung…"
+
+msgid "How are services charged?"
+msgstr "Wie werden Leistungen berechnet?"
+
+msgid ""
+"“Always charged”: added automatically to every quote (e.g. price per adult "
+"on a pitch, tourist tax)."
+msgstr ""
+"„Wird immer berechnet“: wird automatisch jedem Angebot hinzugefügt (z. B. "
+"Preis pro Erwachsenem auf dem Stellplatz, Kurtaxe)."
+
+msgid ""
+"“Optional extra”: the guest can choose it in the booking form (e.g. "
+"electricity, bed linen)."
+msgstr ""
+"„Optionales Extra“: Der Gast kann es im Buchungsformular wählen (z. B. "
+"Strom, Bettwäsche)."
+
+msgid "“Included”: shown as included in the price, without cost."
+msgstr "„Inklusive“: wird als im Preis enthalten angezeigt, ohne Kosten."
+
+msgid "Service"
+msgstr "Leistung"
+
+msgid "How it is charged"
+msgstr "Abrechnungsart"
+
+msgid "Always charged"
+msgstr "Wird immer berechnet"
+
+msgid "Optional extra"
+msgstr "Optionales Extra"
+
+msgid "Included"
+msgstr "Inklusive"
+
+msgid ""
+"No services yet. Typical ones: Adult, Child (3–10 years), Car, Electricity, "
+"Dog, Tourist tax."
+msgstr ""
+"Noch keine Leistungen. Typisch sind: Erwachsener, Kind (3–10 Jahre), Auto, "
+"Strom, Hund, Kurtaxe."
+
+msgid "Web address, languages, currency and booking requests."
+msgstr "Webadresse, Sprachen, Währung und Buchungsanfragen."
+
+msgid "Web address"
+msgstr "Webadresse"
+
+msgid ""
+"Platform administrators: add the certificate with “fly certs add <domain>” "
+"and ask the camping to create the DNS records Fly shows."
+msgstr ""
+"Plattform-Administratoren: Zertifikat mit „fly certs add <Domain>“ "
+"hinzufügen und den Campingplatz bitten, die von Fly angezeigten DNS-Einträge"
+" anzulegen."
+
+#, python-format
+msgid "Own domain: %(domain)s"
+msgstr "Eigene Domain: %(domain)s"
+
+msgid ""
+"Would you like to use your own domain (www.yourcamping.com)? Contact the "
+"platform administrator."
+msgstr ""
+"Möchten Sie Ihre eigene Domain (www.ihrcamping.de) verwenden? Wenden Sie "
+"sich an den Plattform-Administrator."
+
+msgid "Languages and currency"
+msgstr "Sprachen und Währung"
+
+msgid ""
+"People who can manage this camping. Owners can also change settings and "
+"invite others."
+msgstr ""
+"Personen, die diesen Campingplatz verwalten können. Inhaber können zudem "
+"Einstellungen ändern und andere einladen."
+
+msgid "Invitation created."
+msgstr "Einladung erstellt."
+
+msgid ""
+"We have e-mailed the link below. You can also send it yourself; it is valid "
+"for a few days:"
+msgstr ""
+"Wir haben den folgenden Link per E-Mail gesendet. Sie können ihn auch selbst"
+" weitergeben; er ist einige Tage gültig:"
+
+msgid "invitation pending"
+msgstr "Einladung ausstehend"
+
+msgid "Remove access"
+msgstr "Zugang entfernen"
+
+msgid "Remove this person from the team?"
+msgstr "Diese Person aus dem Team entfernen?"
+
+msgid "Invite someone"
+msgstr "Jemanden einladen"
+
+msgid "Send invitation"
+msgstr "Einladung senden"
+
+msgid "Please review the fields marked in red."
+msgstr "Bitte prüfen Sie die rot markierten Felder."
+
+msgid "Change language"
+msgstr "Sprache ändern"
+
+msgid "Pages"
+msgstr "Seiten"
+
+msgid "Previous"
+msgstr "Zurück"
+
+#, python-format
+msgid "Page %(number)s of %(total)s"
+msgstr "Seite %(number)s von %(total)s"
+
+msgid "Next"
+msgstr "Weiter"
+
+#, python-format
+msgid "from <strong>%(price)s</strong> / night"
+msgstr "ab <strong>%(price)s</strong> / Nacht"
+
+#, python-format
+msgid "Check-in from %(start)s"
+msgstr "Anreise ab %(start)s Uhr"
+
+#, python-format
+msgid "until %(end)s"
+msgstr "bis %(end)s Uhr"
+
+#, python-format
+msgid "Check-out until %(end)s."
+msgstr "Abreise bis %(end)s Uhr."
+
+#, python-format
+msgid "Quiet hours from %(start)s to %(end)s."
+msgstr "Nachtruhe von %(start)s bis %(end)s Uhr."
+
+msgid "Length of stay"
+msgstr "Aufenthaltsdauer"
+
+#, python-format
+msgid "Minimum stay: %(counter)s night."
+msgid_plural "Minimum stay: %(counter)s nights."
+msgstr[0] "Mindestaufenthalt: %(counter)s Nacht."
+msgstr[1] "Mindestaufenthalt: %(counter)s Nächte."
+
+#, python-format
+msgid "Maximum stay: %(counter)s night."
+msgid_plural "Maximum stay: %(counter)s nights."
+msgstr[0] "Höchstaufenthalt: %(counter)s Nacht."
+msgstr[1] "Höchstaufenthalt: %(counter)s Nächte."
+
+#, python-format
+msgid "The person booking must be at least %(age)s years old."
+msgstr "Die buchende Person muss mindestens %(age)s Jahre alt sein."
+
+#, python-format
+msgid ""
+"A deposit of %(percent)s%% of the total is required to confirm the booking."
+msgstr ""
+"Zur Bestätigung der Buchung ist eine Anzahlung von %(percent)s %% des "
+"Gesamtbetrags erforderlich."
+
+msgid "No deposit is required to confirm the booking."
+msgstr "Für die Bestätigung der Buchung ist keine Anzahlung nötig."
+
+msgid "Non-refundable: cancellations are not refunded."
+msgstr "Nicht erstattbar: Stornierungen werden nicht erstattet."
+
+#, python-format
+msgid "Free cancellation up to %(counter)s day before arrival."
+msgid_plural "Free cancellation up to %(counter)s days before arrival."
+msgstr[0] "Kostenlose Stornierung bis %(counter)s Tag vor der Anreise."
+msgstr[1] "Kostenlose Stornierung bis %(counter)s Tage vor der Anreise."
+
+msgid "Free cancellation until the day of arrival."
+msgstr "Kostenlose Stornierung bis zum Anreisetag."
+
+msgid "After that, the full amount is charged."
+msgstr "Danach wird der volle Betrag berechnet."
+
+#, python-format
+msgid "After that, %(percent)s%% of the total is charged."
+msgstr "Danach werden %(percent)s %% des Gesamtbetrags berechnet."
+
+msgid "Pets are welcome."
+msgstr "Haustiere sind willkommen."
+
+msgid "Pets are not allowed."
+msgstr "Haustiere sind nicht erlaubt."
+
+msgid "optional"
+msgstr "optional"
+
+msgid "Choose an accommodation and your dates to see the price."
+msgstr "Wählen Sie eine Unterkunft und Ihre Daten, um den Preis zu sehen."
+
+msgid "Main menu"
+msgstr "Hauptmenü"
+
+msgid "List your camping"
+msgstr "Campingplatz eintragen"
+
+msgid "My panel"
+msgstr "Mein Bereich"
+
+msgid "Campings, bungalows and glamping with direct booking requests."
+msgstr "Campingplätze, Bungalows und Glamping mit direkten Buchungsanfragen."
+
+msgid "Footer"
+msgstr "Fußzeile"
+
+msgid "Privacy"
+msgstr "Datenschutz"
+
+msgid "Booking request"
+msgstr "Buchungsanfrage"
+
+msgid ""
+"Tell us about your stay. The camping will check availability and answer by "
+"e-mail. You do not pay anything now."
+msgstr ""
+"Erzählen Sie uns von Ihrem Aufenthalt. Der Campingplatz prüft die "
+"Verfügbarkeit und antwortet per E-Mail. Sie zahlen jetzt nichts."
+
+msgid ""
+"This camping is not taking booking requests online at the moment. Please "
+"contact them directly."
+msgstr ""
+"Dieser Campingplatz nimmt derzeit keine Online-Buchungsanfragen an. Bitte "
+"kontaktieren Sie ihn direkt."
+
+msgid "Online booking requests will be available soon."
+msgstr "Online-Buchungsanfragen sind bald verfügbar."
+
+#, python-format
+msgid "up to %(counter)s guest"
+msgid_plural "up to %(counter)s guests"
+msgstr[0] "bis zu %(counter)s Person"
+msgstr[1] "bis zu %(counter)s Personen"
+
+#, python-format
+msgid "from %(price)s"
+msgstr "ab %(price)s"
+
+msgid "Dates and guests"
+msgstr "Daten und Gäste"
+
+msgid "Your details"
+msgstr "Ihre Daten"
+
+#, python-format
+msgid "Read our <a href=\"%(privacy_url)s\" target=\"_blank\">privacy notice</a>."
+msgstr ""
+"Lesen Sie unsere <a href=\"%(privacy_url)s\" "
+"target=\"_blank\">Datenschutzhinweise</a>."
+
+msgid "Send booking request"
+msgstr "Buchungsanfrage senden"
+
+msgid "Price estimate"
+msgstr "Preisschätzung"
+
+msgid ""
+"Indicative price. The camping confirms the final amount when it accepts your"
+" request."
+msgstr ""
+"Richtpreis. Der Campingplatz bestätigt den Endbetrag, wenn er Ihre Anfrage "
+"annimmt."
+
+msgid "Good to know"
+msgstr "Gut zu wissen"
+
+#, python-format
+msgid "Check-in from %(start)s · check-out until %(end)s"
+msgstr "Anreise ab %(start)s Uhr · Abreise bis %(end)s Uhr"
+
+#, python-format
+msgid "Deposit to confirm: %(percent)s%%"
+msgstr "Anzahlung zur Bestätigung: %(percent)s %%"
+
+msgid "Non-refundable"
+msgstr "Nicht erstattbar"
+
+#, python-format
+msgid "Free cancellation up to %(counter)s day before arrival"
+msgid_plural "Free cancellation up to %(counter)s days before arrival"
+msgstr[0] "Kostenlose Stornierung bis %(counter)s Tag vor der Anreise"
+msgstr[1] "Kostenlose Stornierung bis %(counter)s Tage vor der Anreise"
+
+msgid "All booking policies"
+msgstr "Alle Buchungsbedingungen"
+
+msgid "Calculating…"
+msgstr "Wird berechnet…"
+
+msgid "The price could not be calculated right now."
+msgstr "Der Preis konnte gerade nicht berechnet werden."
+
+msgid "Request sent"
+msgstr "Anfrage gesendet"
+
+#, python-format
+msgid "Thank you, %(name)s!"
+msgstr "Vielen Dank, %(name)s!"
+
+#, python-format
+msgid "Your booking request has been sent to %(camping)s."
+msgstr "Ihre Buchungsanfrage wurde an %(camping)s gesendet."
+
+#, python-format
+msgid ""
+"We have sent a copy to <strong>%(email)s</strong>. The camping will check "
+"availability and reply to you soon."
+msgstr ""
+"Wir haben eine Kopie an <strong>%(email)s</strong> gesendet. Der "
+"Campingplatz prüft die Verfügbarkeit und antwortet Ihnen bald."
+
+msgid "Dates"
+msgstr "Daten"
+
+msgid "What happens next?"
+msgstr "Wie geht es weiter?"
+
+msgid "The camping reviews your request and checks availability."
+msgstr "Der Campingplatz prüft Ihre Anfrage und die Verfügbarkeit."
+
+msgid "You receive an e-mail confirming or declining it."
+msgstr "Sie erhalten eine E-Mail mit Bestätigung oder Absage."
+
+#, python-format
+msgid "To secure the booking you will be asked for a %(percent)s%% deposit."
+msgstr ""
+"Zur Sicherung der Buchung wird eine Anzahlung von %(percent)s %% verlangt."
+
+msgid "Back to the camping"
+msgstr "Zurück zum Campingplatz"
+
+msgid "Preview: this page is not visible to the public yet."
+msgstr "Vorschau: Diese Seite ist noch nicht öffentlich sichtbar."
+
+msgid "Back to the panel"
+msgstr "Zurück zum Bereich"
+
+msgid "Sections"
+msgstr "Abschnitte"
+
+msgid "The camping"
+msgstr "Der Campingplatz"
+
+msgid "Prices"
+msgstr "Preise"
+
+msgid "Policies"
+msgstr "Bedingungen"
+
+msgid "Location"
+msgstr "Lage"
+
+msgid "Book"
+msgstr "Buchen"
+
+msgid "Menu"
+msgstr "Menü"
+
+msgid "Website"
+msgstr "Website"
+
+#, python-format
+msgid "Powered by %(platform)s"
+msgstr "Bereitgestellt von %(platform)s"
+
+msgid "Photo viewer"
+msgstr "Fotobetrachter"
+
+msgid "Close"
+msgstr "Schließen"
+
+msgid "Previous photo"
+msgstr "Vorheriges Foto"
+
+msgid "Next photo"
+msgstr "Nächstes Foto"
+
+#, python-format
+msgid "%(counter)s star"
+msgid_plural "%(counter)s stars"
+msgstr[0] "%(counter)s Stern"
+msgstr[1] "%(counter)s Sterne"
+
+msgid "See prices"
+msgstr "Preise ansehen"
+
+#, python-format
+msgid "From <strong>%(price)s</strong> per night"
+msgstr "Ab <strong>%(price)s</strong> pro Nacht"
+
+#, python-format
+msgid "Some information on this page is only available in %(language)s."
+msgstr ""
+"Einige Informationen auf dieser Seite sind nur auf %(language)s verfügbar."
+
+msgid "Key information"
+msgstr "Wichtige Informationen"
+
+msgid "Check-in"
+msgstr "Anreise"
+
+msgid "Check-out"
+msgstr "Abreise"
+
+#, python-format
+msgid "until %(time)s"
+msgstr "bis %(time)s Uhr"
+
+msgid "Open"
+msgstr "Geöffnet"
+
+msgid "All year"
+msgstr "Ganzjährig"
+
+msgid "Welcome"
+msgstr "Willkommen"
+
+msgid "Not allowed"
+msgstr "Nicht erlaubt"
+
+msgid "The camping has not added a description yet."
+msgstr "Der Campingplatz hat noch keine Beschreibung hinzugefügt."
+
+#, python-format
+msgid "%(counter)s photo"
+msgid_plural "%(counter)s photos"
+msgstr[0] "%(counter)s Foto"
+msgstr[1] "%(counter)s Fotos"
+
+#, python-format
+msgid "%(counter)s bedroom"
+msgid_plural "%(counter)s bedrooms"
+msgstr[0] "%(counter)s Schlafzimmer"
+msgstr[1] "%(counter)s Schlafzimmer"
+
+msgid "Read more"
+msgstr "Mehr lesen"
+
+#, python-format
+msgid "from <strong>%(price)s</strong>"
+msgstr "ab <strong>%(price)s</strong>"
+
+msgid "Request"
+msgstr "Anfragen"
+
+msgid "Accommodation details coming soon."
+msgstr "Informationen zur Unterkunft folgen in Kürze."
+
+msgid "Facilities and services"
+msgstr "Einrichtungen und Service"
+
+msgid "Prices per season"
+msgstr "Preise pro Saison"
+
+#, python-format
+msgid "min. %(counter)s night"
+msgid_plural "min. %(counter)s nights"
+msgstr[0] "mind. %(counter)s Nacht"
+msgstr[1] "mind. %(counter)s Nächte"
+
+msgid "People, vehicles and extras"
+msgstr "Personen, Fahrzeuge und Extras"
+
+msgid "Included in the price"
+msgstr "Im Preis inbegriffen"
+
+msgid "Prices on request."
+msgstr "Preise auf Anfrage."
+
+msgid ""
+"Prices include VAT. The final price is confirmed by the camping when it "
+"accepts your request."
+msgstr ""
+"Die Preise enthalten die MwSt. Der Campingplatz bestätigt den Endpreis, wenn"
+" er Ihre Anfrage annimmt."
+
+msgid "Get directions"
+msgstr "Route planen"
+
+#, python-format
+msgid "Map showing %(name)s"
+msgstr "Karte mit %(name)s"
+
+msgid "View larger map"
+msgstr "Größere Karte ansehen"
+
+msgid "Plan your stay"
+msgstr "Planen Sie Ihren Aufenthalt"
+
+msgid ""
+"Choose your dates and see an instant price estimate. The camping will reply "
+"to your request by e-mail."
+msgstr ""
+"Wählen Sie Ihre Daten und sehen Sie sofort eine Preisschätzung. Der "
+"Campingplatz beantwortet Ihre Anfrage per E-Mail."
+
+msgid "Check price"
+msgstr "Preis prüfen"
+
+msgid "Campings, bungalows and glamping"
+msgstr "Campingplätze, Bungalows und Glamping"
+
+msgid ""
+"Discover campings, compare accommodation, facilities and prices, and send "
+"your booking request directly to the camping."
+msgstr ""
+"Entdecken Sie Campingplätze, vergleichen Sie Unterkünfte, Einrichtungen und "
+"Preise und senden Sie Ihre Buchungsanfrage direkt an den Campingplatz."
+
+msgid "Find your place under the stars"
+msgstr "Finden Sie Ihren Platz unter den Sternen"
+
+msgid ""
+"Compare facilities, prices and booking conditions, and ask the camping "
+"directly. No middlemen, no booking fees."
+msgstr ""
+"Vergleichen Sie Einrichtungen, Preise und Buchungsbedingungen und fragen Sie"
+" direkt beim Campingplatz an. Ohne Vermittler, ohne Buchungsgebühren."
+
+msgid "Camping name, town or region"
+msgstr "Name des Campingplatzes, Ort oder Region"
+
+msgid "Region"
+msgstr "Region"
+
+msgid "All regions"
+msgstr "Alle Regionen"
+
+msgid "Filter by facility"
+msgstr "Nach Einrichtung filtern"
+
+#, python-format
+msgid "%(counter)s camping found"
+msgid_plural "%(counter)s campings found"
+msgstr[0] "%(counter)s Campingplatz gefunden"
+msgstr[1] "%(counter)s Campingplätze gefunden"
+
+msgid "Clear filters"
+msgstr "Filter zurücksetzen"
+
+msgid "No campings match your search."
+msgstr "Kein Campingplatz entspricht Ihrer Suche."
+
+msgid "The first campings are setting up their pages. Come back soon!"
+msgstr ""
+"Die ersten Campingplätze richten gerade ihre Seiten ein. Schauen Sie bald "
+"wieder vorbei!"
+
+msgid "For camping owners"
+msgstr "Für Campingplätze"
+
+msgid "Your camping's website, ready in minutes"
+msgstr "Die Website Ihres Campingplatzes, in Minuten fertig"
+
+msgid ""
+"Upload photos, describe your facilities, set prices by season and publish "
+"your booking policies in several languages. Booking requests arrive straight"
+" in your inbox."
+msgstr ""
+"Laden Sie Fotos hoch, beschreiben Sie Ihre Einrichtungen, legen Sie Preise "
+"pro Saison fest und veröffentlichen Sie Ihre Buchungsbedingungen in mehreren"
+" Sprachen. Buchungsanfragen landen direkt in Ihrem Postfach."
+
+msgid "Create my camping's page"
+msgstr "Seite meines Campingplatzes erstellen"
+
+msgid "Photo gallery"
+msgstr "Fotogalerie"
+
+msgid "Upload from your phone; every image is optimised automatically."
+msgstr "Laden Sie sie vom Handy hoch; jedes Bild wird automatisch optimiert."
+
+msgid "Seasonal prices"
+msgstr "Saisonpreise"
+
+msgid "Low, mid and high season for pitches, bungalows and extras."
+msgstr ""
+"Neben-, Zwischen- und Hauptsaison für Stellplätze, Bungalows und Extras."
+
+msgid "Multi-language"
+msgstr "Mehrsprachig"
+
+msgid "Your page in Spanish, English, French, German, Dutch and Italian."
+msgstr ""
+"Ihre Seite auf Spanisch, Englisch, Französisch, Deutsch, Niederländisch und "
+"Italienisch."
+
+msgid "Guests get an instant price estimate; you confirm with one click."
+msgstr ""
+"Gäste erhalten sofort eine Preisschätzung; Sie bestätigen mit einem Klick."
+
+msgid "Privacy notice"
+msgstr "Datenschutzhinweise"
+
+#, python-format
+msgid ""
+"The data you send through the booking form is received by %(name)s, which is"
+" responsible for processing it in order to answer your request and manage "
+"your stay."
+msgstr ""
+"Die Daten, die Sie über das Buchungsformular senden, erhält %(name)s. Der "
+"Campingplatz ist für ihre Verarbeitung verantwortlich, um Ihre Anfrage zu "
+"beantworten und Ihren Aufenthalt zu organisieren."
+
+#, python-format
+msgid ""
+"You can exercise your rights of access, rectification and erasure by writing"
+" to %(email)s."
+msgstr ""
+"Sie können Ihre Rechte auf Auskunft, Berichtigung und Löschung ausüben, "
+"indem Sie an %(email)s schreiben."
+
+#, python-format
+msgid ""
+"%(platform)s hosts the websites of the campings listed here. When you send a"
+" booking request, your data is passed to the camping you contact, which is "
+"responsible for processing it."
+msgstr ""
+"%(platform)s stellt die Websites der hier aufgeführten Campingplätze bereit."
+" Wenn Sie eine Buchungsanfrage senden, werden Ihre Daten an den "
+"kontaktierten Campingplatz übermittelt, der für ihre Verarbeitung "
+"verantwortlich ist."
+
+msgid "What data we collect"
+msgstr "Welche Daten wir erheben"
+
+msgid ""
+"Your name, e-mail address, phone number, country, the details of your stay "
+"and your message. We only use them to handle your request."
+msgstr ""
+"Ihr Name, Ihre E-Mail-Adresse, Telefonnummer, Ihr Land, die Details Ihres "
+"Aufenthalts und Ihre Nachricht. Wir verwenden sie nur zur Bearbeitung Ihrer "
+"Anfrage."
+
+msgid "How long we keep it"
+msgstr "Wie lange wir sie speichern"
+
+msgid ""
+"For as long as needed to manage your booking and meet legal obligations."
+msgstr ""
+"So lange, wie es für Ihre Buchung und die gesetzlichen Pflichten nötig ist."
+
+msgid "Cookies"
+msgstr "Cookies"
+
+msgid ""
+"We only use technical cookies that are necessary for the website to work "
+"(language, security and session). We do not use advertising or tracking "
+"cookies."
+msgstr ""
+"Wir verwenden nur technisch notwendige Cookies für den Betrieb der Website "
+"(Sprache, Sicherheit und Sitzung). Wir verwenden keine Werbe- oder Tracking-"
+"Cookies."

@@ -49,7 +49,12 @@ def make_season(camping, start, end, **extra):
 
 
 def make_service(camping, **extra):
-    defaults = {"name": {"es": "Adulto", "en": "Adult"}, "price": Decimal("5"), "unit": "adult_night", "mode": "mandatory"}
+    defaults = {
+        "name": {"es": "Adulto", "en": "Adult"},
+        "price": Decimal("5"),
+        "unit": "adult_night",
+        "mode": "mandatory",
+    }
     defaults.update(extra)
     return Service.objects.create(camping=camping, **defaults)
 

@@ -355,9 +355,7 @@ class Season(models.Model):
 
 class AccommodationType(models.Model):
     camping = models.ForeignKey(Camping, on_delete=models.CASCADE, related_name="accommodations")
-    kind = models.CharField(
-        _("type"), max_length=20, choices=catalog.ACCOMMODATION_KIND_CHOICES, default="pitch"
-    )
+    kind = models.CharField(_("type"), max_length=20, choices=catalog.ACCOMMODATION_KIND_CHOICES, default="pitch")
     name = TranslatedField(_("name"), max_chars=120)
     description = TranslatedField(_("description"), textarea=True)
     max_guests = models.PositiveSmallIntegerField(
@@ -592,9 +590,7 @@ class BookingPolicy(models.Model):
     check_in_from = models.TimeField(_("check-in from"), default=time(14, 0))
     check_in_until = models.TimeField(_("check-in until"), null=True, blank=True, default=time(21, 0))
     check_out_until = models.TimeField(_("check-out until"), default=time(12, 0))
-    min_nights = models.PositiveSmallIntegerField(
-        _("minimum nights"), default=1, validators=[MinValueValidator(1)]
-    )
+    min_nights = models.PositiveSmallIntegerField(_("minimum nights"), default=1, validators=[MinValueValidator(1)])
     max_nights = models.PositiveSmallIntegerField(_("maximum nights"), null=True, blank=True)
     min_age = models.PositiveSmallIntegerField(_("minimum age of the person booking"), default=18)
     deposit_percent = models.PositiveSmallIntegerField(
@@ -632,4 +628,6 @@ class BookingPolicy(models.Model):
 
     @property
     def payment_method_labels(self):
-        return [catalog.PAYMENT_METHOD_MAP[key] for key in (self.payment_methods or []) if key in catalog.PAYMENT_METHOD_MAP]
+        return [
+            catalog.PAYMENT_METHOD_MAP[key] for key in (self.payment_methods or []) if key in catalog.PAYMENT_METHOD_MAP
+        ]

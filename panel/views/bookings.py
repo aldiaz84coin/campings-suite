@@ -25,8 +25,13 @@ def booking_list(request, camping):
     if q:
         bookings = bookings.filter(Q(name__icontains=q) | Q(email__icontains=q) | Q(reference__icontains=q))
     page = Paginator(bookings, 25).get_page(request.GET.get("page"))
-    tabs = [("pending", _("Pending")), ("confirmed", _("Confirmed")), ("declined", _("Declined")),
-            ("cancelled", _("Cancelled")), ("all", _("All"))]
+    tabs = [
+        ("pending", _("Pending")),
+        ("confirmed", _("Confirmed")),
+        ("declined", _("Declined")),
+        ("cancelled", _("Cancelled")),
+        ("all", _("All")),
+    ]
     context = {
         "page": page,
         "bookings": page.object_list,

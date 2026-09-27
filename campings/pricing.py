@@ -34,12 +34,12 @@ def season_for(day, seasons):
     return None
 
 
-def _count(singular, plural, n):
-    return ngettext(singular, plural, n) % {"count": n}
-
-
 def nights_label(n):
-    return _count("%(count)s night", "%(count)s nights", n)
+    return ngettext("%(count)s night", "%(count)s nights", n) % {"count": n}
+
+
+def people_label(n):
+    return ngettext("%(count)s person", "%(count)s people", n) % {"count": n}
 
 
 @dataclass
@@ -133,14 +133,15 @@ def _group_nights(nights, price_of):
 
 
 def _quantity_label(unit, adults, children, pets):
-    persons = adults + children
-    return {
-        "adult_night": _count("%(count)s adult", "%(count)s adults", adults),
-        "child_night": _count("%(count)s child", "%(count)s children", children),
-        "person_night": _count("%(count)s person", "%(count)s people", persons),
-        "person_stay": _count("%(count)s person", "%(count)s people", persons),
-        "pet_night": _count("%(count)s pet", "%(count)s pets", pets),
-    }.get(unit, "")
+    if unit == "adult_night":
+        return ngettext("%(count)s adult", "%(count)s adults", adults) % {"count": adults}
+    if unit == "child_night":
+        return ngettext("%(count)s child", "%(count)s children", children) % {"count": children}
+    if unit in ("person_night", "person_stay"):
+        return people_label(adults + children)
+    if unit == "pet_night":
+        return ngettext("%(count)s pet", "%(count)s pets", pets) % {"count": pets}
+    return ""
 
 
 def _service_factor(unit, adults, children, pets):
@@ -218,11 +219,12 @@ def build_quote(
 
     if adults + children > accommodation.max_guests:
         errors.append(
-            _count(
+            ngettext(
                 "This accommodation is for up to %(count)s guest.",
                 "This accommodation is for up to %(count)s guests.",
                 accommodation.max_guests,
             )
+            % {"count": accommodation.max_guests}
         )
 
     if check_availability and not errors:
@@ -243,14 +245,10 @@ def build_quote(
     for price, season, count in groups:
         if accommodation.price_unit == "person_night":
             amount = price * count * persons
-            detail = "%s × %s × %s" % (
-                nights_label(count),
-                _count("%(count)s person", "%(count)s people", persons),
-                format_money(price, camping.currency),
-            )
+            detail = f"{nights_label(count)} × {people_label(persons)} × {format_money(price, camping.currency)}"
         else:
             amount = price * count
-            detail = "%s × %s" % (nights_label(count), format_money(price, camping.currency))
+            detail = f"{nights_label(count)} × {format_money(price, camping.currency)}"
         if season is not None and len(groups) > 1:
             detail = f"{detail} · {translate_value(season.name)}"
         quote.lines.append(QuoteLine(name, detail, amount.quantize(CENT, ROUND_HALF_UP), "accommodation"))
@@ -270,7 +268,11 @@ def build_quote(
         if service.unit in catalog.PER_NIGHT_UNITS:
             amounts = [service.price_for(season_for(night, seasons), rates) for night in stay_nights]
             amount = sum(amounts, Decimal("0")) * factor
-            parts = [label for label in (_quantity_label(service.unit, adults, children, pets), nights_label(nights)) if label]
+            parts = [
+                label
+                for label in (_quantity_label(service.unit, adults, children, pets), nights_label(nights))
+                if label
+            ]
             if len(set(amounts)) == 1:
                 parts.append(format_money(amounts[0], camping.currency))
             detail = " × ".join(parts)

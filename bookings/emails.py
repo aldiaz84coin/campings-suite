@@ -70,7 +70,11 @@ def send_new_booking_emails(request, booking):
         )
 
     with translation.override(booking.language):
-        context = {**context, "quote": booking.guest_quote, "accommodation_name": booking.accommodation_label(booking.language)}
+        context = {
+            **context,
+            "quote": booking.guest_quote,
+            "accommodation_name": booking.accommodation_label(booking.language),
+        }
         send_templated_email(
             translation.gettext("We have received your booking request at %(camping)s") % {"camping": camping.name},
             "emails/booking_new_guest.txt",

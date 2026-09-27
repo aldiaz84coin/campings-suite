@@ -5,7 +5,7 @@
     <thead>
       <tr>
         <th scope="col"><span class="sr-only">{% translate "Item" %}</span></th>
-        {% if seasons %}{% for season in seasons %}<th scope="col"><span class="season-dot" style="--dot: {{ season.color }}"></span>{{ season.name|tr }}<small>{{ season.start_date|date:"j M" }} – {{ season.end_date|date:"j M" }}</small></th>{% endfor %}{% else %}<th scope="col">{% translate "Price" %}</th>{% endif %}
+        {% if seasons %}{% for season in seasons %}<th scope="col"><span class="season-dot" style="--dot: {{ season.color }}"></span>{{ season.name|tr }}<small>{{ season.start_date|date:"j M" }} – {{ season.end_date|date:"j M Y" }}</small></th>{% endfor %}{% else %}<th scope="col">{% translate "Price" %}</th>{% endif %}
       </tr>
     </thead>
     <tbody>

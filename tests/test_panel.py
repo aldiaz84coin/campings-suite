@@ -83,15 +83,37 @@ class CampingEditingTests(TestCase):
         season = make_season(self.camping, future(1), future(30))
         facility = self.camping.facilities.create(kind="custom", name={"es": "Kayak"})
         booking = BookingRequest.objects.create(
-            camping=self.camping, accommodation=acc, arrival=future(3), departure=future(5), name="G", email="g@example.com"
+            camping=self.camping,
+            accommodation=acc,
+            arrival=future(3),
+            departure=future(5),
+            name="G",
+            email="g@example.com",
         )
         pages = [
-            ("dashboard", {}), ("profile", {}), ("location", {}), ("appearance", {}), ("settings", {}), ("photos", {}),
-            ("facilities", {}), ("facility_create", {}), ("facility_edit", {"pk": facility.pk}),
-            ("accommodations", {}), ("accommodation_create", {}), ("accommodation_edit", {"pk": acc.pk}),
-            ("services", {}), ("service_create", {}), ("service_edit", {"pk": service.pk}),
-            ("seasons", {}), ("season_create", {}), ("season_edit", {"pk": season.pk}),
-            ("prices", {}), ("policies", {}), ("bookings", {}), ("booking_detail", {"pk": booking.pk}), ("team", {}),
+            ("dashboard", {}),
+            ("profile", {}),
+            ("location", {}),
+            ("appearance", {}),
+            ("settings", {}),
+            ("photos", {}),
+            ("facilities", {}),
+            ("facility_create", {}),
+            ("facility_edit", {"pk": facility.pk}),
+            ("accommodations", {}),
+            ("accommodation_create", {}),
+            ("accommodation_edit", {"pk": acc.pk}),
+            ("services", {}),
+            ("service_create", {}),
+            ("service_edit", {"pk": service.pk}),
+            ("seasons", {}),
+            ("season_create", {}),
+            ("season_edit", {"pk": season.pk}),
+            ("prices", {}),
+            ("policies", {}),
+            ("bookings", {}),
+            ("booking_detail", {"pk": booking.pk}),
+            ("team", {}),
         ]
         for name, kwargs in pages:
             for language in ("es", "en", "de"):
@@ -115,8 +137,13 @@ class CampingEditingTests(TestCase):
     def test_settings_change_languages_and_slug(self):
         response = self.client.post(
             panel_url("settings", self.camping),
-            {"slug": "nuevo-slug", "default_language": "fr", "languages": ["en", "de"], "currency": "EUR",
-             "accepts_booking_requests": "on"},
+            {
+                "slug": "nuevo-slug",
+                "default_language": "fr",
+                "languages": ["en", "de"],
+                "currency": "EUR",
+                "accepts_booking_requests": "on",
+            },
         )
         self.assertRedirects(response, "/en/panel/c/nuevo-slug/settings/", fetch_redirect_response=False)
         self.camping.refresh_from_db()
@@ -125,8 +152,13 @@ class CampingEditingTests(TestCase):
     def test_owner_cannot_set_custom_domain(self):
         self.client.post(
             panel_url("settings", self.camping),
-            {"slug": self.camping.slug, "default_language": "es", "languages": ["es"], "currency": "EUR",
-             "custom_domain": "www.hack.test"},
+            {
+                "slug": self.camping.slug,
+                "default_language": "es",
+                "languages": ["es"],
+                "currency": "EUR",
+                "custom_domain": "www.hack.test",
+            },
         )
         self.camping.refresh_from_db()
         self.assertIsNone(self.camping.custom_domain)
@@ -146,7 +178,9 @@ class CampingEditingTests(TestCase):
         self.assertTrue(self.camping.is_published)
 
     def test_facility_checklist(self):
-        self.client.post(panel_url("facilities", self.camping), {"facilities": ["pool", "wifi", "bogus"], "paid": ["wifi"]})
+        self.client.post(
+            panel_url("facilities", self.camping), {"facilities": ["pool", "wifi", "bogus"], "paid": ["wifi"]}
+        )
         kinds = dict(self.camping.facilities.values_list("kind", "is_paid"))
         self.assertEqual(kinds, {"pool": False, "wifi": True})
         self.client.post(panel_url("facilities", self.camping), {"facilities": ["pool"]})
@@ -162,10 +196,22 @@ class CampingEditingTests(TestCase):
         photo = self.make_photo()
         response = self.client.post(
             panel_url("accommodation_create", self.camping),
-            {"kind": "bungalow", "name_es": "Bungalow Mar", "max_guests": 4, "units": 3, "base_price": "80,5".replace(",", "."),
-             "price_unit": "night", "amenities": ["kitchen", "wifi"], "photos": [photo.pk], "is_active": "on", "position": ""},
+            {
+                "kind": "bungalow",
+                "name_es": "Bungalow Mar",
+                "max_guests": 4,
+                "units": 3,
+                "base_price": "80,5".replace(",", "."),
+                "price_unit": "night",
+                "amenities": ["kitchen", "wifi"],
+                "photos": [photo.pk],
+                "is_active": "on",
+                "position": "",
+            },
         )
-        self.assertEqual(response.status_code, 302, getattr(response, "context", None) and response.context["form"].errors)
+        self.assertEqual(
+            response.status_code, 302, getattr(response, "context", None) and response.context["form"].errors
+        )
         acc = self.camping.accommodations.get()
         self.assertEqual(acc.amenities, ["kitchen", "wifi"])
         self.assertEqual(acc.base_price, Decimal("80.50"))
@@ -175,7 +221,14 @@ class CampingEditingTests(TestCase):
     def test_accommodation_requires_name_in_main_language(self):
         response = self.client.post(
             panel_url("accommodation_create", self.camping),
-            {"kind": "pitch", "name_en": "Only English", "max_guests": 4, "units": 1, "base_price": "10", "price_unit": "night"},
+            {
+                "kind": "pitch",
+                "name_en": "Only English",
+                "max_guests": 4,
+                "units": 1,
+                "base_price": "10",
+                "price_unit": "night",
+            },
         )
         self.assertEqual(response.status_code, 200)
         self.assertIn("name", response.context["form"].errors)
@@ -184,7 +237,12 @@ class CampingEditingTests(TestCase):
         make_season(self.camping, future(10), future(20))
         response = self.client.post(
             panel_url("season_create", self.camping),
-            {"name_es": "Otra", "start_date": future(15).isoformat(), "end_date": future(25).isoformat(), "color": "#123456"},
+            {
+                "name_es": "Otra",
+                "start_date": future(15).isoformat(),
+                "end_date": future(25).isoformat(),
+                "color": "#123456",
+            },
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(self.camping.seasons.count(), 1)
@@ -205,8 +263,12 @@ class CampingEditingTests(TestCase):
         season = make_season(self.camping, future(1), future(30))
         response = self.client.post(
             panel_url("prices", self.camping),
-            {f"acc-{acc.pk}-base": "55", f"acc-{acc.pk}-{season.pk}": "70,50", f"svc-{service.pk}-base": "6",
-             f"svc-{service.pk}-{season.pk}": ""},
+            {
+                f"acc-{acc.pk}-base": "55",
+                f"acc-{acc.pk}-{season.pk}": "70,50",
+                f"svc-{service.pk}-base": "6",
+                f"svc-{service.pk}-{season.pk}": "",
+            },
         )
         self.assertEqual(response.status_code, 302)
         acc.refresh_from_db()
@@ -214,7 +276,9 @@ class CampingEditingTests(TestCase):
         self.assertEqual(AccommodationRate.objects.get().price, Decimal("70.50"))
         self.assertFalse(ServiceRate.objects.exists())
         # Clearing a cell removes the seasonal price.
-        self.client.post(panel_url("prices", self.camping), {f"acc-{acc.pk}-base": "55", f"acc-{acc.pk}-{season.pk}": ""})
+        self.client.post(
+            panel_url("prices", self.camping), {f"acc-{acc.pk}-base": "55", f"acc-{acc.pk}-{season.pk}": ""}
+        )
         self.assertFalse(AccommodationRate.objects.exists())
 
     def test_invalid_price_is_reported(self):
@@ -227,9 +291,19 @@ class CampingEditingTests(TestCase):
     def test_policy_update(self):
         response = self.client.post(
             panel_url("policies", self.camping),
-            {"check_in_from": "15:00", "check_out_until": "11:00", "min_nights": 2, "min_age": 18, "deposit_percent": 20,
-             "payment_methods": ["card", "bizum"], "refundable": "on", "free_cancellation_days": 7,
-             "cancellation_fee_percent": 50, "pets_allowed": "on", "rules_text_es": "Silencio"},
+            {
+                "check_in_from": "15:00",
+                "check_out_until": "11:00",
+                "min_nights": 2,
+                "min_age": 18,
+                "deposit_percent": 20,
+                "payment_methods": ["card", "bizum"],
+                "refundable": "on",
+                "free_cancellation_days": 7,
+                "cancellation_fee_percent": 50,
+                "pets_allowed": "on",
+                "rules_text_es": "Silencio",
+            },
         )
         self.assertEqual(response.status_code, 302)
         policy = Camping.objects.get(pk=self.camping.pk).get_policy()
@@ -250,7 +324,9 @@ class PhotoTests(TestCase):
         self.url = panel_url("photos", self.camping)
 
     def test_upload_resizes_and_converts_to_webp(self):
-        response = self.client.post(self.url, {"images": [image_file(size=(4000, 3000)), image_file("b.png", fmt="PNG")]})
+        response = self.client.post(
+            self.url, {"images": [image_file(size=(4000, 3000)), image_file("b.png", fmt="PNG")]}
+        )
         self.assertEqual(response.status_code, 302)
         photos = list(self.camping.photos.all())
         self.assertEqual(len(photos), 2)
@@ -274,8 +350,11 @@ class PhotoTests(TestCase):
         for _ in range(3):
             self.client.post(self.url, {"images": [image_file()]})
         a, b, c = self.camping.photos.all()
-        self.client.post(panel_url("photo_reorder", self.camping), json.dumps({"order": [c.pk, a.pk, b.pk]}),
-                         content_type="application/json")
+        self.client.post(
+            panel_url("photo_reorder", self.camping),
+            json.dumps({"order": [c.pk, a.pk, b.pk]}),
+            content_type="application/json",
+        )
         self.assertEqual(list(self.camping.photos.values_list("pk", flat=True)), [c.pk, a.pk, b.pk])
         self.client.post(panel_url("photo_cover", self.camping, pk=b.pk))
         self.assertEqual(self.camping.cover_photo, b)
@@ -287,13 +366,20 @@ class PhotoTests(TestCase):
 
     def test_cannot_reorder_other_campings_photos(self):
         other = make_camping("Otro", owner=make_user("x@example.com"))
-        response = self.client.post(panel_url("photo_reorder", other), json.dumps({"order": []}), content_type="application/json")
+        response = self.client.post(
+            panel_url("photo_reorder", other), json.dumps({"order": []}), content_type="application/json"
+        )
         self.assertEqual(response.status_code, 404)
 
     def test_logo_upload(self):
         response = self.client.post(
             panel_url("appearance", self.camping),
-            {"primary_color": "#123456", "accent_color": "#abcdef", "font_style": "classic", "logo_file": image_file("logo.png", fmt="PNG")},
+            {
+                "primary_color": "#123456",
+                "accent_color": "#abcdef",
+                "font_style": "classic",
+                "logo_file": image_file("logo.png", fmt="PNG"),
+            },
         )
         self.assertEqual(response.status_code, 302)
         self.camping.refresh_from_db()
@@ -316,14 +402,21 @@ class BookingManagementTests(TestCase):
         self.camping = make_camping("Reservas", owner=self.owner)
         self.acc = make_accommodation(self.camping)
         self.booking = BookingRequest.objects.create(
-            camping=self.camping, accommodation=self.acc, arrival=future(10), departure=future(12),
-            name="Guest", email="guest@example.com", language="de",
+            camping=self.camping,
+            accommodation=self.acc,
+            arrival=future(10),
+            departure=future(12),
+            name="Guest",
+            email="guest@example.com",
+            language="de",
         )
         self.client.force_login(self.owner)
 
     def test_confirm_sends_email_in_guest_language(self):
         url = panel_url("booking_detail", self.camping, pk=self.booking.pk)
-        response = self.client.post(url, {"status": ["pending", "confirmed"], "internal_notes": "", "notify_guest": "on"})
+        response = self.client.post(
+            url, {"status": ["pending", "confirmed"], "internal_notes": "", "notify_guest": "on"}
+        )
         self.assertEqual(response.status_code, 302)
         self.booking.refresh_from_db()
         self.assertEqual(self.booking.status, "confirmed")
@@ -346,8 +439,14 @@ class SignupAndTeamTests(TestCase):
     def test_signup_creates_user_camping_and_membership(self):
         response = self.client.post(
             "/fr/panel/signup/",
-            {"camping_name": "Camping du Lac", "first_name": "Luc", "email": "Luc@Example.com",
-             "password1": "a-very-safe-pass-9", "password2": "a-very-safe-pass-9", "accept_terms": "on"},
+            {
+                "camping_name": "Camping du Lac",
+                "first_name": "Luc",
+                "email": "Luc@Example.com",
+                "password1": "a-very-safe-pass-9",
+                "password2": "a-very-safe-pass-9",
+                "accept_terms": "on",
+            },
         )
         camping = Camping.objects.get(name="Camping du Lac")
         self.assertRedirects(response, f"/fr/panel/c/{camping.slug}/", fetch_redirect_response=False)
@@ -359,8 +458,14 @@ class SignupAndTeamTests(TestCase):
         make_user("taken@example.com")
         response = self.client.post(
             "/es/panel/signup/",
-            {"camping_name": "X", "first_name": "Y", "email": "TAKEN@example.com", "password1": "a-very-safe-pass-9",
-             "password2": "a-very-safe-pass-9", "accept_terms": "on"},
+            {
+                "camping_name": "X",
+                "first_name": "Y",
+                "email": "TAKEN@example.com",
+                "password1": "a-very-safe-pass-9",
+                "password2": "a-very-safe-pass-9",
+                "accept_terms": "on",
+            },
         )
         self.assertEqual(response.status_code, 200)
         self.assertIn("email", response.context["form"].errors)
@@ -378,7 +483,9 @@ class SignupAndTeamTests(TestCase):
         # Follow the invitation and choose a password.
         response = self.client.get(link, follow=True)
         form_url = response.redirect_chain[-1][0]
-        response = self.client.post(form_url, {"new_password1": "another-safe-pass-7", "new_password2": "another-safe-pass-7"})
+        response = self.client.post(
+            form_url, {"new_password1": "another-safe-pass-7", "new_password2": "another-safe-pass-7"}
+        )
         self.assertEqual(response.status_code, 302)
         self.assertTrue(self.client.login(email="new@example.com", password="another-safe-pass-7"))
 
@@ -393,7 +500,9 @@ class SignupAndTeamTests(TestCase):
     def test_platform_creates_camping_with_owner(self):
         admin = make_user("admin@example.com", is_superuser=True, is_staff=True)
         self.client.force_login(admin)
-        response = self.client.post("/es/panel/platform/new/", {"name": "Nuevo", "owner_email": "own@example.com", "default_language": "es"})
+        response = self.client.post(
+            "/es/panel/platform/new/", {"name": "Nuevo", "owner_email": "own@example.com", "default_language": "es"}
+        )
         self.assertEqual(response.status_code, 302)
         camping = Camping.objects.get(name="Nuevo")
         self.assertTrue(camping.is_approved)

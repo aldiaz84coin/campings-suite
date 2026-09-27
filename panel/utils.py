@@ -59,6 +59,4 @@ def panel_render(request, template, context=None, section=None):
 
 
 def wants_json(request):
-    return request.headers.get("x-requested-with") == "fetch" or "application/json" in request.headers.get(
-        "accept", ""
-    )
+    return request.headers.get("x-requested-with") == "fetch" or "application/json" in request.headers.get("accept", "")

@@ -115,8 +115,13 @@ class AvailabilityTests(TestCase):
 
     def book(self, arrival, departure, status=BookingRequest.Status.CONFIRMED):
         return BookingRequest.objects.create(
-            camping=self.camping, accommodation=self.acc, arrival=arrival, departure=departure,
-            name="Guest", email="guest@example.com", status=status,
+            camping=self.camping,
+            accommodation=self.acc,
+            arrival=arrival,
+            departure=departure,
+            name="Guest",
+            email="guest@example.com",
+            status=status,
         )
 
     def test_counts_the_busiest_night_only(self):

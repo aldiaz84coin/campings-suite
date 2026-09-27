@@ -19,7 +19,6 @@ from campings.models import (
     Service,
     ServiceRate,
 )
-
 from core.i18n import translate_value
 
 from ..forms import AccommodationForm, FacilityForm, PolicyForm, SeasonForm, ServiceForm
@@ -295,12 +294,14 @@ def seasons_copy(request, camping):
                 for r in season.accommodation_rates.all()
             )
             ServiceRate.objects.bulk_create(
-                ServiceRate(service_id=r.service_id, season=new_season, price=r.price) for r in season.service_rates.all()
+                ServiceRate(service_id=r.service_id, season=new_season, price=r.price)
+                for r in season.service_rates.all()
             )
             copied += 1
     if copied:
         messages.success(
-            request, _("%(count)s season(s) copied to %(year)s with their prices.") % {"count": copied, "year": last_year + 1}
+            request,
+            _("%(count)s season(s) copied to %(year)s with their prices.") % {"count": copied, "year": last_year + 1},
         )
     else:
         messages.info(request, _("The seasons of %(year)s already exist.") % {"year": last_year + 1})
@@ -325,7 +326,7 @@ def _parse_price(raw):
 
 
 def _sync_rates(owner, rate_model, owner_field, seasons, data, prefix, errors, label):
-    existing = {rate.season_id: rate for rate in getattr(owner, "rates").all()}
+    existing = {rate.season_id: rate for rate in owner.rates.all()}
     base_key = f"{prefix}-{owner.pk}-base"
     try:
         base = _parse_price(data.get(base_key))
@@ -368,7 +369,13 @@ def prices(request, camping):
         with transaction.atomic():
             for accommodation in accommodation_list:
                 _sync_rates(
-                    accommodation, AccommodationRate, "accommodation", seasons, request.POST, "acc", errors,
+                    accommodation,
+                    AccommodationRate,
+                    "accommodation",
+                    seasons,
+                    request.POST,
+                    "acc",
+                    errors,
                     accommodation.display_name,
                 )
             for service in service_list:

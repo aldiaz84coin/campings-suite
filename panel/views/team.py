@@ -60,7 +60,9 @@ def team(request, camping):
             messages.error(request, _("Only owners can invite people."))
             return redirect("panel:team", slug=camping.slug)
         if form.is_valid():
-            membership, invite_link = invite_user(request, camping, form.cleaned_data["email"], form.cleaned_data["role"])
+            membership, invite_link = invite_user(
+                request, camping, form.cleaned_data["email"], form.cleaned_data["role"]
+            )
             messages.success(request, _("%(email)s has been added to the team.") % {"email": membership.user.email})
             if not invite_link:
                 return redirect("panel:team", slug=camping.slug)
