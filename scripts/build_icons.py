@@ -114,6 +114,7 @@ LUCIDE = sorted(
         "circle-x",
         "copy",
         "credit-card",
+        "download",
         "euro",
         "external-link",
         "eye",

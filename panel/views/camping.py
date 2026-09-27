@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db.models import Sum
 from django.shortcuts import redirect
 from django.utils import timezone
 from django.utils.translation import gettext as _
@@ -73,7 +74,22 @@ def dashboard(request, camping):
     requests_qs = camping.booking_requests.select_related("accommodation")
     checklist = setup_checklist(camping)
     done = sum(1 for item in checklist if item["done"])
+    confirmed = requests_qs.filter(status=BookingRequest.Status.CONFIRMED)
+    staying = confirmed.filter(arrival__lte=today, departure__gt=today).aggregate(
+        units=Sum("units"), adults=Sum("adults"), children=Sum("children")
+    )
+    capacity = camping.accommodations.filter(is_active=True).aggregate(total=Sum("units"))["total"] or 0
+    units_used = staying["units"] or 0
     context = {
+        "today": {
+            "date": today,
+            "arrivals": list(confirmed.filter(arrival=today)),
+            "departures": list(confirmed.filter(departure=today)),
+            "guests": (staying["adults"] or 0) + (staying["children"] or 0),
+            "units_used": units_used,
+            "capacity": capacity,
+            "occupancy": round(units_used * 100 / capacity) if capacity else 0,
+        },
         "checklist": checklist,
         "progress": round(done * 100 / len(checklist)),
         "recent_requests": requests_qs[:6],

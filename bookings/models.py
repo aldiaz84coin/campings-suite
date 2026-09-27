@@ -2,6 +2,7 @@ import secrets
 import uuid
 
 from django.conf import settings
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils import translation
 from django.utils.translation import gettext_lazy as _
@@ -16,13 +17,20 @@ def generate_reference():
 
 
 class BookingRequest(models.Model):
-    """A stay requested from the public site, confirmed manually by the camping."""
+    """A stay: requested from the public site or added by the camping.
+
+    Only confirmed stays take up units of the accommodation type.
+    """
 
     class Status(models.TextChoices):
         PENDING = "pending", _("Pending")
         CONFIRMED = "confirmed", _("Confirmed")
         DECLINED = "declined", _("Declined")
         CANCELLED = "cancelled", _("Cancelled")
+
+    class Source(models.TextChoices):
+        WEB = "web", _("Website")
+        MANUAL = "manual", _("Added in the panel")
 
     camping = models.ForeignKey(Camping, on_delete=models.CASCADE, related_name="booking_requests")
     reference = models.CharField(_("reference"), max_length=12, unique=True, editable=False)
@@ -36,6 +44,12 @@ class BookingRequest(models.Model):
         verbose_name=_("accommodation"),
     )
     accommodation_name = models.CharField(_("accommodation name"), max_length=200, blank=True)
+    units = models.PositiveSmallIntegerField(
+        _("units"),
+        default=1,
+        validators=[MinValueValidator(1), MaxValueValidator(99)],
+        help_text=_("How many units of this accommodation the stay takes up."),
+    )
     arrival = models.DateField(_("arrival"))
     departure = models.DateField(_("departure"))
     adults = models.PositiveSmallIntegerField(_("adults"), default=2)
@@ -44,7 +58,7 @@ class BookingRequest(models.Model):
     extras = models.ManyToManyField(Service, blank=True, verbose_name=_("extras"))
 
     name = models.CharField(_("name"), max_length=150)
-    email = models.EmailField(_("e-mail"))
+    email = models.EmailField(_("e-mail"), blank=True)
     phone = models.CharField(_("phone"), max_length=40, blank=True)
     country = models.CharField(_("country"), max_length=80, blank=True)
     message = models.TextField(_("message"), blank=True)
@@ -55,6 +69,7 @@ class BookingRequest(models.Model):
     estimated_total = models.DecimalField(_("estimated total"), max_digits=10, decimal_places=2, null=True, blank=True)
     status = models.CharField(_("status"), max_length=12, choices=Status.choices, default=Status.PENDING, db_index=True)
     internal_notes = models.TextField(_("internal notes"), blank=True)
+    source = models.CharField(_("source"), max_length=10, choices=Source.choices, default=Source.WEB)
 
     created_at = models.DateTimeField(_("received"), auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(_("updated"), auto_now=True)

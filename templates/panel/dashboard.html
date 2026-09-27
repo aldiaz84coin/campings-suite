@@ -36,6 +36,28 @@
 </div>
 
 <div class="dashboard-grid">
+  <section class="card card-pad today-card">
+    <div class="card-head"><h2>{% icon "calendar-check" %} {% translate "Today" %}</h2><span class="muted small">{{ today.date|date:"l j F" }}</span></div>
+    <div class="today-stats">
+      <div><strong>{{ today.occupancy }}%</strong><span>{% blocktranslate with used=today.units_used total=today.capacity %}occupancy ({{ used }}/{{ total }} units){% endblocktranslate %}</span></div>
+      <div><strong>{{ today.guests }}</strong><span>{% translate "guests tonight" %}</span></div>
+    </div>
+    <div class="today-lists">
+      <div>
+        <h3>{% icon "log-in" %} {% translate "Arrivals" %} <span class="count count--muted">{{ today.arrivals|length }}</span></h3>
+        {% if today.arrivals %}<ul class="plain-list small">{% for booking in today.arrivals %}<li><a href="{% url 'panel:booking_detail' slug=camping.slug pk=booking.pk %}">{{ booking.name }}</a> · {{ booking.accommodation_name }}</li>{% endfor %}</ul>{% else %}<p class="muted small">{% translate "No arrivals today." %}</p>{% endif %}
+      </div>
+      <div>
+        <h3>{% icon "log-out" %} {% translate "Departures" %} <span class="count count--muted">{{ today.departures|length }}</span></h3>
+        {% if today.departures %}<ul class="plain-list small">{% for booking in today.departures %}<li><a href="{% url 'panel:booking_detail' slug=camping.slug pk=booking.pk %}">{{ booking.name }}</a> · {{ booking.accommodation_name }}</li>{% endfor %}</ul>{% else %}<p class="muted small">{% translate "No departures today." %}</p>{% endif %}
+      </div>
+    </div>
+    <div class="today-actions">
+      <a class="btn btn-outline btn-sm" href="{% url 'panel:calendar' slug=camping.slug %}">{% icon "calendar-days" %}<span>{% translate "Occupancy calendar" %}</span></a>
+      <a class="btn btn-ghost btn-sm" href="{% url 'panel:booking_create' slug=camping.slug %}">{% icon "plus" %}<span>{% translate "New booking" %}</span></a>
+    </div>
+  </section>
+
   <section class="card card-pad">
     <div class="card-head"><h2>{% translate "Set up your page" %}</h2><span class="muted small">{{ progress }}%</span></div>
     <div class="progress" role="progressbar" aria-valuenow="{{ progress }}" aria-valuemin="0" aria-valuemax="100"><span style="width: {{ progress }}%"></span></div>

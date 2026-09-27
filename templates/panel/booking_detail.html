@@ -6,10 +6,11 @@
   <div>
     <a class="back-link" href="{% url 'panel:bookings' slug=camping.slug %}">{% icon "arrow-left" %} {% translate "Booking requests" %}</a>
     <h1>{{ booking.name }} {% include "panel/_status_badge.html" with status=booking.status label=booking.get_status_display %}</h1>
-    <p class="muted">{% blocktranslate with reference=booking.reference date=booking.created_at|date:"DATETIME_FORMAT" %}Request {{ reference }} received on {{ date }}{% endblocktranslate %}</p>
+    <p class="muted">{% if booking.source == "manual" %}{% blocktranslate with reference=booking.reference date=booking.created_at|date:"DATETIME_FORMAT" %}Booking {{ reference }} added in the panel on {{ date }}{% endblocktranslate %}{% else %}{% blocktranslate with reference=booking.reference date=booking.created_at|date:"DATETIME_FORMAT" %}Request {{ reference }} received on {{ date }}{% endblocktranslate %}{% endif %}</p>
   </div>
   <div class="page-header__actions">
-    <a class="btn btn-outline" href="mailto:{{ booking.email }}?subject={{ camping.name|urlencode }}%20·%20{{ booking.reference }}">{% icon "mail" %}<span>{% translate "Write to the guest" %}</span></a>
+    <a class="btn btn-outline" href="{% url 'panel:booking_edit' slug=camping.slug pk=booking.pk %}">{% icon "pencil" %}<span>{% translate "Edit stay" %}</span></a>
+    {% if booking.email %}<a class="btn btn-outline" href="mailto:{{ booking.email }}?subject={{ camping.name|urlencode }}%20·%20{{ booking.reference }}">{% icon "mail" %}<span>{% translate "Write to the guest" %}</span></a>{% endif %}
     {% if booking.phone %}<a class="btn btn-ghost" href="tel:{{ booking.phone|cut:' ' }}">{% icon "phone" %}<span>{{ booking.phone }}</span></a>{% endif %}
   </div>
 </div>
@@ -19,7 +20,7 @@
     <section class="card card-pad">
       <h2>{% translate "Stay" %}</h2>
       <dl class="data-list">
-        <div><dt>{% translate "Accommodation" %}</dt><dd>{{ booking.accommodation_name|default:"—" }}</dd></div>
+        <div><dt>{% translate "Accommodation" %}</dt><dd>{{ booking.accommodation_name|default:"—" }}{% if booking.units > 1 %} × {{ booking.units }}{% endif %}</dd></div>
         <div><dt>{% translate "Arrival" %}</dt><dd>{{ booking.arrival|date:"l j F Y" }}</dd></div>
         <div><dt>{% translate "Departure" %}</dt><dd>{{ booking.departure|date:"l j F Y" }}</dd></div>
         <div><dt>{% translate "Nights" %}</dt><dd>{{ booking.nights }}</dd></div>
@@ -37,8 +38,9 @@
 
     {% if quote.lines %}
     <section class="card card-pad">
-      <h2>{% translate "Price estimate sent to the guest" %}</h2>
+      <h2>{% if booking.source == "manual" %}{% translate "Price" %}{% else %}{% translate "Price estimate sent to the guest" %}{% endif %}</h2>
       {% include "public/_quote.html" %}
+      {% if booking.estimated_total is not None and quote.total and booking.estimated_total|stringformat:".2f" != quote.total %}<p class="quote-total"><span>{% translate "Agreed price" %}</span><strong>{{ booking.estimated_total|money:camping.currency }}</strong></p>{% endif %}
     </section>
     {% endif %}
 
@@ -46,7 +48,7 @@
       <h2>{% translate "Guest" %}</h2>
       <dl class="data-list">
         <div><dt>{% translate "Name" %}</dt><dd>{{ booking.name }}</dd></div>
-        <div><dt>{% translate "E-mail" %}</dt><dd><a href="mailto:{{ booking.email }}">{{ booking.email }}</a></dd></div>
+        <div><dt>{% translate "E-mail" %}</dt><dd>{% if booking.email %}<a href="mailto:{{ booking.email }}">{{ booking.email }}</a>{% else %}—{% endif %}</dd></div>
         {% if booking.phone %}<div><dt>{% translate "Phone" %}</dt><dd><a href="tel:{{ booking.phone|cut:' ' }}">{{ booking.phone }}</a></dd></div>{% endif %}
         {% if booking.country %}<div><dt>{% translate "Country" %}</dt><dd>{{ booking.country }}</dd></div>{% endif %}
         <div><dt>{% translate "Language" %}</dt><dd>{{ booking.language|lang_name }}</dd></div>

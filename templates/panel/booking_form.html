@@ -1,0 +1,61 @@
+{% extends "panel/base.html" %}
+{% load i18n core_tags %}
+{% block page_title %}{% if booking %}{% translate "Edit stay" %}{% else %}{% translate "New booking" %}{% endif %}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    {% if booking %}
+      <a class="back-link" href="{% url 'panel:booking_detail' slug=camping.slug pk=booking.pk %}">{% icon "arrow-left" %} {{ booking.reference }} · {{ booking.name }}</a>
+      <h1>{% translate "Edit stay" %}</h1>
+    {% else %}
+      <a class="back-link" href="{% url 'panel:bookings' slug=camping.slug %}">{% icon "arrow-left" %} {% translate "Booking requests" %}</a>
+      <h1>{% translate "New booking" %}</h1>
+      <p class="muted">{% translate "Add stays booked by phone, e-mail or at the reception so that availability is always up to date." %}</p>
+    {% endif %}
+  </div>
+</div>
+<form method="post" novalidate class="detail-grid">
+  {% csrf_token %}
+  <div class="form-stack">
+    {% include "partials/form_errors.html" %}
+    <section class="card card-pad">
+      <h2>{% icon "tent" %} {% translate "Stay" %}</h2>
+      <div class="form-grid">
+        {% include "partials/field.html" with field=form.accommodation %}
+        {% include "partials/field.html" with field=form.units %}
+        {% include "partials/field.html" with field=form.arrival %}
+        {% include "partials/field.html" with field=form.departure %}
+      </div>
+      <div class="form-grid form-grid--3">
+        {% include "partials/field.html" with field=form.adults %}
+        {% include "partials/field.html" with field=form.children %}
+        {% include "partials/field.html" with field=form.pets %}
+      </div>
+      {% if form.extras.field.queryset %}{% include "partials/field.html" with field=form.extras %}{% endif %}
+    </section>
+    <section class="card card-pad">
+      <h2>{% icon "user" %} {% translate "Guest" %}</h2>
+      <div class="form-grid">
+        {% include "partials/field.html" with field=form.name %}
+        {% include "partials/field.html" with field=form.email %}
+        {% include "partials/field.html" with field=form.phone %}
+        {% include "partials/field.html" with field=form.country %}
+        {% include "partials/field.html" with field=form.language %}
+      </div>
+    </section>
+  </div>
+  <aside class="form-stack">
+    <section class="card card-pad">
+      <h2>{% icon "euro" %} {% translate "Price" %}</h2>
+      {% if quote %}{% include "public/_quote.html" %}{% else %}<p class="muted small">{% translate "The price is calculated from your price table when you save." %}</p>{% endif %}
+      {% include "partials/field.html" with field=form.total_override %}
+    </section>
+    <section class="card card-pad">
+      {% include "partials/field.html" with field=form.status %}
+      {% include "partials/field.html" with field=form.internal_notes %}
+      {% if form.overbooking or form.ignore_availability.value %}{% include "partials/field.html" with field=form.ignore_availability %}{% endif %}
+      <button class="btn btn-primary btn-block" type="submit">{% icon "check" %}<span>{% translate "Save booking" %}</span></button>
+    </section>
+  </aside>
+</form>
+{% endblock %}

@@ -42,6 +42,10 @@ def people_label(n):
     return ngettext("%(count)s person", "%(count)s people", n) % {"count": n}
 
 
+def units_label(n):
+    return ngettext("%(count)s unit", "%(count)s units", n) % {"count": n}
+
+
 @dataclass
 class QuoteLine:
     label: str
@@ -98,7 +102,7 @@ def minimum_nights(camping, accommodation, arrival, seasons):
 
 
 def occupied_units(accommodation, arrival, departure, exclude_pk=None):
-    """Highest number of units taken by confirmed bookings on any night."""
+    """Highest number of units taken by confirmed stays on any night."""
     from bookings.models import BookingRequest
 
     bookings = BookingRequest.objects.filter(
@@ -109,10 +113,10 @@ def occupied_units(accommodation, arrival, departure, exclude_pk=None):
     )
     if exclude_pk:
         bookings = bookings.exclude(pk=exclude_pk)
-    ranges = list(bookings.values_list("arrival", "departure"))
+    ranges = list(bookings.values_list("arrival", "departure", "units"))
     peak = 0
     for night in nights_between(arrival, departure):
-        peak = max(peak, sum(1 for start, end in ranges if start <= night < end))
+        peak = max(peak, sum(units for start, end, units in ranges if start <= night < end))
     return peak
 
 
@@ -169,16 +173,27 @@ def build_quote(
     check_availability=True,
     exclude_booking_pk=None,
     allow_past=False,
+    units=1,
+    allow_inactive=False,
 ):
-    """Validate a stay and compute its estimated price."""
+    """Validate a stay and compute its estimated price.
+
+    ``units`` is the number of accommodation units booked (e.g. two pitches);
+    the accommodation price and its capacity are multiplied by it.
+    ``allow_inactive`` lets the panel price accommodation types hidden from
+    the website.
+    """
     quote = Quote(currency=camping.currency)
     policy = camping.get_policy()
     seasons = list(camping.seasons.all())
     errors = quote.errors
     adults, children, pets = int(adults or 0), int(children or 0), int(pets or 0)
+    units = max(int(units or 1), 1)
 
     valid_accommodation = (
-        accommodation is not None and accommodation.camping_id == camping.pk and accommodation.is_active
+        accommodation is not None
+        and accommodation.camping_id == camping.pk
+        and (accommodation.is_active or allow_inactive)
     )
     if not valid_accommodation:
         errors.append(_("Please choose an accommodation."))
@@ -217,18 +232,19 @@ def build_quote(
     if not valid_accommodation:
         return quote
 
-    if adults + children > accommodation.max_guests:
+    capacity = accommodation.max_guests * units
+    if adults + children > capacity:
         errors.append(
             ngettext(
                 "This accommodation is for up to %(count)s guest.",
                 "This accommodation is for up to %(count)s guests.",
-                accommodation.max_guests,
+                capacity,
             )
-            % {"count": accommodation.max_guests}
+            % {"count": capacity}
         )
 
     if check_availability and not errors:
-        if available_units(accommodation, arrival, departure, exclude_booking_pk) < 1:
+        if available_units(accommodation, arrival, departure, exclude_booking_pk) < units:
             errors.append(_("Sorry, this accommodation is fully booked for these dates."))
 
     stay_nights = list(nights_between(arrival, departure))
@@ -247,8 +263,10 @@ def build_quote(
             amount = price * count * persons
             detail = f"{nights_label(count)} × {people_label(persons)} × {format_money(price, camping.currency)}"
         else:
-            amount = price * count
+            amount = price * count * units
             detail = f"{nights_label(count)} × {format_money(price, camping.currency)}"
+            if units > 1:
+                detail = f"{units_label(units)} × {detail}"
         if season is not None and len(groups) > 1:
             detail = f"{detail} · {translate_value(season.name)}"
         quote.lines.append(QuoteLine(name, detail, amount.quantize(CENT, ROUND_HALF_UP), "accommodation"))

@@ -4,16 +4,29 @@
 {% block content %}
 <div class="page-header">
   <div><h1>{% translate "Booking requests" %}</h1><p class="muted">{% translate "Requests sent from your page. Confirm or decline them and the guest receives an e-mail." %}</p></div>
-  <form class="search-inline" method="get">
-    <input type="hidden" name="status" value="{{ status }}">
-    <label class="sr-only" for="booking-search">{% translate "Search" %}</label>
-    <input id="booking-search" type="search" name="q" value="{{ q }}" placeholder="{% translate 'Name, e-mail or reference' %}">
-    <button class="btn btn-outline" type="submit">{% icon "search" %}<span class="sr-only">{% translate "Search" %}</span></button>
-  </form>
+  <div class="page-header__actions">
+    <a class="btn btn-outline" href="{% url 'panel:booking_export' slug=camping.slug %}?{{ export_query }}">{% icon "download" %}<span>{% translate "Export CSV" %}</span></a>
+    <a class="btn btn-primary" href="{% url 'panel:booking_create' slug=camping.slug %}">{% icon "plus" %}<span>{% translate "New booking" %}</span></a>
+  </div>
 </div>
+<form class="search-inline" method="get">
+  <input type="hidden" name="status" value="{{ status }}">
+  {% if filter_date %}<input type="hidden" name="date" value="{{ filter_date|date:'Y-m-d' }}">{% endif %}
+  {% if filter_accommodation %}<input type="hidden" name="accommodation" value="{{ filter_accommodation.pk }}">{% endif %}
+  <label class="sr-only" for="booking-search">{% translate "Search" %}</label>
+  <input id="booking-search" type="search" name="q" value="{{ q }}" placeholder="{% translate 'Name, e-mail, phone or reference' %}">
+  <button class="btn btn-outline" type="submit">{% icon "search" %}<span class="sr-only">{% translate "Search" %}</span></button>
+</form>
+{% if filter_date or filter_accommodation %}
+<div class="chips filter-chips">
+  {% if filter_date %}<span class="chip">{% icon "calendar" %}<span>{% blocktranslate with date=filter_date|date:"DATE_FORMAT" %}Staying on {{ date }}{% endblocktranslate %}</span></span>{% endif %}
+  {% if filter_accommodation %}<span class="chip">{% icon filter_accommodation.kind_icon %}<span>{{ filter_accommodation.display_name }}</span></span>{% endif %}
+  <a class="chip" href="?status={{ status }}">{% icon "x" %}<span>{% translate "Clear filters" %}</span></a>
+</div>
+{% endif %}
 <nav class="tabs" aria-label="{% translate 'Filter by status' %}">
   {% for key, label, count in tabs %}
-    <a class="tab{% if key == status %} is-active{% endif %}" href="?status={{ key }}{% if q %}&amp;q={{ q|urlencode }}{% endif %}"{% if key == status %} aria-current="page"{% endif %}>{{ label }}{% if count %} <span class="count">{{ count }}</span>{% endif %}</a>
+    <a class="tab{% if key == status %} is-active{% endif %}" href="?status={{ key }}{% if q %}&amp;q={{ q|urlencode }}{% endif %}{% if filter_date %}&amp;date={{ filter_date|date:'Y-m-d' }}{% endif %}{% if filter_accommodation %}&amp;accommodation={{ filter_accommodation.pk }}{% endif %}"{% if key == status %} aria-current="page"{% endif %}>{{ label }}{% if count %} <span class="count">{{ count }}</span>{% endif %}</a>
   {% endfor %}
 </nav>
 {% if bookings %}
@@ -23,9 +36,9 @@
     <tbody>
       {% for booking in bookings %}
       <tr data-href="{% url 'panel:booking_detail' slug=camping.slug pk=booking.pk %}">
-        <td><a href="{% url 'panel:booking_detail' slug=camping.slug pk=booking.pk %}"><strong>{{ booking.name }}</strong></a><small class="muted d-block">{{ booking.reference }}</small></td>
+        <td><a href="{% url 'panel:booking_detail' slug=camping.slug pk=booking.pk %}"><strong>{{ booking.name }}</strong></a><small class="muted d-block">{{ booking.reference }}{% if booking.source == "manual" %} · {% translate "panel" %}{% endif %}</small></td>
         <td class="nowrap">{{ booking.arrival|date:"j M" }} → {{ booking.departure|date:"j M Y" }}<small class="muted d-block">{% blocktranslate count counter=booking.nights %}{{ counter }} night{% plural %}{{ counter }} nights{% endblocktranslate %}</small></td>
-        <td>{{ booking.accommodation_name }}</td>
+        <td>{{ booking.accommodation_name }}{% if booking.units > 1 %} <span class="badge badge--muted">× {{ booking.units }}</span>{% endif %}</td>
         <td class="nowrap">{% icon "users" %} {{ booking.guests }}{% if booking.pets %} · {% icon "dog" %} {{ booking.pets }}{% endif %}</td>
         <td class="nowrap">{{ booking.estimated_total|money:camping.currency }}</td>
         <td>{% include "panel/_status_badge.html" with status=booking.status label=booking.get_status_display %}</td>
@@ -37,6 +50,6 @@
 </div>
 {% include "partials/pagination.html" %}
 {% else %}
-<div class="card empty-state">{% icon "inbox" "icon-xl" %}<p>{% if q %}{% translate "No requests match your search." %}{% else %}{% translate "There are no requests here." %}{% endif %}</p></div>
+<div class="card empty-state">{% icon "inbox" "icon-xl" %}<p>{% if q or filter_date or filter_accommodation %}{% translate "No requests match your search." %}{% else %}{% translate "There are no requests here." %}{% endif %}</p></div>
 {% endif %}
 {% endblock %}

@@ -85,6 +85,8 @@ def send_new_booking_emails(request, booking):
 
 
 def send_status_email(booking):
+    if not booking.email:
+        return False
     camping = booking.camping
     context = {
         "booking": booking,

@@ -53,7 +53,11 @@ urlpatterns = [
     path("c/<slug:slug>/prices/", offer.prices, name="prices"),
     path("c/<slug:slug>/policies/", offer.policies, name="policies"),
     path("c/<slug:slug>/bookings/", bookings.booking_list, name="bookings"),
+    path("c/<slug:slug>/bookings/new/", bookings.booking_create, name="booking_create"),
+    path("c/<slug:slug>/bookings/export/", bookings.booking_export, name="booking_export"),
     path("c/<slug:slug>/bookings/<int:pk>/", bookings.booking_detail, name="booking_detail"),
+    path("c/<slug:slug>/bookings/<int:pk>/edit/", bookings.booking_edit, name="booking_edit"),
+    path("c/<slug:slug>/calendar/", bookings.booking_calendar, name="calendar"),
     path("c/<slug:slug>/team/", team.team, name="team"),
     path("c/<slug:slug>/team/<int:pk>/remove/", team.team_remove, name="team_remove"),
 ]

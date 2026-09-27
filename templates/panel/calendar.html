@@ -1,0 +1,63 @@
+{% extends "panel/base.html" %}
+{% load i18n core_tags %}
+{% block page_title %}{% translate "Occupancy calendar" %}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>{% translate "Occupancy calendar" %}</h1>
+    <p class="muted">{% translate "Units taken by confirmed stays each night. Click a day to see its bookings or to add one." %}</p>
+  </div>
+  <div class="page-header__actions">
+    <a class="btn btn-primary" href="{% url 'panel:booking_create' slug=camping.slug %}">{% icon "plus" %}<span>{% translate "New booking" %}</span></a>
+  </div>
+</div>
+<div class="calendar-toolbar card">
+  <a class="icon-button" href="?month={{ previous_month }}" aria-label="{% translate 'Previous month' %}">{% icon "chevron-left" %}</a>
+  <strong class="calendar-toolbar__month">{{ month_label|capfirst }}</strong>
+  <a class="icon-button" href="?month={{ next_month }}" aria-label="{% translate 'Next month' %}">{% icon "chevron-right" %}</a>
+  <a class="btn btn-ghost btn-sm" href="?month={{ this_month }}">{% translate "Today" %}</a>
+  <ul class="calendar-legend" role="list">
+    <li><span class="cal-swatch cal-free"></span>{% translate "Free" %}</li>
+    <li><span class="cal-swatch cal-partial"></span>{% translate "Partly booked" %}</li>
+    <li><span class="cal-swatch cal-full"></span>{% translate "Full" %}</li>
+    <li><span class="cal-swatch cal-over"></span>{% translate "Overbooked" %}</li>
+    <li><span class="cal-dot"></span>{% translate "Pending request" %}</li>
+  </ul>
+</div>
+{% if rows %}
+<div class="table-scroll calendar-scroll">
+  <table class="occupancy">
+    <thead>
+      <tr>
+        <th scope="col" class="occupancy__corner">{% translate "Accommodation" %}</th>
+        {% for day in days %}<th scope="col" class="{% if day.weekday >= 5 %}is-weekend{% endif %}{% if day == today %} is-today{% endif %}"><small>{{ day|date:"D"|slice:":2" }}</small>{{ day.day }}</th>{% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+      <tr{% if not row.accommodation.is_active %} class="is-inactive"{% endif %}>
+        <th scope="row"><span class="occupancy__name">{{ row.accommodation.display_name }}</span><small class="muted">{% blocktranslate count counter=row.accommodation.units %}{{ counter }} unit{% plural %}{{ counter }} units{% endblocktranslate %}</small></th>
+        {% for cell in row.cells %}
+          <td class="cal-{{ cell.level }}{% if cell.day.weekday >= 5 %} is-weekend{% endif %}{% if cell.day == today %} is-today{% endif %}">
+            {% if cell.used or cell.pending %}
+              <a href="{% url 'panel:bookings' slug=camping.slug %}?status=all&amp;date={{ cell.day|date:'Y-m-d' }}&amp;accommodation={{ row.accommodation.pk }}" title="{{ cell.day|date:'DATE_FORMAT' }} · {{ cell.used }}/{{ row.accommodation.units }} · {{ cell.names }}">{% if cell.used %}{{ cell.used }}{% endif %}{% if cell.pending %}<span class="cal-dot" aria-label="{% translate 'Pending request' %}"></span>{% endif %}</a>
+            {% else %}
+              <a href="{% url 'panel:booking_create' slug=camping.slug %}?accommodation={{ row.accommodation.pk }}&amp;arrival={{ cell.day|date:'Y-m-d' }}" title="{% translate 'New booking' %} · {{ cell.day|date:'DATE_FORMAT' }}" aria-label="{% translate 'New booking' %} · {{ cell.day|date:'DATE_FORMAT' }}"></a>
+            {% endif %}
+          </td>
+        {% endfor %}
+      </tr>
+      {% endfor %}
+    </tbody>
+    <tfoot>
+      <tr>
+        <th scope="row">{% translate "Occupancy" %}</th>
+        {% for day, percent in day_totals %}<td class="occupancy__total{% if day == today %} is-today{% endif %}">{{ percent }}%</td>{% endfor %}
+      </tr>
+    </tfoot>
+  </table>
+</div>
+{% else %}
+<div class="card empty-state">{% icon "calendar-days" "icon-xl" %}<p>{% translate "Create your accommodation types to see their occupancy here." %}</p></div>
+{% endif %}
+{% endblock %}

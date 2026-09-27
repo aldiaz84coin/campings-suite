@@ -5,6 +5,7 @@ with gettext and an icon from ``static/icons/sprite.svg``.
 """
 
 from django.utils.translation import gettext_lazy as _
+from django.utils.translation import pgettext_lazy
 
 # --- Facilities (instalaciones) -----------------------------------------------
 
@@ -71,7 +72,7 @@ CUSTOM_FACILITY_ICONS = [
     ("sparkles", _("Generic")),
     ("tent", _("Tent")),
     ("trees", _("Nature")),
-    ("sun", _("Sun")),
+    ("sun", pgettext_lazy("icon", "Sun")),
     ("utensils", _("Food")),
     ("music", _("Music")),
     ("ticket", _("Activities")),
