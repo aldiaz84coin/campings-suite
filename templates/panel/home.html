@@ -1,0 +1,26 @@
+{% extends "panel/base.html" %}
+{% load i18n core_tags %}
+{% block page_title %}{% translate "My campings" %}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><h1>{% translate "My campings" %}</h1><p class="muted">{% translate "Choose the camping you want to manage." %}</p></div>
+  {% if user.is_superuser %}<a class="btn btn-primary" href="{% url 'panel:platform_new' %}">{% icon "plus" %}<span>{% translate "New camping" %}</span></a>{% endif %}
+</div>
+{% if campings %}
+<div class="tile-grid">
+  {% for item in campings %}
+  <a class="tile card" href="{% url 'panel:dashboard' slug=item.slug %}">
+    <span class="tile__avatar">{% if item.logo %}<img src="{{ item.logo.url }}" alt="">{% else %}{{ item.name|slice:":1"|upper }}{% endif %}</span>
+    <span class="tile__text"><strong>{{ item.name }}</strong><small class="muted">{{ item.location_label|default:item.slug }}</small></span>
+    {% if item.is_public %}<span class="badge badge--success">{% translate "Public" %}</span>{% else %}<span class="badge badge--muted">{% translate "Draft" %}</span>{% endif %}
+  </a>
+  {% endfor %}
+</div>
+{% else %}
+<div class="card empty-state">
+  {% icon "tent" "icon-xl" %}
+  <p>{% translate "You don't manage any camping yet." %}</p>
+  {% if SIGNUP_ENABLED %}<p class="small">{% translate "Ask the owner of your camping to invite you from the Team section." %}</p>{% endif %}
+</div>
+{% endif %}
+{% endblock %}

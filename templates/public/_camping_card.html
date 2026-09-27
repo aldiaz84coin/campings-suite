@@ -1,0 +1,23 @@
+{% load i18n core_tags %}{% with cover=camping.cover_photo price=camping.starting_price tagline=camping.tagline|tr %}
+<article class="camping-card">
+  <a class="camping-card__media" href="{% url 'public:camping_detail' slug=camping.slug %}" tabindex="-1" aria-hidden="true">
+    {% if cover %}<img src="{{ cover.thumbnail.url }}" alt="" loading="lazy" decoding="async">{% else %}<span class="media-placeholder">{% icon "tent" %}</span>{% endif %}
+    {% if camping.stars %}<span class="camping-card__stars" aria-hidden="true">{% for star in camping.stars|times %}★{% endfor %}</span>{% endif %}
+  </a>
+  <div class="camping-card__body">
+    <h3 class="camping-card__title"><a href="{% url 'public:camping_detail' slug=camping.slug %}">{{ camping.name }}</a></h3>
+    {% if camping.location_label %}<p class="camping-card__location">{% icon "map-pin" %}<span>{{ camping.location_label }}</span></p>{% endif %}
+    {% if tagline %}<p class="camping-card__tagline">{{ tagline }}</p>{% endif %}
+    {% with facilities=camping.facilities.all %}{% if facilities %}
+    <ul class="icon-row" role="list">
+      {% for facility in facilities|slice:":6" %}<li title="{{ facility.display_name }}">{% icon facility.icon_name label=facility.display_name %}</li>{% endfor %}
+      {% if facilities|length > 6 %}<li class="icon-row__more">+{{ facilities|length|add:"-6" }}</li>{% endif %}
+    </ul>
+    {% endif %}{% endwith %}
+    <div class="camping-card__footer">
+      {% if price %}<p class="camping-card__price">{% blocktranslate with price=price|money:camping.currency %}from <strong>{{ price }}</strong> / night{% endblocktranslate %}</p>{% else %}<span></span>{% endif %}
+      <a class="btn btn-sm btn-outline" href="{% url 'public:camping_detail' slug=camping.slug %}">{% translate "View" %}</a>
+    </div>
+  </div>
+</article>
+{% endwith %}

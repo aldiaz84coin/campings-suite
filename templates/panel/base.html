@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% load i18n static core_tags %}
+{% block title %}{% block page_title %}{% translate "Panel" %}{% endblock %} · {{ PLATFORM_NAME }}{% endblock %}
+{% block styles %}<link rel="stylesheet" href="{% static 'css/panel.css' %}">{% endblock %}
+{% block body_class %}panel{% endblock %}
+{% block body %}
+<div class="panel-layout">
+  <aside class="sidebar" id="sidebar" data-sidebar>
+    <div class="sidebar__top">
+      <a class="brand" href="{% url 'panel:home' %}"><span class="brand__mark">{% icon "tent" %}</span><span class="brand__name">{{ PLATFORM_NAME }}</span></a>
+      <button class="icon-button sidebar__close" type="button" data-sidebar-close aria-label="{% translate 'Close menu' %}">{% icon "x" %}</button>
+    </div>
+    {% if camping %}
+      <details class="camping-switcher" data-dropdown>
+        <summary>
+          <span class="camping-switcher__avatar">{% if camping.logo %}<img src="{{ camping.logo.url }}" alt="">{% else %}{{ camping.name|slice:":1"|upper }}{% endif %}</span>
+          <span class="camping-switcher__text">
+            <strong>{{ camping.name }}</strong>
+            <small>{% if camping.is_public %}<span class="dot dot--success"></span>{% translate "Public" %}{% elif camping.is_published %}<span class="dot dot--warning"></span>{% translate "Waiting for approval" %}{% else %}<span class="dot"></span>{% translate "Draft" %}{% endif %}</small>
+          </span>
+          {% if my_campings|length > 1 or user.is_superuser %}{% icon "chevron-down" "icon-xs" %}{% endif %}
+        </summary>
+        {% if my_campings|length > 1 or user.is_superuser %}
+        <ul class="dropdown-menu" role="list">
+          {% for item in my_campings %}<li><a href="{% url 'panel:dashboard' slug=item.slug %}"{% if item.pk == camping.pk %} aria-current="true"{% endif %}>{{ item.name }}</a></li>{% endfor %}
+          {% if user.is_superuser %}<li><a href="{% url 'panel:platform' %}">{% icon "shield-check" %} {% translate "All campings" %}</a></li>{% endif %}
+        </ul>
+        {% endif %}
+      </details>
+      <nav class="sidebar-nav" aria-label="{% translate 'Panel' %}">
+        {% include "panel/_nav_link.html" with name="dashboard" icon="layout-dashboard" label=_("Dashboard") %}
+        <p class="sidebar-nav__heading">{% translate "Your page" %}</p>
+        {% include "panel/_nav_link.html" with name="profile" icon="pencil" label=_("Description & contact") %}
+        {% include "panel/_nav_link.html" with name="location" icon="map-pin" label=_("Location & season") %}
+        {% include "panel/_nav_link.html" with name="photos" icon="images" label=_("Photos") %}
+        {% include "panel/_nav_link.html" with name="appearance" icon="palette" label=_("Appearance") %}
+        <p class="sidebar-nav__heading">{% translate "Your offer" %}</p>
+        {% include "panel/_nav_link.html" with name="accommodations" icon="tent" label=_("Accommodation") %}
+        {% include "panel/_nav_link.html" with name="facilities" icon="waves-ladder" label=_("Facilities") %}
+        {% include "panel/_nav_link.html" with name="services" icon="tag" label=_("Services & extras") %}
+        {% include "panel/_nav_link.html" with name="seasons" icon="calendar-range" label=_("Seasons") %}
+        {% include "panel/_nav_link.html" with name="prices" icon="euro" label=_("Price table") %}
+        {% include "panel/_nav_link.html" with name="policies" icon="file-text" label=_("Booking policies") %}
+        <p class="sidebar-nav__heading">{% translate "Bookings" %}</p>
+        {% include "panel/_nav_link.html" with name="bookings" icon="inbox" label=_("Booking requests") badge=pending_count %}
+        <p class="sidebar-nav__heading">{% translate "Administration" %}</p>
+        {% if is_owner %}{% include "panel/_nav_link.html" with name="settings" icon="settings" label=_("Settings") %}{% endif %}
+        {% include "panel/_nav_link.html" with name="team" icon="users" label=_("Team") %}
+      </nav>
+      <a class="sidebar__public" href="{% url 'public:camping_detail' slug=camping.slug %}" target="_blank" rel="noopener">{% icon "external-link" %}<span>{% if camping.is_public %}{% translate "View public page" %}{% else %}{% translate "Preview page" %}{% endif %}</span></a>
+    {% else %}
+      <nav class="sidebar-nav" aria-label="{% translate 'Panel' %}">
+        <a class="sidebar-nav__link{% if section is None %} is-active{% endif %}" href="{% url 'panel:home' %}">{% icon "tent" %}<span>{% translate "My campings" %}</span></a>
+        {% if user.is_superuser %}<a class="sidebar-nav__link{% if section == 'platform' %} is-active{% endif %}" href="{% url 'panel:platform' %}">{% icon "shield-check" %}<span>{% translate "Platform" %}</span></a>{% endif %}
+        <a class="sidebar-nav__link{% if section == 'account' %} is-active{% endif %}" href="{% url 'panel:account' %}">{% icon "user" %}<span>{% translate "My account" %}</span></a>
+      </nav>
+    {% endif %}
+  </aside>
+  <div class="sidebar-backdrop" data-sidebar-close></div>
+  <div class="panel-main">
+    <header class="topbar">
+      <button class="icon-button topbar__menu" type="button" data-sidebar-open aria-controls="sidebar" aria-label="{% translate 'Open menu' %}">{% icon "menu" %}</button>
+      <div class="topbar__spacer"></div>
+      {% include "partials/language_switcher.html" %}
+      <details class="user-menu" data-dropdown>
+        <summary><span class="avatar">{{ user.display_name|slice:":1"|upper }}</span><span class="hide-sm">{{ user.display_name }}</span>{% icon "chevron-down" "icon-xs" %}</summary>
+        <ul class="dropdown-menu" role="list">
+          <li><a href="{% url 'panel:home' %}">{% icon "tent" %} {% translate "My campings" %}</a></li>
+          <li><a href="{% url 'panel:account' %}">{% icon "user" %} {% translate "My account" %}</a></li>
+          {% if user.is_superuser %}
+            <li><a href="{% url 'panel:platform' %}">{% icon "shield-check" %} {% translate "Platform" %}</a></li>
+            <li><a href="{% url 'admin:index' %}">{% icon "settings" %} {% translate "Superadmin" %}</a></li>
+          {% endif %}
+          <li><form method="post" action="{% url 'panel:logout' %}">{% csrf_token %}<button type="submit">{% icon "log-out" %} {% translate "Sign out" %}</button></form></li>
+        </ul>
+      </details>
+    </header>
+    <main id="main" class="panel-content">
+      {% include "partials/messages.html" %}
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}<script src="{% static 'js/panel.js' %}" defer></script>{% endblock %}

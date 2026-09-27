@@ -1,0 +1,16 @@
+<div class="i18n-field{% if widget.textarea %} i18n-field--textarea{% endif %}" data-i18n-field>
+  <div class="i18n-tabs" role="tablist">
+    {% for sub in widget.subwidgets %}
+      <button type="button" class="i18n-tab" data-lang="{{ sub.lang_code }}" role="tab" title="{{ sub.lang_name }}">
+        <span>{{ sub.lang_code|upper }}</span>{% if sub.is_required_language %}<span class="i18n-req" aria-hidden="true">*</span>{% endif %}
+        <span class="i18n-dot{% if sub.value %} is-filled{% endif %}" aria-hidden="true"></span>
+      </button>
+    {% endfor %}
+  </div>
+  {% for sub in widget.subwidgets %}
+    <div class="i18n-pane" data-lang="{{ sub.lang_code }}" role="tabpanel">
+      <span class="i18n-pane-label">{{ sub.lang_name }}</span>
+      {% include sub.template_name with widget=sub %}
+    </div>
+  {% endfor %}
+</div>

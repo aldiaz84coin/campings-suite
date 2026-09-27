@@ -1,0 +1,54 @@
+{% extends "panel/base.html" %}
+{% load i18n core_tags %}
+{% block page_title %}{% translate "Booking policies" %}{% endblock %}
+{% block content %}
+<div class="page-header"><div><h1>{% translate "Booking policies" %}</h1><p class="muted">{% translate "Clear conditions avoid misunderstandings. They are shown on your page and during the booking request." %}</p></div></div>
+<form method="post" novalidate class="form-stack">
+  {% csrf_token %}
+  {% include "partials/form_errors.html" %}
+  <section class="card card-pad">
+    <h2>{% icon "clock" %} {% translate "Arrival and departure" %}</h2>
+    <div class="form-grid form-grid--3">
+      {% include "partials/field.html" with field=form.check_in_from %}
+      {% include "partials/field.html" with field=form.check_in_until %}
+      {% include "partials/field.html" with field=form.check_out_until %}
+      {% include "partials/field.html" with field=form.quiet_hours_from %}
+      {% include "partials/field.html" with field=form.quiet_hours_until %}
+    </div>
+  </section>
+  <section class="card card-pad">
+    <h2>{% icon "moon" %} {% translate "Stay" %}</h2>
+    <div class="form-grid form-grid--3">
+      {% include "partials/field.html" with field=form.min_nights %}
+      {% include "partials/field.html" with field=form.max_nights %}
+      {% include "partials/field.html" with field=form.min_age %}
+    </div>
+  </section>
+  {% include "panel/_lang_hint.html" %}
+  <section class="card card-pad">
+    <h2>{% icon "wallet" %} {% translate "Deposit and payment" %}</h2>
+    {% include "partials/field.html" with field=form.deposit_percent %}
+    <div class="field"><span class="field__label">{{ form.payment_methods.label }}</span><div class="check-grid">{% for option in form.payment_methods %}<label class="check">{{ option.tag }} <span>{{ option.choice_label }}</span></label>{% endfor %}</div></div>
+    {% include "partials/field.html" with field=form.payment_text %}
+  </section>
+  <section class="card card-pad">
+    <h2>{% icon "calendar-range" %} {% translate "Cancellation" %}</h2>
+    {% include "partials/field.html" with field=form.refundable %}
+    <div class="form-grid">
+      {% include "partials/field.html" with field=form.free_cancellation_days %}
+      {% include "partials/field.html" with field=form.cancellation_fee_percent %}
+    </div>
+    {% include "partials/field.html" with field=form.cancellation_text %}
+  </section>
+  <section class="card card-pad">
+    <h2>{% icon "dog" %} {% translate "Pets" %}</h2>
+    {% include "partials/field.html" with field=form.pets_allowed %}
+    {% include "partials/field.html" with field=form.pets_text %}
+  </section>
+  <section class="card card-pad">
+    <h2>{% icon "scroll-text" %} {% translate "Camping rules" %}</h2>
+    {% include "partials/field.html" with field=form.rules_text %}
+  </section>
+  {% include "panel/_form_actions.html" %}
+</form>
+{% endblock %}

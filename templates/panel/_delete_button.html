@@ -1,0 +1,1 @@
+{% load i18n core_tags %}<form method="post" action="{{ action }}" class="inline-form">{% csrf_token %}<button class="btn btn-danger-outline btn-sm" type="submit" data-confirm="{{ confirm|default:_('Are you sure? This cannot be undone.') }}">{% icon "trash-2" %}<span>{% translate "Delete" %}</span></button></form>

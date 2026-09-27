@@ -1,0 +1,38 @@
+{% extends "public/camping_base.html" %}
+{% load i18n core_tags %}
+{% block title %}{% translate "Request sent" %} · {{ camping.name }}{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container narrow">
+    <div class="card done-card">
+      <span class="done-card__icon">{% icon "circle-check" "icon-xl" %}</span>
+      <h1>{% blocktranslate with name=booking.name %}Thank you, {{ name }}!{% endblocktranslate %}</h1>
+      <p class="lead">{% blocktranslate with camping=camping.name %}Your booking request has been sent to {{ camping }}.{% endblocktranslate %}</p>
+      <p>{% blocktranslate with email=booking.email %}We have sent a copy to <strong>{{ email }}</strong>. The camping will check availability and reply to you soon.{% endblocktranslate %}</p>
+      <p class="reference">{% translate "Reference" %} <strong>{{ booking.reference }}</strong></p>
+
+      <dl class="summary-list">
+        <div><dt>{% translate "Accommodation" %}</dt><dd>{{ accommodation_name }}</dd></div>
+        <div><dt>{% translate "Dates" %}</dt><dd>{{ booking.arrival|date:"DATE_FORMAT" }} → {{ booking.departure|date:"DATE_FORMAT" }} ({% blocktranslate count counter=booking.nights %}{{ counter }} night{% plural %}{{ counter }} nights{% endblocktranslate %})</dd></div>
+        <div><dt>{% translate "Guests" %}</dt><dd>{% blocktranslate count counter=booking.adults %}{{ counter }} adult{% plural %}{{ counter }} adults{% endblocktranslate %}{% if booking.children %}, {% blocktranslate count counter=booking.children %}{{ counter }} child{% plural %}{{ counter }} children{% endblocktranslate %}{% endif %}{% if booking.pets %}, {% blocktranslate count counter=booking.pets %}{{ counter }} pet{% plural %}{{ counter }} pets{% endblocktranslate %}{% endif %}</dd></div>
+      </dl>
+
+      {% if quote.lines %}
+      <div class="quote-box">
+        {% include "public/_quote.html" %}
+      </div>
+      {% endif %}
+
+      <div class="done-card__next">
+        <h2>{% translate "What happens next?" %}</h2>
+        <ol>
+          <li>{% translate "The camping reviews your request and checks availability." %}</li>
+          <li>{% translate "You receive an e-mail confirming or declining it." %}</li>
+          {% if policy.deposit_percent %}<li>{% blocktranslate with percent=policy.deposit_percent %}To secure the booking you will be asked for a {{ percent }}% deposit.{% endblocktranslate %}</li>{% endif %}
+        </ol>
+      </div>
+      <a class="btn btn-primary" href="{% camping_url 'public:camping_detail' camping %}">{% icon "arrow-left" %}<span>{% translate "Back to the camping" %}</span></a>
+    </div>
+  </div>
+</section>
+{% endblock %}

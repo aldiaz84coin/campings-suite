@@ -1,0 +1,38 @@
+{% extends "panel/base.html" %}
+{% load i18n core_tags %}
+{% block page_title %}{% translate "Accommodation" %}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><h1>{% translate "Accommodation" %}</h1><p class="muted">{% translate "Pitches, bungalows, mobile homes, glamping… with their capacity and base price." %}</p></div>
+  <a class="btn btn-primary" href="{% url 'panel:accommodation_create' slug=camping.slug %}">{% icon "plus" %}<span>{% translate "New accommodation type" %}</span></a>
+</div>
+{% if accommodations %}
+<div class="item-grid">
+  {% for acc in accommodations %}
+  {% with photo=acc.photos.all|first %}
+  <article class="item-card card{% if not acc.is_active %} is-inactive{% endif %}">
+    <div class="item-card__media">{% if photo %}<img src="{{ photo.thumbnail.url }}" alt="" loading="lazy">{% else %}<span class="media-placeholder">{% icon acc.kind_icon %}</span>{% endif %}</div>
+    <div class="item-card__body">
+      <p class="small muted">{{ acc.get_kind_display }}{% if not acc.is_active %} · <span class="badge badge--muted">{% translate "Hidden" %}</span>{% endif %}</p>
+      <h2>{{ acc.display_name }}</h2>
+      <ul class="spec-list small" role="list">
+        <li>{% icon "users" %} {{ acc.max_guests }}</li>
+        {% if acc.size_m2 %}<li>{% icon "ruler" %} {{ acc.size_m2 }} m²</li>{% endif %}
+        <li>{% icon "list-checks" %} {% blocktranslate count counter=acc.units %}{{ counter }} unit{% plural %}{{ counter }} units{% endblocktranslate %}</li>
+      </ul>
+      <p class="item-card__price"><strong>{{ acc.base_price|money:camping.currency }}</strong> <span class="muted small">{{ acc.get_price_unit_display }}</span>{% if acc.rates.all %} · <span class="small muted">{% blocktranslate count counter=acc.rates.all|length %}{{ counter }} seasonal price{% plural %}{{ counter }} seasonal prices{% endblocktranslate %}</span>{% endif %}</p>
+    </div>
+    <div class="item-card__actions"><a class="btn btn-outline btn-sm" href="{% url 'panel:accommodation_edit' slug=camping.slug pk=acc.pk %}">{% icon "pencil" %}<span>{% translate "Edit" %}</span></a></div>
+  </article>
+  {% endwith %}
+  {% endfor %}
+</div>
+<p class="small muted">{% url 'panel:prices' slug=camping.slug as prices_url %}{% blocktranslate %}Set different prices for each season in the <a href="{{ prices_url }}">price table</a>.{% endblocktranslate %}</p>
+{% else %}
+<div class="card empty-state">
+  {% icon "tent" "icon-xl" %}
+  <p>{% translate "Create your first accommodation type, for example “Pitch with electricity” or “Bungalow for 4”." %}</p>
+  <a class="btn btn-primary" href="{% url 'panel:accommodation_create' slug=camping.slug %}">{% icon "plus" %}<span>{% translate "New accommodation type" %}</span></a>
+</div>
+{% endif %}
+{% endblock %}

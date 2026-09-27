@@ -1,0 +1,25 @@
+{% extends "panel/base.html" %}
+{% load i18n core_tags %}
+{% block page_title %}{% if is_new %}{% translate "New season" %}{% else %}{{ object.name|tr }}{% endif %}{% endblock %}
+{% block content %}
+<div class="page-header"><div><a class="back-link" href="{% url 'panel:seasons' slug=camping.slug %}">{% icon "arrow-left" %} {% translate "Seasons" %}</a><h1>{% if is_new %}{% translate "New season" %}{% else %}{{ object.name|tr }}{% endif %}</h1></div></div>
+<form method="post" novalidate class="form-stack narrow-form">
+  {% csrf_token %}
+  {% include "partials/form_errors.html" %}
+  <section class="card card-pad">
+    {% include "panel/_lang_hint.html" %}
+    {% include "partials/field.html" with field=form.name %}
+    <div class="form-grid">
+      {% include "partials/field.html" with field=form.start_date %}
+      {% include "partials/field.html" with field=form.end_date %}
+      {% include "partials/field.html" with field=form.min_nights %}
+      {% include "partials/field.html" with field=form.color %}
+    </div>
+  </section>
+  {% url 'panel:seasons' slug=camping.slug as cancel_url %}
+  {% include "panel/_form_actions.html" with cancel_url=cancel_url %}
+</form>
+{% if not is_new %}
+<div class="danger-zone">{% url 'panel:season_delete' slug=camping.slug pk=object.pk as delete_url %}{% translate "Delete this season? Its prices will be deleted too." as confirm_text %}{% include "panel/_delete_button.html" with action=delete_url confirm=confirm_text %}</div>
+{% endif %}
+{% endblock %}

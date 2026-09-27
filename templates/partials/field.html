@@ -1,0 +1,12 @@
+{% load core_tags %}{% with widget_type=field.widget_type %}
+<div class="field field--{{ widget_type }}{% if field.errors %} has-error{% endif %}{% if field.field.required %} is-required{% endif %}{% if wide %} field--wide{% endif %}">
+  {% if widget_type == "checkbox" %}
+    <label class="check">{{ field }} <span>{{ field.label }}</span></label>
+  {% else %}
+    {% if field.label %}<label for="{{ field.id_for_label }}" class="field__label">{{ field.label }}</label>{% endif %}
+    {% if widget_type == "checkboxselectmultiple" %}<div class="check-list">{% for option in field %}<label class="check">{{ option.tag }} <span>{{ option.choice_label }}</span></label>{% endfor %}</div>{% else %}{{ field }}{% endif %}
+  {% endif %}
+  {% if field.help_text %}<p class="field__help">{{ field.help_text|safe }}</p>{% endif %}
+  {% for error in field.errors %}<p class="field__error">{{ error }}</p>{% endfor %}
+</div>
+{% endwith %}

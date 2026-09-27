@@ -1,0 +1,54 @@
+{% extends "panel/base.html" %}
+{% load i18n core_tags %}
+{% block page_title %}{% translate "Photos" %}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><h1>{% translate "Photos" %}</h1><p class="muted">{% blocktranslate with max=max_photos %}The first photo is the main image of your page. Drag the photos to change their order. Up to {{ max }} photos.{% endblocktranslate %}</p></div>
+</div>
+<form class="dropzone card" method="post" enctype="multipart/form-data" data-dropzone data-max-mb="{{ max_upload_mb }}">
+  {% csrf_token %}
+  <div class="dropzone__inner">
+    {% icon "upload" "icon-lg" %}
+    <p><strong>{% translate "Drag your photos here" %}</strong><br><span class="muted">{% blocktranslate with mb=max_upload_mb %}or choose them from your device (JPG, PNG, WebP or HEIC, up to {{ mb }} MB each). We resize and optimise them automatically.{% endblocktranslate %}</span></p>
+    <label class="btn btn-primary">{% icon "images" %}<span>{% translate "Choose photos" %}</span>{{ form.images }}</label>
+    <noscript><button class="btn btn-outline" type="submit">{% translate "Upload" %}</button></noscript>
+  </div>
+  <div class="upload-progress" data-upload-progress hidden><div class="progress"><span data-progress-bar></span></div><p class="small muted" data-progress-text></p></div>
+  {% for error in form.images.errors %}<p class="field__error">{{ error }}</p>{% endfor %}
+</form>
+
+{% if photos %}
+<ul class="photo-grid" role="list" data-sortable data-reorder-url="{% url 'panel:photo_reorder' slug=camping.slug %}">
+  {% for photo in photos %}
+  <li class="photo-tile{% if forloop.first %} is-cover{% endif %}" draggable="true" data-id="{{ photo.pk }}">
+    <img src="{{ photo.thumbnail.url }}" alt="{{ photo.alt_text }}" loading="lazy">
+    {% if forloop.first %}<span class="photo-tile__cover">{% icon "star" %} {% translate "Main photo" %}</span>{% endif %}
+    <span class="photo-tile__handle" title="{% translate 'Drag to reorder' %}">{% icon "grip-vertical" %}</span>
+    <div class="photo-tile__info">
+      {% with caption=photo.caption|tr %}{% if caption %}<span class="photo-tile__caption">{{ caption }}</span>{% endif %}{% endwith %}
+      {% if photo.accommodation %}<span class="badge badge--muted">{% icon "tent" %} {{ photo.accommodation.display_name }}</span>{% endif %}
+    </div>
+    <div class="photo-tile__actions">
+      <a class="icon-button" href="{% url 'panel:photo_edit' slug=camping.slug pk=photo.pk %}" title="{% translate 'Edit caption' %}">{% icon "pencil" %}</a>
+      {% if not forloop.first %}
+        <form method="post" action="{% url 'panel:photo_cover' slug=camping.slug pk=photo.pk %}">{% csrf_token %}<button class="icon-button" type="submit" title="{% translate 'Make main photo' %}">{% icon "star" %}</button></form>
+        <form method="post" action="{% url 'panel:photo_move' slug=camping.slug pk=photo.pk direction='up' %}" class="no-js-only">{% csrf_token %}<button class="icon-button" type="submit" title="{% translate 'Move up' %}">{% icon "arrow-left" %}</button></form>
+      {% endif %}
+      {% if not forloop.last %}<form method="post" action="{% url 'panel:photo_move' slug=camping.slug pk=photo.pk direction='down' %}" class="no-js-only">{% csrf_token %}<button class="icon-button" type="submit" title="{% translate 'Move down' %}">{% icon "arrow-right" %}</button></form>{% endif %}
+      <form method="post" action="{% url 'panel:photo_delete' slug=camping.slug pk=photo.pk %}">{% csrf_token %}<button class="icon-button icon-button--danger" type="submit" title="{% translate 'Delete' %}" data-confirm="{% translate 'Delete this photo?' %}">{% icon "trash-2" %}</button></form>
+    </div>
+  </li>
+  {% endfor %}
+</ul>
+<p class="small muted reorder-status" data-reorder-status aria-live="polite"></p>
+{% else %}
+<div class="card empty-state">{% icon "images" "icon-xl" %}<p>{% translate "No photos yet. Pages with good photos receive many more requests!" %}</p></div>
+{% endif %}
+<template id="upload-messages">
+  <span data-msg="uploading">{% translate "Uploading photo {done} of {total}…" %}</span>
+  <span data-msg="done">{% translate "Done! Reloading…" %}</span>
+  <span data-msg="too-big">{% blocktranslate with mb=max_upload_mb %}{name} is larger than {{ mb }} MB.{% endblocktranslate %}</span>
+  <span data-msg="saved">{% translate "Order saved." %}</span>
+  <span data-msg="error">{% translate "Something went wrong. Please try again." %}</span>
+</template>
+{% endblock %}

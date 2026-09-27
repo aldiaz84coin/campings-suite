@@ -1,0 +1,60 @@
+{% extends "panel/base.html" %}
+{% load i18n core_tags %}
+{% block page_title %}{% if is_new %}{% translate "New accommodation type" %}{% else %}{{ object.display_name }}{% endif %}{% endblock %}
+{% block content %}
+<div class="page-header"><div><a class="back-link" href="{% url 'panel:accommodations' slug=camping.slug %}">{% icon "arrow-left" %} {% translate "Accommodation" %}</a><h1>{% if is_new %}{% translate "New accommodation type" %}{% else %}{{ object.display_name }}{% endif %}</h1></div></div>
+<form method="post" novalidate class="form-stack">
+  {% csrf_token %}
+  {% include "partials/form_errors.html" %}
+  {% include "panel/_lang_hint.html" %}
+  <section class="card card-pad">
+    <h2>{% translate "Description" %}</h2>
+    <div class="form-grid">
+      {% include "partials/field.html" with field=form.kind %}
+      {% include "partials/field.html" with field=form.is_active %}
+    </div>
+    {% include "partials/field.html" with field=form.name %}
+    {% include "partials/field.html" with field=form.description %}
+  </section>
+  <section class="card card-pad">
+    <h2>{% translate "Capacity" %}</h2>
+    <div class="form-grid form-grid--3">
+      {% include "partials/field.html" with field=form.max_guests %}
+      {% include "partials/field.html" with field=form.size_m2 %}
+      {% include "partials/field.html" with field=form.bedrooms %}
+      {% include "partials/field.html" with field=form.units %}
+      {% include "partials/field.html" with field=form.min_nights %}
+      {% include "partials/field.html" with field=form.position %}
+    </div>
+  </section>
+  <section class="card card-pad">
+    <h2>{% translate "Price" %}</h2>
+    <div class="form-grid">
+      {% include "partials/field.html" with field=form.base_price %}
+      {% include "partials/field.html" with field=form.price_unit %}
+    </div>
+  </section>
+  <section class="card card-pad">
+    <h2>{% translate "Amenities" %}</h2>
+    <div class="check-grid">{% for option in form.amenities %}<label class="check">{{ option.tag }} <span>{{ option.choice_label }}</span></label>{% endfor %}</div>
+  </section>
+  <section class="card card-pad">
+    <h2>{% translate "Photos" %}</h2>
+    {% if form.photos.field.queryset %}
+      <p class="field__help">{% translate "Choose the photos of this accommodation. They will be shown on its card." %}</p>
+      <div class="photo-picker">
+        {% for photo in form.photos.field.queryset %}
+          <label class="photo-pick"><input type="checkbox" name="photos" value="{{ photo.pk }}"{% if photo.pk in selected_photo_ids %} checked{% endif %}><img src="{{ photo.thumbnail.url }}" alt="{{ photo.alt_text }}" loading="lazy"></label>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="muted">{% url 'panel:photos' slug=camping.slug as photos_url %}{% blocktranslate %}First <a href="{{ photos_url }}">upload photos</a> to your gallery, then you can assign them here.{% endblocktranslate %}</p>
+    {% endif %}
+  </section>
+  {% url 'panel:accommodations' slug=camping.slug as cancel_url %}
+  {% include "panel/_form_actions.html" with cancel_url=cancel_url %}
+</form>
+{% if not is_new %}
+<div class="danger-zone">{% url 'panel:accommodation_delete' slug=camping.slug pk=object.pk as delete_url %}{% translate "Delete this accommodation type? Its seasonal prices will be deleted too." as confirm_text %}{% include "panel/_delete_button.html" with action=delete_url confirm=confirm_text %}</div>
+{% endif %}
+{% endblock %}

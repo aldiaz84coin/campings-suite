@@ -1,0 +1,20 @@
+{% load static i18n %}<!doctype html>
+{% get_current_language as LANGUAGE_CODE %}
+<html lang="{{ LANGUAGE_CODE }}" class="no-js">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ PLATFORM_NAME }}{% endblock %}</title>
+  {% if noindex %}<meta name="robots" content="noindex">{% endif %}
+  {% block meta %}{% endblock %}
+  <link rel="icon" href="{% static 'img/favicon.svg' %}" type="image/svg+xml">
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  {% block styles %}{% endblock %}
+  <script>document.documentElement.classList.replace("no-js", "js");</script>
+</head>
+<body class="{% block body_class %}{% endblock %}"{% block body_attrs %}{% endblock %}>
+  <a class="skip-link" href="#main">{% translate "Skip to content" %}</a>
+  {% block body %}{% endblock %}
+  {% block scripts %}{% endblock %}
+</body>
+</html>

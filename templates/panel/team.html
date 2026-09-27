@@ -1,0 +1,40 @@
+{% extends "panel/base.html" %}
+{% load i18n core_tags %}
+{% block page_title %}{% translate "Team" %}{% endblock %}
+{% block content %}
+<div class="page-header"><div><h1>{% translate "Team" %}</h1><p class="muted">{% translate "People who can manage this camping. Owners can also change settings and invite others." %}</p></div></div>
+{% if invite_link %}
+<div class="alert alert-success">
+  {% icon "circle-check" %}
+  <div>
+    <p><strong>{% translate "Invitation created." %}</strong> {% translate "We have e-mailed the link below. You can also send it yourself; it is valid for a few days:" %}</p>
+    <div class="copy-field"><input type="text" readonly value="{{ invite_link }}" data-copy-source><button class="btn btn-outline btn-sm" type="button" data-copy>{% icon "copy" %}<span>{% translate "Copy" %}</span></button></div>
+  </div>
+</div>
+{% endif %}
+<div class="detail-grid">
+  <section class="card">
+    <ul class="list" role="list">
+      {% for member in members %}
+      <li class="list__item">
+        <span class="avatar">{{ member.user.display_name|slice:":1"|upper }}</span>
+        <span class="list__text"><strong>{{ member.user.get_full_name|default:member.user.email }}</strong><small class="muted">{{ member.user.email }}{% if not member.user.has_usable_password %} · {% translate "invitation pending" %}{% endif %}</small></span>
+        <span class="badge{% if member.is_owner %}{% else %} badge--muted{% endif %}">{{ member.get_role_display }}</span>
+        {% if is_owner and member.user != user %}
+        <form method="post" action="{% url 'panel:team_remove' slug=camping.slug pk=member.pk %}">{% csrf_token %}<button class="icon-button icon-button--danger" type="submit" title="{% translate 'Remove access' %}" data-confirm="{% translate 'Remove this person from the team?' %}">{% icon "trash-2" %}</button></form>
+        {% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% if is_owner %}
+  <form method="post" class="card card-pad" novalidate>
+    {% csrf_token %}
+    <h2>{% icon "user-plus" %} {% translate "Invite someone" %}</h2>
+    {% include "partials/field.html" with field=form.email %}
+    {% include "partials/field.html" with field=form.role %}
+    <button class="btn btn-primary btn-block" type="submit">{% translate "Send invitation" %}</button>
+  </form>
+  {% endif %}
+</div>
+{% endblock %}

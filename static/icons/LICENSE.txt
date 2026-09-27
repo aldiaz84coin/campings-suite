@@ -1,0 +1,11 @@
+Icons in sprite.svg come from:
+
+- Lucide (https://lucide.dev) - ISC License
+  Copyright (c) Lucide Icons and Contributors. Portions derived from Feather
+  (MIT License, Copyright (c) 2013-2023 Cole Bemis).
+  Permission to use, copy, modify, and/or distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+- Simple Icons (https://simpleicons.org) - CC0 1.0 Universal.
+  Brand icons are trademarks of their respective owners.

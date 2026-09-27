@@ -1,0 +1,34 @@
+{% extends "panel/base.html" %}
+{% load i18n core_tags %}
+{% block page_title %}{% if is_new %}{% translate "New service" %}{% else %}{{ object.display_name }}{% endif %}{% endblock %}
+{% block content %}
+<div class="page-header"><div><a class="back-link" href="{% url 'panel:services' slug=camping.slug %}">{% icon "arrow-left" %} {% translate "Services & extras" %}</a><h1>{% if is_new %}{% translate "New service" %}{% else %}{{ object.display_name }}{% endif %}</h1></div></div>
+<form method="post" novalidate class="form-stack">
+  {% csrf_token %}
+  {% include "partials/form_errors.html" %}
+  {% include "panel/_lang_hint.html" %}
+  <section class="card card-pad">
+    {% include "partials/field.html" with field=form.name %}
+    {% include "partials/field.html" with field=form.description %}
+    <div class="form-grid">
+      {% include "partials/field.html" with field=form.icon %}
+      {% include "partials/field.html" with field=form.is_active %}
+    </div>
+  </section>
+  <section class="card card-pad">
+    <h2>{% translate "Price" %}</h2>
+    <div class="form-grid form-grid--3">
+      {% include "partials/field.html" with field=form.price %}
+      {% include "partials/field.html" with field=form.unit %}
+      {% include "partials/field.html" with field=form.position %}
+    </div>
+    {% include "partials/field.html" with field=form.mode %}
+    {% include "partials/field.html" with field=form.accommodations %}
+  </section>
+  {% url 'panel:services' slug=camping.slug as cancel_url %}
+  {% include "panel/_form_actions.html" with cancel_url=cancel_url %}
+</form>
+{% if not is_new %}
+<div class="danger-zone">{% url 'panel:service_delete' slug=camping.slug pk=object.pk as delete_url %}{% include "panel/_delete_button.html" with action=delete_url %}</div>
+{% endif %}
+{% endblock %}

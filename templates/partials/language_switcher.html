@@ -1,0 +1,9 @@
+{% load i18n core_tags %}{% language_links as links %}
+<details class="lang-switcher" data-dropdown>
+  <summary aria-label="{% translate 'Change language' %}">{% icon "globe" %}<span>{{ LANGUAGE_CODE|upper }}</span>{% icon "chevron-down" "icon-xs" %}</summary>
+  <ul class="dropdown-menu" role="list">
+    {% for link in links %}
+      <li><a href="{{ link.url }}" hreflang="{{ link.code }}" lang="{{ link.code }}"{% if link.current %} aria-current="true"{% endif %}>{{ link.name }}</a></li>
+    {% endfor %}
+  </ul>
+</details>

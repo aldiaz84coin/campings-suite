@@ -1,0 +1,82 @@
+{% extends "panel/base.html" %}
+{% load i18n core_tags %}
+{% block page_title %}{{ booking.reference }} · {{ booking.name }}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <a class="back-link" href="{% url 'panel:bookings' slug=camping.slug %}">{% icon "arrow-left" %} {% translate "Booking requests" %}</a>
+    <h1>{{ booking.name }} {% include "panel/_status_badge.html" with status=booking.status label=booking.get_status_display %}</h1>
+    <p class="muted">{% blocktranslate with reference=booking.reference date=booking.created_at|date:"DATETIME_FORMAT" %}Request {{ reference }} received on {{ date }}{% endblocktranslate %}</p>
+  </div>
+  <div class="page-header__actions">
+    <a class="btn btn-outline" href="mailto:{{ booking.email }}?subject={{ camping.name|urlencode }}%20·%20{{ booking.reference }}">{% icon "mail" %}<span>{% translate "Write to the guest" %}</span></a>
+    {% if booking.phone %}<a class="btn btn-ghost" href="tel:{{ booking.phone|cut:' ' }}">{% icon "phone" %}<span>{{ booking.phone }}</span></a>{% endif %}
+  </div>
+</div>
+
+<div class="detail-grid">
+  <div class="form-stack">
+    <section class="card card-pad">
+      <h2>{% translate "Stay" %}</h2>
+      <dl class="data-list">
+        <div><dt>{% translate "Accommodation" %}</dt><dd>{{ booking.accommodation_name|default:"—" }}</dd></div>
+        <div><dt>{% translate "Arrival" %}</dt><dd>{{ booking.arrival|date:"l j F Y" }}</dd></div>
+        <div><dt>{% translate "Departure" %}</dt><dd>{{ booking.departure|date:"l j F Y" }}</dd></div>
+        <div><dt>{% translate "Nights" %}</dt><dd>{{ booking.nights }}</dd></div>
+        <div><dt>{% translate "Guests" %}</dt><dd>{% blocktranslate count counter=booking.adults %}{{ counter }} adult{% plural %}{{ counter }} adults{% endblocktranslate %}{% if booking.children %}, {% blocktranslate count counter=booking.children %}{{ counter }} child{% plural %}{{ counter }} children{% endblocktranslate %}{% endif %}{% if booking.pets %}, {% blocktranslate count counter=booking.pets %}{{ counter }} pet{% plural %}{{ counter }} pets{% endblocktranslate %}{% endif %}</dd></div>
+        {% with extras=booking.extras.all %}{% if extras %}<div><dt>{% translate "Extras" %}</dt><dd>{% for extra in extras %}{{ extra.display_name }}{% if not forloop.last %}, {% endif %}{% endfor %}</dd></div>{% endif %}{% endwith %}
+      </dl>
+      {% if free_units is not None %}
+        {% if free_units < 1 %}
+          <div class="alert alert-warning">{% icon "circle-alert" %}<span>{% translate "Careful: according to your confirmed bookings there are no free units of this accommodation for these dates." %}</span></div>
+        {% else %}
+          <p class="small muted">{% blocktranslate count counter=free_units %}{{ counter }} unit still free for these dates.{% plural %}{{ counter }} units still free for these dates.{% endblocktranslate %}</p>
+        {% endif %}
+      {% endif %}
+    </section>
+
+    {% if quote.lines %}
+    <section class="card card-pad">
+      <h2>{% translate "Price estimate sent to the guest" %}</h2>
+      {% include "public/_quote.html" %}
+    </section>
+    {% endif %}
+
+    <section class="card card-pad">
+      <h2>{% translate "Guest" %}</h2>
+      <dl class="data-list">
+        <div><dt>{% translate "Name" %}</dt><dd>{{ booking.name }}</dd></div>
+        <div><dt>{% translate "E-mail" %}</dt><dd><a href="mailto:{{ booking.email }}">{{ booking.email }}</a></dd></div>
+        {% if booking.phone %}<div><dt>{% translate "Phone" %}</dt><dd><a href="tel:{{ booking.phone|cut:' ' }}">{{ booking.phone }}</a></dd></div>{% endif %}
+        {% if booking.country %}<div><dt>{% translate "Country" %}</dt><dd>{{ booking.country }}</dd></div>{% endif %}
+        <div><dt>{% translate "Language" %}</dt><dd>{{ booking.language|lang_name }}</dd></div>
+      </dl>
+      {% if booking.message %}<blockquote class="message">{{ booking.message|linebreaksbr }}</blockquote>{% endif %}
+    </section>
+  </div>
+
+  <aside class="form-stack">
+    <form method="post" class="card card-pad" novalidate>
+      {% csrf_token %}
+      <h2>{% translate "Manage request" %}</h2>
+      {% include "partials/field.html" with field=form.status %}
+      {% include "partials/field.html" with field=form.internal_notes %}
+      {% include "partials/field.html" with field=form.notify_guest %}
+      {% comment %}Quick buttons come after the select so their value wins.{% endcomment %}
+      <div class="quick-actions">
+        {% if booking.status == "pending" %}
+          <button class="btn btn-primary" type="submit" name="status" value="confirmed">{% icon "check" %}<span>{% translate "Confirm" %}</span></button>
+          <button class="btn btn-danger-outline" type="submit" name="status" value="declined">{% icon "x" %}<span>{% translate "Decline" %}</span></button>
+        {% endif %}
+        <button class="btn btn-outline" type="submit">{% translate "Save" %}</button>
+      </div>
+    </form>
+    {% if overlapping %}
+    <section class="card card-pad">
+      <h2>{% translate "Confirmed stays on the same dates" %}</h2>
+      <ul class="plain-list small">{% for other in overlapping %}<li><a href="{% url 'panel:booking_detail' slug=camping.slug pk=other.pk %}">{{ other.name }}</a> · {{ other.arrival|date:"j M" }} → {{ other.departure|date:"j M" }}</li>{% endfor %}</ul>
+    </section>
+    {% endif %}
+  </aside>
+</div>
+{% endblock %}

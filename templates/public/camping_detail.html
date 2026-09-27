@@ -1,0 +1,232 @@
+{% extends "public/camping_base.html" %}
+{% load i18n core_tags %}
+{% block title %}{{ camping.name }}{% with tagline=camping.tagline|tr %}{% if tagline %} · {{ tagline }}{% endif %}{% endwith %}{% endblock %}
+{% block meta %}{{ block.super }}
+<meta name="description" content="{{ meta_description }}">
+<meta property="og:type" content="website">
+<meta property="og:title" content="{{ camping.name }}">
+<meta property="og:description" content="{{ meta_description }}">
+{% if og_image %}<meta property="og:image" content="{{ og_image }}"><meta name="twitter:card" content="summary_large_image">{% endif %}
+{% json_ld json_ld %}
+{% endblock %}
+{% block content %}
+{% with description=camping.description|tr:camping.default_language tagline=camping.tagline|tr:camping.default_language location_info=camping.location_info|tr:camping.default_language %}
+
+<section class="camping-hero{% if not cover %} camping-hero--plain{% endif %}">
+  {% if cover %}
+    <img class="camping-hero__image" src="{{ cover.image.url }}" srcset="{{ cover.thumbnail.url }} 800w, {{ cover.image.url }} {{ cover.width|default:2000 }}w" sizes="100vw" alt="{{ cover.alt_text }}" fetchpriority="high">
+  {% endif %}
+  <div class="container camping-hero__content">
+    {% if camping.stars %}<p class="camping-hero__stars" aria-label="{% blocktranslate count counter=camping.stars %}{{ counter }} star{% plural %}{{ counter }} stars{% endblocktranslate %}">{% for star in camping.stars|times %}★{% endfor %}</p>{% endif %}
+    <h1>{{ camping.name }}</h1>
+    {% if tagline %}<p class="camping-hero__tagline">{{ tagline }}</p>{% endif %}
+    {% if camping.location_label %}<p class="camping-hero__location">{% icon "map-pin" %}<span>{{ camping.location_label }}{% if camping.country %}, {{ camping.country }}{% endif %}</span></p>{% endif %}
+    <div class="camping-hero__actions">
+      {% if camping.accepts_booking_requests %}<a class="btn btn-accent btn-lg" href="{% camping_url 'public:booking' camping %}">{% icon "calendar-check" %}<span>{% translate "Request a booking" %}</span></a>{% endif %}
+      <a class="btn btn-glass btn-lg" href="#prices">{% icon "euro" %}<span>{% translate "See prices" %}</span></a>
+    </div>
+    {% if starting_price %}<p class="camping-hero__price">{% blocktranslate with price=starting_price|money:camping.currency %}From <strong>{{ price }}</strong> per night{% endblocktranslate %}</p>{% endif %}
+  </div>
+</section>
+
+{% if translation_missing %}
+<div class="container"><p class="notice">{% icon "languages" %} {% blocktranslate with language=camping.default_language|lang_name %}Some information on this page is only available in {{ language }}.{% endblocktranslate %}</p></div>
+{% endif %}
+
+<section class="quick-facts" aria-label="{% translate 'Key information' %}">
+  <div class="container quick-facts__inner">
+    <div class="fact">{% icon "log-in" %}<div><span class="fact__label">{% translate "Check-in" %}</span><strong>{{ policy.check_in_from|time:"H:i" }}{% if policy.check_in_until %} – {{ policy.check_in_until|time:"H:i" }}{% endif %}</strong></div></div>
+    <div class="fact">{% icon "log-out" %}<div><span class="fact__label">{% translate "Check-out" %}</span><strong>{% blocktranslate with time=policy.check_out_until|time:"H:i" %}until {{ time }}{% endblocktranslate %}</strong></div></div>
+    <div class="fact">{% icon "calendar-days" %}<div><span class="fact__label">{% translate "Open" %}</span><strong>{% if camping.open_all_year or not camping.opening_date or not camping.closing_date %}{% translate "All year" %}{% else %}{{ camping.opening_date|date:"MONTH_DAY_FORMAT" }} – {{ camping.closing_date|date:"MONTH_DAY_FORMAT" }}{% endif %}</strong></div></div>
+    <div class="fact">{% icon "moon" %}<div><span class="fact__label">{% translate "Minimum stay" %}</span><strong>{% blocktranslate count counter=policy.min_nights %}{{ counter }} night{% plural %}{{ counter }} nights{% endblocktranslate %}</strong></div></div>
+    <div class="fact">{% icon "dog" %}<div><span class="fact__label">{% translate "Pets" %}</span><strong>{% if policy.pets_allowed %}{% translate "Welcome" %}{% else %}{% translate "Not allowed" %}{% endif %}</strong></div></div>
+  </div>
+</section>
+
+<section id="about" class="section">
+  <div class="container about">
+    <div class="about__text prose">
+      <h2>{% translate "The camping" %}</h2>
+      {% if description %}{{ description|linebreaks }}{% else %}<p class="muted">{% translate "The camping has not added a description yet." %}</p>{% endif %}
+    </div>
+    <aside class="about__aside card">
+      <h3>{% translate "Contact" %}</h3>
+      <ul class="contact-list contact-list--stacked" role="list">
+        {% if camping.phone %}<li><a href="tel:{{ camping.phone|cut:' ' }}">{% icon "phone" %}<span>{{ camping.phone }}</span></a></li>{% endif %}
+        {% if camping.whatsapp %}<li><a href="https://wa.me/{{ camping.whatsapp|digits }}" target="_blank" rel="noopener">{% icon "whatsapp" %}<span>WhatsApp</span></a></li>{% endif %}
+        {% if camping.email %}<li><a href="mailto:{{ camping.email }}">{% icon "mail" %}<span>{{ camping.email }}</span></a></li>{% endif %}
+        {% if camping.website %}<li><a href="{{ camping.website }}" target="_blank" rel="noopener">{% icon "globe" %}<span>{% translate "Website" %}</span></a></li>{% endif %}
+        {% if camping.address or camping.city %}<li>{% icon "map-pin" %}<span>{{ camping.address }}{% if camping.address %}, {% endif %}{{ camping.postal_code }} {{ camping.city }}</span></li>{% endif %}
+      </ul>
+      {% if camping.accepts_booking_requests %}<a class="btn btn-primary btn-block" href="{% camping_url 'public:booking' camping %}">{% translate "Request a booking" %}</a>{% endif %}
+    </aside>
+  </div>
+</section>
+
+{% if photos %}
+<section id="gallery" class="section section--tight">
+  <div class="container">
+    <div class="section-head"><h2>{% translate "Photos" %}</h2><span class="muted">{% blocktranslate count counter=photos|length %}{{ counter }} photo{% plural %}{{ counter }} photos{% endblocktranslate %}</span></div>
+    <div class="gallery gallery--{% if photos|length >= 5 %}5{% else %}{{ photos|length }}{% endif %}">
+      {% for photo in photos %}
+        <a class="gallery__item{% if forloop.counter > 5 %} is-extra{% endif %}" href="{{ photo.image.url }}" data-lightbox="camping" data-caption="{{ photo.caption|tr }}">
+          <img src="{% if forloop.first %}{{ photo.image.url }}{% else %}{{ photo.thumbnail.url }}{% endif %}" alt="{{ photo.alt_text }}" loading="lazy" decoding="async">
+          {% if forloop.counter == 5 and photos|length > 5 %}<span class="gallery__more">{% icon "images" %} +{{ photos|length|add:"-5" }}</span>{% endif %}
+        </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<section id="accommodation" class="section section--soft">
+  <div class="container">
+    <div class="section-head"><h2>{% translate "Accommodation" %}</h2></div>
+    {% if accommodations %}
+    <div class="acc-grid">
+      {% for acc in accommodations %}
+      {% with acc_photos=acc.photos.all acc_description=acc.description|tr:camping.default_language lowest=acc.lowest_price %}
+      <article class="acc-card" id="acc-{{ acc.pk }}">
+        <div class="acc-card__media">
+          {% if acc_photos %}
+            {% for photo in acc_photos %}
+              <a href="{{ photo.image.url }}" data-lightbox="acc-{{ acc.pk }}" data-caption="{{ photo.caption|tr }}"{% if not forloop.first %} hidden{% endif %}>{% if forloop.first %}<img src="{{ photo.thumbnail.url }}" alt="{{ photo.alt_text }}" loading="lazy" decoding="async">{% endif %}</a>
+            {% endfor %}
+            {% if acc_photos|length > 1 %}<span class="acc-card__count">{% icon "images" %} {{ acc_photos|length }}</span>{% endif %}
+          {% else %}
+            <span class="media-placeholder">{% icon acc.kind_icon %}</span>
+          {% endif %}
+          <span class="badge acc-card__kind">{% icon acc.kind_icon %} {{ acc.get_kind_display }}</span>
+        </div>
+        <div class="acc-card__body">
+          <h3>{{ acc.display_name }}</h3>
+          <ul class="spec-list" role="list">
+            <li>{% icon "users" %} {% blocktranslate count counter=acc.max_guests %}up to {{ counter }} guest{% plural %}up to {{ counter }} guests{% endblocktranslate %}</li>
+            {% if acc.size_m2 %}<li>{% icon "ruler" %} {{ acc.size_m2 }} m²</li>{% endif %}
+            {% if acc.bedrooms %}<li>{% icon "bed-double" %} {% blocktranslate count counter=acc.bedrooms %}{{ counter }} bedroom{% plural %}{{ counter }} bedrooms{% endblocktranslate %}</li>{% endif %}
+          </ul>
+          {% if acc_description|length > 180 %}
+            <details class="acc-card__description"><summary>{{ acc_description|truncatechars:160 }} <span class="link-more">{% translate "Read more" %}</span></summary><div class="prose">{{ acc_description|linebreaks }}</div></details>
+          {% elif acc_description %}
+            <p class="acc-card__text">{{ acc_description }}</p>
+          {% endif %}
+          {% if acc.amenity_items %}
+          <ul class="amenities" role="list">
+            {% for item in acc.amenity_items %}<li>{% icon item.icon %}<span>{{ item.label }}</span></li>{% endfor %}
+          </ul>
+          {% endif %}
+          <div class="acc-card__footer">
+            {% if lowest %}<p class="price-tag">{% blocktranslate with price=lowest|money:camping.currency %}from <strong>{{ price }}</strong>{% endblocktranslate %} <small>{{ acc.get_price_unit_display }}</small></p>{% else %}<span></span>{% endif %}
+            {% if camping.accepts_booking_requests %}<a class="btn btn-primary btn-sm" href="{% camping_url 'public:booking' camping %}?accommodation={{ acc.pk }}">{% translate "Request" %}</a>{% endif %}
+          </div>
+        </div>
+      </article>
+      {% endwith %}
+      {% endfor %}
+    </div>
+    {% else %}
+      <p class="muted">{% translate "Accommodation details coming soon." %}</p>
+    {% endif %}
+  </div>
+</section>
+
+{% if facility_groups %}
+<section id="facilities" class="section">
+  <div class="container">
+    <div class="section-head"><h2>{% translate "Facilities and services" %}</h2></div>
+    <div class="facility-groups">
+      {% for key, label, items in facility_groups %}
+      <div class="facility-group">
+        <h3>{{ label }}</h3>
+        <ul class="facility-list" role="list">
+          {% for facility in items %}
+          {% with details=facility.description|tr:camping.default_language %}
+          <li class="facility">
+            <span class="facility__icon">{% icon facility.icon_name %}</span>
+            <div>
+              <span class="facility__name">{{ facility.display_name }}{% if facility.is_paid %} <span class="badge badge--muted" title="{% translate 'Extra charge' %}">€</span>{% endif %}</span>
+              {% if details %}<span class="facility__details">{{ details }}</span>{% endif %}
+            </div>
+          </li>
+          {% endwith %}
+          {% endfor %}
+        </ul>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<section id="prices" class="section section--soft">
+  <div class="container">
+    <div class="section-head"><h2>{% translate "Prices" %}</h2>{% if seasons %}<span class="muted">{% translate "Prices per season" %}</span>{% endif %}</div>
+    {% if seasons %}
+    <ul class="season-legend" role="list">
+      {% for season in seasons %}<li><span class="season-dot" style="--dot: {{ season.color }}"></span><strong>{{ season.name|tr }}</strong> {{ season.start_date|date:"j M" }} – {{ season.end_date|date:"j M Y" }}{% if season.min_nights and season.min_nights > 1 %} · {% blocktranslate count counter=season.min_nights %}min. {{ counter }} night{% plural %}min. {{ counter }} nights{% endblocktranslate %}{% endif %}</li>{% endfor %}
+    </ul>
+    {% endif %}
+    {% if accommodation_rows %}
+      {% include "public/_price_table.html" with rows=accommodation_rows caption=_("Accommodation") %}
+    {% endif %}
+    {% if service_rows %}
+      {% include "public/_price_table.html" with rows=service_rows caption=_("People, vehicles and extras") %}
+    {% endif %}
+    {% if included_services %}
+      <div class="included">
+        <h3>{% translate "Included in the price" %}</h3>
+        <ul class="chips chips--static" role="list">{% for service in included_services %}<li class="chip">{% icon service.icon %}<span>{{ service.display_name }}</span></li>{% endfor %}</ul>
+      </div>
+    {% endif %}
+    {% if not accommodation_rows and not service_rows %}<p class="muted">{% translate "Prices on request." %}</p>{% endif %}
+    <p class="small muted">{% translate "Prices include VAT. The final price is confirmed by the camping when it accepts your request." %}</p>
+  </div>
+</section>
+
+<section id="policies" class="section">
+  <div class="container">
+    <div class="section-head"><h2>{% translate "Booking policies" %}</h2></div>
+    {% include "public/_policies.html" %}
+  </div>
+</section>
+
+<section id="location" class="section section--soft">
+  <div class="container location">
+    <div class="location__text">
+      <h2>{% translate "Location" %}</h2>
+      {% if camping.address or camping.city %}
+      <p class="location__address">{% icon "map-pin" %}<span>{% if camping.address %}{{ camping.address }}<br>{% endif %}{{ camping.postal_code }} {{ camping.city }}{% if camping.region %}, {{ camping.region }}{% endif %}{% if camping.country %}<br>{{ camping.country }}{% endif %}</span></p>
+      {% endif %}
+      {% if location_info %}<div class="prose">{{ location_info|linebreaks }}</div>{% endif %}
+      {% if map.directions %}<p><a class="btn btn-outline" href="{{ map.directions }}" target="_blank" rel="noopener">{% icon "map" %}<span>{% translate "Get directions" %}</span></a></p>{% endif %}
+    </div>
+    {% if map.embed %}
+    <div class="location__map">
+      <iframe title="{% blocktranslate with name=camping.name %}Map showing {{ name }}{% endblocktranslate %}" src="{{ map.embed }}" loading="lazy" referrerpolicy="no-referrer"></iframe>
+      <a class="small" href="{{ map.link }}" target="_blank" rel="noopener">{% translate "View larger map" %}</a>
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+{% if camping.accepts_booking_requests and accommodations %}
+<section id="book" class="section book-cta">
+  <div class="container">
+    <div class="book-cta__card">
+      <div class="book-cta__intro">
+        <h2>{% translate "Plan your stay" %}</h2>
+        <p>{% translate "Choose your dates and see an instant price estimate. The camping will reply to your request by e-mail." %}</p>
+      </div>
+      <form class="stay-search" method="get" action="{% camping_url 'public:booking' camping %}">
+        {% for field in search_form %}
+          <div class="field field--{{ field.widget_type }}"><label for="{{ field.id_for_label }}" class="field__label">{{ field.label }}</label>{{ field }}</div>
+        {% endfor %}
+        <button class="btn btn-accent" type="submit">{% translate "Check price" %}</button>
+      </form>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% endwith %}
+{% endblock %}

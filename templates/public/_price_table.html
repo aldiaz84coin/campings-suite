@@ -1,0 +1,24 @@
+{% load i18n core_tags %}
+<div class="table-scroll">
+  <table class="price-table">
+    <caption>{{ caption }}</caption>
+    <thead>
+      <tr>
+        <th scope="col"><span class="sr-only">{% translate "Item" %}</span></th>
+        {% if seasons %}{% for season in seasons %}<th scope="col"><span class="season-dot" style="--dot: {{ season.color }}"></span>{{ season.name|tr }}<small>{{ season.start_date|date:"j M" }} – {{ season.end_date|date:"j M" }}</small></th>{% endfor %}{% else %}<th scope="col">{% translate "Price" %}</th>{% endif %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+      <tr>
+        <th scope="row"><span class="price-table__item">{% icon row.icon %}<span>{{ row.name }}<small>{{ row.unit }}{% if row.kind == "optional" %} · {% translate "optional" %}{% endif %}</small></span></span></th>
+        {% if seasons %}
+          {% for price in row.prices %}<td>{% if price %}{{ price|money:camping.currency }}{% else %}<span class="muted">—</span>{% endif %}</td>{% endfor %}
+        {% else %}
+          <td>{% if row.base %}{{ row.base|money:camping.currency }}{% else %}<span class="muted">—</span>{% endif %}</td>
+        {% endif %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

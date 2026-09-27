@@ -1,0 +1,51 @@
+{% extends "panel/base.html" %}
+{% load i18n core_tags %}
+{% block page_title %}{% translate "Appearance" %}{% endblock %}
+{% block content %}
+<div class="page-header"><div><h1>{% translate "Appearance" %}</h1><p class="muted">{% translate "Adapt your page to your brand: logo, colours and typography." %}</p></div></div>
+<div class="appearance-layout">
+  <form method="post" enctype="multipart/form-data" novalidate class="form-stack" data-appearance-form>
+    {% csrf_token %}
+    {% include "partials/form_errors.html" %}
+    <section class="card card-pad">
+      <h2>{% translate "Logo" %}</h2>
+      {% if camping.logo %}<div class="logo-preview"><img src="{{ camping.logo.url }}" alt="{% translate 'Current logo' %}"></div>{% endif %}
+      {% include "partials/field.html" with field=form.logo_file %}
+      {% if camping.logo %}{% include "partials/field.html" with field=form.remove_logo %}{% endif %}
+    </section>
+    <section class="card card-pad">
+      <h2>{% translate "Colours" %}</h2>
+      <div class="form-grid">
+        {% include "partials/field.html" with field=form.primary_color %}
+        {% include "partials/field.html" with field=form.accent_color %}
+      </div>
+      <p class="field__help">{% translate "Suggested combinations:" %}</p>
+      <div class="palette-presets" data-presets>
+        <button type="button" data-primary="#2f6f4e" data-accent="#e9a23b" style="--p:#2f6f4e;--a:#e9a23b" aria-label="{% translate 'Forest' %}"></button>
+        <button type="button" data-primary="#1f5f8b" data-accent="#f2b134" style="--p:#1f5f8b;--a:#f2b134" aria-label="{% translate 'Sea' %}"></button>
+        <button type="button" data-primary="#8a4b2a" data-accent="#e6c07b" style="--p:#8a4b2a;--a:#e6c07b" aria-label="{% translate 'Earth' %}"></button>
+        <button type="button" data-primary="#3d4f7d" data-accent="#f28f6b" style="--p:#3d4f7d;--a:#f28f6b" aria-label="{% translate 'Sunset' %}"></button>
+        <button type="button" data-primary="#2b6b6b" data-accent="#e8d44d" style="--p:#2b6b6b;--a:#e8d44d" aria-label="{% translate 'Lagoon' %}"></button>
+        <button type="button" data-primary="#4a4a4a" data-accent="#c9a227" style="--p:#4a4a4a;--a:#c9a227" aria-label="{% translate 'Graphite' %}"></button>
+      </div>
+    </section>
+    <section class="card card-pad">
+      <h2>{% translate "Typography" %}</h2>
+      <div class="radio-cards">
+        {% for option in form.font_style %}
+          <label class="radio-card font-{{ option.data.value }}">{{ option.tag }}<span class="radio-card__sample">Aa</span><span>{{ option.choice_label }}</span></label>
+        {% endfor %}
+      </div>
+    </section>
+    {% include "panel/_form_actions.html" %}
+  </form>
+  <aside class="appearance-preview" aria-label="{% translate 'Preview' %}">
+    <p class="small muted">{% translate "Preview" %}</p>
+    <div class="mini-site font-{{ camping.font_style }}" data-preview style="--primary: {{ camping.primary_color }}; --accent: {{ camping.accent_color }};">
+      <div class="mini-site__header"><span class="mini-site__logo">{% if camping.logo %}<img src="{{ camping.logo.url }}" alt="">{% else %}{% icon "tent" %}{% endif %}</span><strong>{{ camping.name }}</strong></div>
+      <div class="mini-site__hero">{% with cover=camping.cover_photo %}{% if cover %}<img src="{{ cover.thumbnail.url }}" alt="">{% endif %}{% endwith %}<div><strong>{{ camping.name }}</strong><span>{{ camping.tagline|tr }}</span><span class="mini-site__btn">{% translate "Request a booking" %}</span></div></div>
+      <div class="mini-site__body"><span class="mini-site__chip">{% icon "waves-ladder" %}</span><span class="mini-site__chip">{% icon "wifi" %}</span><span class="mini-site__chip">{% icon "dog" %}</span><span class="mini-site__price">{% translate "from" %} <b>35 €</b></span></div>
+    </div>
+  </aside>
+</div>
+{% endblock %}

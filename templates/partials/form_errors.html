@@ -1,0 +1,8 @@
+{% load i18n core_tags %}{% if form.non_field_errors %}
+<div class="alert alert-error" role="alert">
+  {% icon "circle-alert" %}
+  <div>{% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}</div>
+</div>
+{% elif form.errors %}
+<div class="alert alert-error" role="alert">{% icon "circle-alert" %}<span>{% translate "Please review the fields marked in red." %}</span></div>
+{% endif %}

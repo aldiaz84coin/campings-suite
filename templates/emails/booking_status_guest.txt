@@ -1,0 +1,10 @@
+{% load i18n %}{% autoescape off %}{% blocktranslate with name=booking.name %}Hello {{ name }},{% endblocktranslate %}
+
+{% if booking.status == "confirmed" %}{% blocktranslate with camping=camping.name %}Good news! {{ camping }} has confirmed your booking request.{% endblocktranslate %}{% elif booking.status == "declined" %}{% blocktranslate with camping=camping.name %}We are sorry: {{ camping }} cannot accept your booking request for these dates.{% endblocktranslate %}{% elif booking.status == "cancelled" %}{% blocktranslate with camping=camping.name %}Your booking at {{ camping }} has been cancelled.{% endblocktranslate %}{% else %}{% blocktranslate with camping=camping.name status=booking.get_status_display %}The status of your booking request at {{ camping }} is now: {{ status }}.{% endblocktranslate %}{% endif %}
+
+{% include "emails/_booking_summary.txt" %}
+{% if booking.status == "confirmed" and booking.camping.policy.deposit_percent %}{% blocktranslate with percent=booking.camping.policy.deposit_percent %}The camping will contact you about the {{ percent }}% deposit needed to secure the booking.{% endblocktranslate %}
+
+{% endif %}{% translate "If you have any questions, just reply to this e-mail." %}
+
+-- {{ camping.name }}{% endautoescape %}

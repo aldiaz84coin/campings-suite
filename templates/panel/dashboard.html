@@ -1,0 +1,89 @@
+{% extends "panel/base.html" %}
+{% load i18n core_tags %}
+{% block page_title %}{{ camping.name }}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>{% blocktranslate with name=user.first_name|default:user.display_name %}Hello, {{ name }}{% endblocktranslate %}</h1>
+    <p class="muted">{% blocktranslate with camping=camping.name %}This is the control panel of {{ camping }}.{% endblocktranslate %}</p>
+  </div>
+  <div class="page-header__actions">
+    <a class="btn btn-outline" href="{% url 'public:camping_detail' slug=camping.slug %}" target="_blank" rel="noopener">{% icon "eye" %}<span>{% if camping.is_public %}{% translate "View page" %}{% else %}{% translate "Preview" %}{% endif %}</span></a>
+    {% if is_owner %}
+    <form method="post" action="{% url 'panel:publish' slug=camping.slug %}">
+      {% csrf_token %}
+      {% if camping.is_published %}
+        <button class="btn btn-ghost" type="submit" data-confirm="{% translate 'Hide your page from the public?' %}">{% icon "eye-off" %}<span>{% translate "Unpublish" %}</span></button>
+      {% else %}
+        <button class="btn btn-primary" type="submit">{% icon "globe" %}<span>{% translate "Publish page" %}</span></button>
+      {% endif %}
+    </form>
+    {% endif %}
+  </div>
+</div>
+
+{% if camping.is_published and not camping.is_approved %}
+<div class="alert alert-warning">{% icon "hourglass" %}<span>{% translate "Your page is ready and waiting for approval by the platform. We will review it shortly." %}</span></div>
+{% elif not camping.is_published %}
+<div class="alert alert-info">{% icon "info" %}<span>{% translate "Your page is a draft. Complete the steps below and publish it when you are ready." %}</span></div>
+{% endif %}
+
+<div class="stat-grid">
+  <a class="stat card" href="{% url 'panel:bookings' slug=camping.slug %}">{% icon "inbox" %}<div><strong>{{ pending_count }}</strong><span>{% translate "Pending requests" %}</span></div></a>
+  <a class="stat card" href="{% url 'panel:bookings' slug=camping.slug %}?status=all">{% icon "calendar-check" %}<div><strong>{{ stats.requests_month }}</strong><span>{% translate "Requests this month" %}</span></div></a>
+  <a class="stat card" href="{% url 'panel:photos' slug=camping.slug %}">{% icon "images" %}<div><strong>{{ stats.photos }}</strong><span>{% translate "Photos" %}</span></div></a>
+  <a class="stat card" href="{% url 'panel:accommodations' slug=camping.slug %}">{% icon "tent" %}<div><strong>{{ stats.accommodations }}</strong><span>{% translate "Accommodation types" %}</span></div></a>
+</div>
+
+<div class="dashboard-grid">
+  <section class="card card-pad">
+    <div class="card-head"><h2>{% translate "Set up your page" %}</h2><span class="muted small">{{ progress }}%</span></div>
+    <div class="progress" role="progressbar" aria-valuenow="{{ progress }}" aria-valuemin="0" aria-valuemax="100"><span style="width: {{ progress }}%"></span></div>
+    <ol class="checklist">
+      {% for item in checklist %}
+      <li class="{% if item.done %}is-done{% endif %}">
+        <span class="checklist__mark">{% if item.done %}{% icon "check" %}{% else %}{{ forloop.counter }}{% endif %}</span>
+        <a href="{% url item.url_name slug=camping.slug %}">{{ item.label }}</a>
+      </li>
+      {% endfor %}
+    </ol>
+  </section>
+
+  <section class="card card-pad">
+    <div class="card-head"><h2>{% translate "Latest requests" %}</h2><a class="small" href="{% url 'panel:bookings' slug=camping.slug %}?status=all">{% translate "See all" %}</a></div>
+    {% if recent_requests %}
+    <ul class="request-list" role="list">
+      {% for booking in recent_requests %}
+      <li>
+        <a href="{% url 'panel:booking_detail' slug=camping.slug pk=booking.pk %}">
+          <span><strong>{{ booking.name }}</strong><small class="muted">{{ booking.arrival|date:"j M" }} → {{ booking.departure|date:"j M Y" }} · {{ booking.accommodation_name }}</small></span>
+          {% include "panel/_status_badge.html" with status=booking.status label=booking.get_status_display %}
+        </a>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+      <p class="muted">{% translate "No booking requests yet. They will appear here as soon as guests send them from your page." %}</p>
+    {% endif %}
+  </section>
+
+  {% if upcoming %}
+  <section class="card card-pad">
+    <div class="card-head"><h2>{% translate "Upcoming stays" %}</h2></div>
+    <ul class="request-list" role="list">
+      {% for booking in upcoming %}
+      <li><a href="{% url 'panel:booking_detail' slug=camping.slug pk=booking.pk %}"><span><strong>{{ booking.arrival|date:"D j M" }}</strong><small class="muted">{{ booking.name }} · {{ booking.accommodation_name }} · {% blocktranslate count counter=booking.nights %}{{ counter }} night{% plural %}{{ counter }} nights{% endblocktranslate %}</small></span></a></li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+
+  <section class="card card-pad share-card">
+    <div class="card-head"><h2>{% translate "Your web address" %}</h2></div>
+    {% url 'public:camping_detail' slug=camping.slug as public_path %}
+    <div class="copy-field"><input type="text" readonly value="{{ request.scheme }}://{{ request.get_host }}{{ public_path }}" data-copy-source><button class="btn btn-outline btn-sm" type="button" data-copy>{% icon "copy" %}<span>{% translate "Copy" %}</span></button></div>
+    {% if camping.custom_domain %}<p class="small muted">{% blocktranslate with domain=camping.custom_domain %}Also available at https://{{ domain }}{% endblocktranslate %}</p>{% endif %}
+    <p class="small muted">{% translate "Share it on your social networks, Google Business profile and e-mails." %}</p>
+  </section>
+</div>
+{% endblock %}

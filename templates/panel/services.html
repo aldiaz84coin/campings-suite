@@ -1,0 +1,44 @@
+{% extends "panel/base.html" %}
+{% load i18n core_tags %}
+{% block page_title %}{% translate "Services & extras" %}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><h1>{% translate "Services & extras" %}</h1><p class="muted">{% translate "Everything that has its own price: adults, children, vehicles, electricity, pets, tourist tax, bed linen, cleaning…" %}</p></div>
+  <a class="btn btn-primary" href="{% url 'panel:service_create' slug=camping.slug %}">{% icon "plus" %}<span>{% translate "New service" %}</span></a>
+</div>
+<div class="callout">
+  {% icon "info" %}
+  <div>
+    <p><strong>{% translate "How are services charged?" %}</strong></p>
+    <ul>
+      <li>{% translate "“Always charged”: added automatically to every quote (e.g. price per adult on a pitch, tourist tax)." %}</li>
+      <li>{% translate "“Optional extra”: the guest can choose it in the booking form (e.g. electricity, bed linen)." %}</li>
+      <li>{% translate "“Included”: shown as included in the price, without cost." %}</li>
+    </ul>
+  </div>
+</div>
+{% if services %}
+<div class="table-scroll">
+  <table class="table">
+    <thead><tr><th>{% translate "Service" %}</th><th>{% translate "Price" %}</th><th>{% translate "How it is charged" %}</th><th>{% translate "Applies to" %}</th><th></th></tr></thead>
+    <tbody>
+      {% for service in services %}
+      <tr{% if not service.is_active %} class="is-inactive"{% endif %}>
+        <td><span class="table-item">{% icon service.icon %}<strong>{{ service.display_name }}</strong>{% if not service.is_active %}<span class="badge badge--muted">{% translate "Hidden" %}</span>{% endif %}</span></td>
+        <td class="nowrap">{% if service.mode == "included" %}—{% else %}{{ service.price|money:camping.currency }} <small class="muted">{{ service.get_unit_display }}</small>{% endif %}</td>
+        <td><span class="badge {% if service.mode == 'mandatory' %}badge--info{% elif service.mode == 'optional' %}badge--success{% else %}badge--muted{% endif %}">{% if service.mode == "mandatory" %}{% translate "Always charged" %}{% elif service.mode == "optional" %}{% translate "Optional extra" %}{% else %}{% translate "Included" %}{% endif %}</span></td>
+        <td class="small">{% with accs=service.accommodations.all %}{% if accs %}{% for acc in accs %}{{ acc.display_name }}{% if not forloop.last %}, {% endif %}{% endfor %}{% else %}<span class="muted">{% translate "All" %}</span>{% endif %}{% endwith %}</td>
+        <td class="actions"><a class="btn btn-ghost btn-sm" href="{% url 'panel:service_edit' slug=camping.slug pk=service.pk %}">{% icon "pencil" %}<span>{% translate "Edit" %}</span></a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="card empty-state">
+  {% icon "tag" "icon-xl" %}
+  <p>{% translate "No services yet. Typical ones: Adult, Child (3–10 years), Car, Electricity, Dog, Tourist tax." %}</p>
+  <a class="btn btn-primary" href="{% url 'panel:service_create' slug=camping.slug %}">{% icon "plus" %}<span>{% translate "New service" %}</span></a>
+</div>
+{% endif %}
+{% endblock %}

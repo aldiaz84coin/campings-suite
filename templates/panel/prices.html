@@ -1,0 +1,24 @@
+{% extends "panel/base.html" %}
+{% load i18n core_tags %}
+{% block page_title %}{% translate "Price table" %}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><h1>{% translate "Price table" %}</h1><p class="muted">{% blocktranslate with currency=camping.currency %}All prices in {{ currency }}, VAT included. Leave a season empty to use the base price.{% endblocktranslate %}</p></div>
+  <a class="btn btn-outline" href="{% url 'panel:seasons' slug=camping.slug %}">{% icon "calendar-range" %}<span>{% translate "Manage seasons" %}</span></a>
+</div>
+{% if not accommodation_rows and not service_rows %}
+<div class="card empty-state">{% icon "euro" "icon-xl" %}<p>{% translate "First create your accommodation types and services, then set their prices here." %}</p>
+  <a class="btn btn-primary" href="{% url 'panel:accommodation_create' slug=camping.slug %}">{% icon "plus" %}<span>{% translate "New accommodation type" %}</span></a></div>
+{% else %}
+<form method="post" class="form-stack" novalidate>
+  {% csrf_token %}
+  {% if accommodation_rows %}
+    {% include "panel/_price_matrix.html" with rows=accommodation_rows title=_("Accommodation") %}
+  {% endif %}
+  {% if service_rows %}
+    {% include "panel/_price_matrix.html" with rows=service_rows title=_("Services & extras") %}
+  {% endif %}
+  {% include "panel/_form_actions.html" with label=_("Save prices") %}
+</form>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends "panel/base.html" %}
+{% load i18n core_tags %}
+{% block page_title %}{% translate "Edit photo" %}{% endblock %}
+{% block content %}
+<div class="page-header"><div><a class="back-link" href="{% url 'panel:photos' slug=camping.slug %}">{% icon "arrow-left" %} {% translate "Photos" %}</a><h1>{% translate "Edit photo" %}</h1></div></div>
+<div class="split">
+  <img class="photo-large card" src="{{ photo.image.url }}" alt="{{ photo.alt_text }}">
+  <form method="post" novalidate class="form-stack">
+    {% csrf_token %}
+    {% include "partials/form_errors.html" %}
+    <section class="card card-pad">
+      {% include "panel/_lang_hint.html" %}
+      {% include "partials/field.html" with field=form.caption %}
+      {% include "partials/field.html" with field=form.accommodation %}
+    </section>
+    {% url 'panel:photos' slug=camping.slug as cancel_url %}
+    {% include "panel/_form_actions.html" with cancel_url=cancel_url %}
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% load i18n static core_tags %}
+{% block title %}{{ camping.name }}{% endblock %}
+{% block styles %}<link rel="stylesheet" href="{% static 'css/site.css' %}">{% endblock %}
+{% block meta %}{% for code, url in alternates %}<link rel="alternate" hreflang="{{ code }}" href="{{ url }}">{% endfor %}{% if canonical %}<link rel="canonical" href="{{ canonical }}">{% endif %}{% if camping.logo %}<link rel="icon" href="{{ camping.logo.url }}">{% endif %}<meta name="theme-color" content="{{ camping.primary_color }}">{% endblock %}
+{% block body_class %}camping-site font-{{ camping.font_style }}{% endblock %}
+{% block body_attrs %} style="--primary: {{ camping.primary_color }}; --on-primary: {{ camping.primary_color|contrast_text }}; --accent: {{ camping.accent_color }}; --on-accent: {{ camping.accent_color|contrast_text }};"{% endblock %}
+{% block body %}
+{% if is_preview %}
+<div class="preview-banner" role="note">
+  {% icon "eye" %}<span>{% translate "Preview: this page is not visible to the public yet." %}</span>
+  {% if not on_custom_domain %}<a href="{% url 'panel:dashboard' slug=camping.slug %}">{% translate "Back to the panel" %}</a>{% endif %}
+</div>
+{% endif %}
+<header class="camping-header" data-header>
+  <div class="container camping-header__inner">
+    <a class="camping-brand" href="{% camping_url 'public:camping_detail' camping %}">
+      {% if camping.logo %}<img class="camping-brand__logo" src="{{ camping.logo.url }}" alt="">{% else %}<span class="camping-brand__mark">{% icon "tent" %}</span>{% endif %}
+      <span class="camping-brand__name">{{ camping.name }}</span>
+    </a>
+    <nav class="camping-nav" id="camping-nav" aria-label="{% translate 'Sections' %}" data-nav>
+      {% camping_url 'public:camping_detail' camping as camping_home %}
+      <a href="{{ camping_home }}#about">{% translate "The camping" %}</a>
+      <a href="{{ camping_home }}#accommodation">{% translate "Accommodation" %}</a>
+      <a href="{{ camping_home }}#facilities">{% translate "Facilities" %}</a>
+      <a href="{{ camping_home }}#prices">{% translate "Prices" %}</a>
+      <a href="{{ camping_home }}#policies">{% translate "Policies" %}</a>
+      <a href="{{ camping_home }}#location">{% translate "Location" %}</a>
+    </nav>
+    <div class="camping-header__actions">
+      {% include "partials/language_switcher.html" %}
+      {% if camping.accepts_booking_requests %}<a class="btn btn-accent btn-sm" href="{% camping_url 'public:booking' camping %}">{% icon "calendar-check" %}<span>{% translate "Book" %}</span></a>{% endif %}
+      <button class="nav-toggle" type="button" aria-controls="camping-nav" aria-expanded="false" data-nav-toggle>{% icon "menu" %}<span class="sr-only">{% translate "Menu" %}</span></button>
+    </div>
+  </div>
+</header>
+<main id="main">
+  {% block content %}{% endblock %}
+</main>
+<footer class="camping-footer">
+  <div class="container camping-footer__inner">
+    <div>
+      <p class="camping-footer__name">{{ camping.name }}</p>
+      {% if camping.address or camping.city %}<p>{{ camping.address }}{% if camping.address %}<br>{% endif %}{{ camping.postal_code }} {{ camping.city }}{% if camping.region %}, {{ camping.region }}{% endif %}{% if camping.country %} · {{ camping.country }}{% endif %}</p>{% endif %}
+    </div>
+    <ul class="contact-list" role="list">
+      {% if camping.phone %}<li><a href="tel:{{ camping.phone|cut:' ' }}">{% icon "phone" %}<span>{{ camping.phone }}</span></a></li>{% endif %}
+      {% if camping.whatsapp %}<li><a href="https://wa.me/{{ camping.whatsapp|digits }}" rel="noopener" target="_blank">{% icon "whatsapp" %}<span>WhatsApp</span></a></li>{% endif %}
+      {% if camping.email %}<li><a href="mailto:{{ camping.email }}">{% icon "mail" %}<span>{{ camping.email }}</span></a></li>{% endif %}
+      {% if camping.website %}<li><a href="{{ camping.website }}" rel="noopener" target="_blank">{% icon "globe" %}<span>{% translate "Website" %}</span></a></li>{% endif %}
+      {% if camping.instagram %}<li><a href="{{ camping.instagram }}" rel="noopener" target="_blank">{% icon "instagram" %}<span>Instagram</span></a></li>{% endif %}
+      {% if camping.facebook %}<li><a href="{{ camping.facebook }}" rel="noopener" target="_blank">{% icon "facebook" %}<span>Facebook</span></a></li>{% endif %}
+    </ul>
+  </div>
+  <div class="container camping-footer__bottom">
+    <a href="{% camping_url 'public:camping_privacy' camping %}">{% translate "Privacy" %}</a>
+    <span>{% if on_custom_domain and PLATFORM_URL %}<a href="{{ PLATFORM_URL }}" rel="noopener">{% blocktranslate with platform=PLATFORM_NAME %}Powered by {{ platform }}{% endblocktranslate %}</a>{% elif on_custom_domain %}{% blocktranslate with platform=PLATFORM_NAME %}Powered by {{ platform }}{% endblocktranslate %}{% else %}<a href="{% url 'public:home' %}">{% blocktranslate with platform=PLATFORM_NAME %}Powered by {{ platform }}{% endblocktranslate %}</a>{% endif %}</span>
+  </div>
+</footer>
+<dialog class="lightbox" data-lightbox-dialog aria-label="{% translate 'Photo viewer' %}">
+  <figure class="lightbox__figure"><img alt="" data-lightbox-image><figcaption data-lightbox-caption></figcaption></figure>
+  <button class="lightbox__btn lightbox__close" type="button" data-lightbox-close aria-label="{% translate 'Close' %}">{% icon "x" %}</button>
+  <button class="lightbox__btn lightbox__prev" type="button" data-lightbox-prev aria-label="{% translate 'Previous photo' %}">{% icon "chevron-left" %}</button>
+  <button class="lightbox__btn lightbox__next" type="button" data-lightbox-next aria-label="{% translate 'Next photo' %}">{% icon "chevron-right" %}</button>
+  <span class="lightbox__counter" data-lightbox-counter></span>
+</dialog>
+{% endblock %}
+{% block scripts %}<script src="{% static 'js/site.js' %}" defer></script>{% endblock %}

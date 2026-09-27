@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load i18n static core_tags %}
+{% block styles %}<link rel="stylesheet" href="{% static 'css/panel.css' %}">{% endblock %}
+{% block body_class %}auth-page{% endblock %}
+{% block body %}
+<div class="auth-shell">
+  <header class="auth-header">
+    <a class="brand" href="{% url 'public:home' %}"><span class="brand__mark">{% icon "tent" %}</span><span class="brand__name">{{ PLATFORM_NAME }}</span></a>
+    {% include "partials/language_switcher.html" %}
+  </header>
+  <main id="main" class="auth-main">
+    <div class="auth-card card">
+      {% include "partials/messages.html" %}
+      {% block content %}{% endblock %}
+    </div>
+    {% block below %}{% endblock %}
+  </main>
+</div>
+{% endblock %}
+{% block scripts %}<script src="{% static 'js/panel.js' %}" defer></script>{% endblock %}

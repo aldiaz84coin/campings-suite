@@ -1,0 +1,42 @@
+{% extends "panel/base.html" %}
+{% load i18n core_tags %}
+{% block page_title %}{% translate "Settings" %}{% endblock %}
+{% block content %}
+<div class="page-header"><div><h1>{% translate "Settings" %}</h1><p class="muted">{% translate "Web address, languages, currency and booking requests." %}</p></div></div>
+<form method="post" novalidate class="form-stack">
+  {% csrf_token %}
+  {% include "partials/form_errors.html" %}
+  <section class="card card-pad">
+    <h2>{% translate "Web address" %}</h2>
+    {% url 'public:camping_detail' slug='SLUG' as sample_path %}
+    <div class="field{% if form.slug.errors %} has-error{% endif %}">
+      <label class="field__label" for="{{ form.slug.id_for_label }}">{{ form.slug.label }}</label>
+      <div class="input-affix"><span class="input-affix__prefix">{{ request.get_host }}{{ sample_path|cut:'SLUG/' }}</span>{{ form.slug }}</div>
+      <p class="field__help">{{ form.slug.help_text }}</p>
+      {% for error in form.slug.errors %}<p class="field__error">{{ error }}</p>{% endfor %}
+    </div>
+    {% if form.custom_domain %}
+      {% include "partials/field.html" with field=form.custom_domain %}
+      <p class="field__help">{% translate "Platform administrators: add the certificate with “fly certs add <domain>” and ask the camping to create the DNS records Fly shows." %}</p>
+    {% elif camping.custom_domain %}
+      <p class="muted">{% blocktranslate with domain=camping.custom_domain %}Own domain: {{ domain }}{% endblocktranslate %}</p>
+    {% else %}
+      <p class="muted small">{% translate "Would you like to use your own domain (www.yourcamping.com)? Contact the platform administrator." %}</p>
+    {% endif %}
+  </section>
+  <section class="card card-pad">
+    <h2>{% translate "Languages and currency" %}</h2>
+    <div class="form-grid">
+      {% include "partials/field.html" with field=form.default_language %}
+      {% include "partials/field.html" with field=form.currency %}
+    </div>
+    {% include "partials/field.html" with field=form.languages %}
+  </section>
+  <section class="card card-pad">
+    <h2>{% translate "Booking requests" %}</h2>
+    {% include "partials/field.html" with field=form.accepts_booking_requests %}
+    {% include "partials/field.html" with field=form.notification_email %}
+  </section>
+  {% include "panel/_form_actions.html" %}
+</form>
+{% endblock %}

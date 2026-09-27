@@ -1,0 +1,42 @@
+{% extends "panel/base.html" %}
+{% load i18n core_tags %}
+{% block page_title %}{% translate "Location & season" %}{% endblock %}
+{% block content %}
+<div class="page-header"><div><h1>{% translate "Location & season" %}</h1><p class="muted">{% translate "Where you are and when you are open." %}</p></div></div>
+<form method="post" novalidate class="form-stack">
+  {% csrf_token %}
+  {% include "partials/form_errors.html" %}
+  <section class="card card-pad">
+    <h2>{% translate "Address" %}</h2>
+    {% include "partials/field.html" with field=form.address %}
+    <div class="form-grid">
+      {% include "partials/field.html" with field=form.postal_code %}
+      {% include "partials/field.html" with field=form.city %}
+      {% include "partials/field.html" with field=form.region %}
+      {% include "partials/field.html" with field=form.country %}
+    </div>
+  </section>
+  <section class="card card-pad">
+    <h2>{% translate "Map" %}</h2>
+    <div class="form-grid">
+      {% include "partials/field.html" with field=form.latitude %}
+      {% include "partials/field.html" with field=form.longitude %}
+    </div>
+    {% with links=camping.map_links %}{% if links.embed %}
+      <iframe class="map-preview" title="{% translate 'Map preview' %}" loading="lazy" src="{{ links.embed }}" referrerpolicy="no-referrer"></iframe>
+    {% endif %}{% endwith %}
+    {% include "panel/_lang_hint.html" %}
+    {% include "partials/field.html" with field=form.location_info %}
+  </section>
+  <section class="card card-pad">
+    <h2>{% translate "Opening period" %}</h2>
+    {% include "partials/field.html" with field=form.open_all_year %}
+    <div class="form-grid" data-season-dates>
+      {% include "partials/field.html" with field=form.opening_date %}
+      {% include "partials/field.html" with field=form.closing_date %}
+    </div>
+    <p class="field__help">{% translate "Booking requests outside these dates are not accepted." %}</p>
+  </section>
+  {% include "panel/_form_actions.html" %}
+</form>
+{% endblock %}

@@ -1,0 +1,5 @@
+/* Translated fields inside the Django admin: show every language stacked. */
+.i18n-tabs { display: none !important; }
+.i18n-field { display: grid; gap: 8px; }
+.i18n-pane-label { display: block; font-weight: 600; font-size: 12px; margin-bottom: 2px; opacity: .75; }
+.i18n-field input[type="text"], .i18n-field textarea { width: 100%; max-width: 720px; box-sizing: border-box; }

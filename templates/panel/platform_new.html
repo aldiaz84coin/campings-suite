@@ -1,0 +1,18 @@
+{% extends "panel/base.html" %}
+{% load i18n core_tags %}
+{% block page_title %}{% translate "New camping" %}{% endblock %}
+{% block content %}
+<div class="page-header"><div><a class="back-link" href="{% url 'panel:platform' %}">{% icon "arrow-left" %} {% translate "Platform" %}</a><h1>{% translate "New camping" %}</h1><p class="muted">{% translate "Creates the camping and invites its owner by e-mail. If the owner has no account yet, you will get a link to share with them." %}</p></div></div>
+<form method="post" novalidate class="form-stack narrow-form">
+  {% csrf_token %}
+  {% include "partials/form_errors.html" %}
+  <section class="card card-pad">
+    {% include "partials/field.html" with field=form.name %}
+    {% include "partials/field.html" with field=form.owner_email %}
+    {% include "partials/field.html" with field=form.owner_name %}
+    {% include "partials/field.html" with field=form.default_language %}
+  </section>
+  {% url 'panel:platform' as cancel_url %}
+  {% include "panel/_form_actions.html" with cancel_url=cancel_url label=_("Create camping") %}
+</form>
+{% endblock %}

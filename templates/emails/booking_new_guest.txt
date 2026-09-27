@@ -1,0 +1,11 @@
+{% load i18n %}{% autoescape off %}{% blocktranslate with name=booking.name %}Hello {{ name }},{% endblocktranslate %}
+
+{% blocktranslate with camping=camping.name %}Thank you for your booking request at {{ camping }}. This is a summary of what you sent:{% endblocktranslate %}
+
+{% include "emails/_booking_summary.txt" %}
+{% translate "The camping will check availability and reply to you as soon as possible. This e-mail is not a booking confirmation yet." %}
+
+{% if camping.phone %}{% translate "Phone" %}: {{ camping.phone }}
+{% endif %}{% if camping.email %}{% translate "E-mail" %}: {{ camping.email }}
+{% endif %}
+-- {{ camping.name }}{% endautoescape %}

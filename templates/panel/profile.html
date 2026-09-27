@@ -1,0 +1,32 @@
+{% extends "panel/base.html" %}
+{% load i18n core_tags %}
+{% block page_title %}{% translate "Description & contact" %}{% endblock %}
+{% block content %}
+<div class="page-header"><div><h1>{% translate "Description & contact" %}</h1><p class="muted">{% translate "What visitors read about your camping and how they can reach you." %}</p></div></div>
+<form method="post" novalidate class="form-stack">
+  {% csrf_token %}
+  {% include "partials/form_errors.html" %}
+  {% include "panel/_lang_hint.html" %}
+  <section class="card card-pad">
+    <h2>{% translate "Presentation" %}</h2>
+    <div class="form-grid">
+      {% include "partials/field.html" with field=form.name %}
+      {% include "partials/field.html" with field=form.stars %}
+    </div>
+    {% include "partials/field.html" with field=form.tagline %}
+    {% include "partials/field.html" with field=form.description %}
+  </section>
+  <section class="card card-pad">
+    <h2>{% translate "Contact" %}</h2>
+    <div class="form-grid">
+      {% include "partials/field.html" with field=form.email %}
+      {% include "partials/field.html" with field=form.phone %}
+      {% include "partials/field.html" with field=form.whatsapp %}
+      {% include "partials/field.html" with field=form.website %}
+      {% include "partials/field.html" with field=form.instagram %}
+      {% include "partials/field.html" with field=form.facebook %}
+    </div>
+  </section>
+  {% include "panel/_form_actions.html" %}
+</form>
+{% endblock %}

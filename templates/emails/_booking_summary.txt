@@ -1,0 +1,11 @@
+{% load i18n core_tags %}{% translate "Reference" %}: {{ booking.reference }}
+{% translate "Accommodation" %}: {{ accommodation_name }}
+{% translate "Arrival" %}: {{ booking.arrival|date:"DATE_FORMAT" }}
+{% translate "Departure" %}: {{ booking.departure|date:"DATE_FORMAT" }} ({% blocktranslate count counter=booking.nights %}{{ counter }} night{% plural %}{{ counter }} nights{% endblocktranslate %})
+{% translate "Guests" %}: {% blocktranslate count counter=booking.adults %}{{ counter }} adult{% plural %}{{ counter }} adults{% endblocktranslate %}{% if booking.children %}, {% blocktranslate count counter=booking.children %}{{ counter }} child{% plural %}{{ counter }} children{% endblocktranslate %}{% endif %}{% if booking.pets %}, {% blocktranslate count counter=booking.pets %}{{ counter }} pet{% plural %}{{ counter }} pets{% endblocktranslate %}{% endif %}
+{% if booking.extras.all %}{% translate "Extras" %}: {% for extra in booking.extras.all %}{{ extra.display_name }}{% if not forloop.last %}, {% endif %}{% endfor %}
+{% endif %}{% if quote.lines %}
+{% for line in quote.lines %}- {{ line.label }} ({{ line.detail }}): {{ line.amount_display }}
+{% endfor %}{% translate "Estimated total" %}: {{ quote.total_display }}{% if quote.deposit_display %}
+{% translate "Deposit to confirm" %}: {{ quote.deposit_display }}{% endif %}
+{% endif %}

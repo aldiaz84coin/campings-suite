@@ -1,0 +1,37 @@
+{% extends "panel/base.html" %}
+{% load i18n core_tags %}
+{% block page_title %}{% translate "Seasons" %}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><h1>{% translate "Seasons" %}</h1><p class="muted">{% translate "Periods with different prices: low, mid and high season, bank holidays… Dates cannot overlap." %}</p></div>
+  <div class="page-header__actions">
+    {% if seasons %}<form method="post" action="{% url 'panel:seasons_copy' slug=camping.slug %}">{% csrf_token %}<button class="btn btn-outline" type="submit">{% icon "copy" %}<span>{% translate "Copy to next year" %}</span></button></form>{% endif %}
+    <a class="btn btn-primary" href="{% url 'panel:season_create' slug=camping.slug %}">{% icon "plus" %}<span>{% translate "New season" %}</span></a>
+  </div>
+</div>
+{% if seasons %}
+<div class="table-scroll">
+  <table class="table">
+    <thead><tr><th>{% translate "Season" %}</th><th>{% translate "From" %}</th><th>{% translate "To" %}</th><th>{% translate "Minimum stay" %}</th><th></th></tr></thead>
+    <tbody>
+    {% for season in seasons %}
+      <tr>
+        <td><span class="table-item"><span class="season-dot" style="--dot: {{ season.color }}"></span><strong>{{ season.name|tr }}</strong></span></td>
+        <td class="nowrap">{{ season.start_date|date:"D j M Y" }}</td>
+        <td class="nowrap">{{ season.end_date|date:"D j M Y" }}</td>
+        <td>{% if season.min_nights %}{% blocktranslate count counter=season.min_nights %}{{ counter }} night{% plural %}{{ counter }} nights{% endblocktranslate %}{% else %}—{% endif %}</td>
+        <td class="actions"><a class="btn btn-ghost btn-sm" href="{% url 'panel:season_edit' slug=camping.slug pk=season.pk %}">{% icon "pencil" %}<span>{% translate "Edit" %}</span></a></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+<p class="small muted">{% url 'panel:prices' slug=camping.slug as prices_url %}{% blocktranslate %}Now set the price of each accommodation and service per season in the <a href="{{ prices_url }}">price table</a>. Days outside any season use the base price.{% endblocktranslate %}</p>
+{% else %}
+<div class="card empty-state">
+  {% icon "calendar-range" "icon-xl" %}
+  <p>{% translate "Without seasons, the base price of each accommodation and service is used all year." %}</p>
+  <a class="btn btn-primary" href="{% url 'panel:season_create' slug=camping.slug %}">{% icon "plus" %}<span>{% translate "New season" %}</span></a>
+</div>
+{% endif %}
+{% endblock %}

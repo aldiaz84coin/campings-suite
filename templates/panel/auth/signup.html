@@ -1,0 +1,19 @@
+{% extends "panel/auth/base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Create your camping's page" %} · {{ PLATFORM_NAME }}{% endblock %}
+{% block content %}
+<h1>{% translate "Create your camping's page" %}</h1>
+<p class="muted">{% translate "In a few minutes you will have a website with photos, prices and booking requests, in several languages." %}</p>
+{% include "partials/form_errors.html" %}
+<form method="post" novalidate>
+  {% csrf_token %}
+  {% include "partials/field.html" with field=form.camping_name %}
+  {% include "partials/field.html" with field=form.first_name %}
+  {% include "partials/field.html" with field=form.email %}
+  {% include "partials/field.html" with field=form.password1 %}
+  {% include "partials/field.html" with field=form.password2 %}
+  {% include "partials/field.html" with field=form.accept_terms %}
+  <button class="btn btn-primary btn-block" type="submit">{% translate "Create my account" %}</button>
+</form>
+{% endblock %}
+{% block below %}<p class="auth-below">{% translate "Already have an account?" %} <a href="{% url 'panel:login' %}">{% translate "Sign in" %}</a></p>{% endblock %}

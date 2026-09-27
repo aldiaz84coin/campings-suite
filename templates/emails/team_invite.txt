@@ -1,0 +1,8 @@
+{% load i18n %}{% autoescape off %}{% blocktranslate with camping=camping.name platform=platform_name %}You have been invited to manage {{ camping }} on {{ platform }}.{% endblocktranslate %}
+
+{% if set_password_url %}{% translate "Choose your password here to get started:" %}
+{{ set_password_url }}
+{% else %}{% translate "Sign in with your usual account:" %}
+{{ login_url }}
+{% endif %}
+-- {{ platform_name }}{% endautoescape %}

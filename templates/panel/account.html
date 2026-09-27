@@ -1,0 +1,23 @@
+{% extends "panel/base.html" %}
+{% load i18n core_tags %}
+{% block page_title %}{% translate "My account" %}{% endblock %}
+{% block content %}
+<div class="page-header"><div><h1>{% translate "My account" %}</h1><p class="muted">{{ user.email }}</p></div></div>
+<form method="post" novalidate class="form-stack narrow-form">
+  {% csrf_token %}
+  {% include "partials/form_errors.html" %}
+  <section class="card card-pad">
+    <div class="form-grid">
+      {% include "partials/field.html" with field=form.first_name %}
+      {% include "partials/field.html" with field=form.last_name %}
+    </div>
+    {% include "partials/field.html" with field=form.preferred_language %}
+  </section>
+  {% include "panel/_form_actions.html" %}
+</form>
+<section class="card card-pad narrow-form">
+  <h2>{% icon "key-round" %} {% translate "Password" %}</h2>
+  <p class="muted">{% translate "Use a long password that you do not use on other websites." %}</p>
+  <a class="btn btn-outline" href="{% url 'panel:password_change' %}">{% translate "Change password" %}</a>
+</section>
+{% endblock %}

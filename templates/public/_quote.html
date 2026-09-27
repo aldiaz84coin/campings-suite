@@ -1,0 +1,15 @@
+{% load i18n %}{% if quote %}
+  {% if quote.errors %}
+    <ul class="quote-errors" role="list">{% for error in quote.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+  {% endif %}
+  {% if quote.lines %}
+    <p class="quote-nights">{{ quote.nights_label }}</p>
+    <ul class="quote-lines" role="list">
+      {% for line in quote.lines %}<li><span><strong>{{ line.label }}</strong><small>{{ line.detail }}</small></span><span>{{ line.amount_display }}</span></li>{% endfor %}
+    </ul>
+    <p class="quote-total"><span>{% translate "Estimated total" %}</span><strong>{{ quote.total_display }}</strong></p>
+    {% if quote.deposit_display %}<p class="quote-deposit"><span>{% translate "Deposit to confirm" %}</span><span>{{ quote.deposit_display }}</span></p>{% endif %}
+  {% endif %}
+{% else %}
+  <p class="muted">{% translate "Choose an accommodation and your dates to see the price." %}</p>
+{% endif %}

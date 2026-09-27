@@ -1,0 +1,63 @@
+{% load i18n core_tags %}
+{% with cancellation_text=policy.cancellation_text|tr:camping.default_language payment_text=policy.payment_text|tr:camping.default_language pets_text=policy.pets_text|tr:camping.default_language rules_text=policy.rules_text|tr:camping.default_language %}
+<div class="policy-grid">
+  <article class="policy-card">
+    <h3>{% icon "clock" %} {% translate "Arrival and departure" %}</h3>
+    <p>{% blocktranslate with start=policy.check_in_from|time:"H:i" %}Check-in from {{ start }}{% endblocktranslate %}{% if policy.check_in_until %} {% blocktranslate with end=policy.check_in_until|time:"H:i" %}until {{ end }}{% endblocktranslate %}{% endif %}.</p>
+    <p>{% blocktranslate with end=policy.check_out_until|time:"H:i" %}Check-out until {{ end }}.{% endblocktranslate %}</p>
+    {% if policy.quiet_hours_from and policy.quiet_hours_until %}<p>{% blocktranslate with start=policy.quiet_hours_from|time:"H:i" end=policy.quiet_hours_until|time:"H:i" %}Quiet hours from {{ start }} to {{ end }}.{% endblocktranslate %}</p>{% endif %}
+  </article>
+
+  <article class="policy-card">
+    <h3>{% icon "moon" %} {% translate "Length of stay" %}</h3>
+    <p>{% blocktranslate count counter=policy.min_nights %}Minimum stay: {{ counter }} night.{% plural %}Minimum stay: {{ counter }} nights.{% endblocktranslate %}</p>
+    {% if policy.max_nights %}<p>{% blocktranslate count counter=policy.max_nights %}Maximum stay: {{ counter }} night.{% plural %}Maximum stay: {{ counter }} nights.{% endblocktranslate %}</p>{% endif %}
+    {% if season_minimums %}<ul class="plain-list">{% for season in season_minimums %}<li>{{ season.name|tr }}: {% blocktranslate count counter=season.min_nights %}{{ counter }} night{% plural %}{{ counter }} nights{% endblocktranslate %}</li>{% endfor %}</ul>{% endif %}
+    {% if policy.min_age %}<p>{% blocktranslate with age=policy.min_age %}The person booking must be at least {{ age }} years old.{% endblocktranslate %}</p>{% endif %}
+  </article>
+
+  <article class="policy-card">
+    <h3>{% icon "wallet" %} {% translate "Deposit and payment" %}</h3>
+    {% if policy.deposit_percent %}
+      <p>{% blocktranslate with percent=policy.deposit_percent %}A deposit of {{ percent }}% of the total is required to confirm the booking.{% endblocktranslate %}</p>
+    {% else %}
+      <p>{% translate "No deposit is required to confirm the booking." %}</p>
+    {% endif %}
+    {% if policy.payment_method_labels %}<ul class="chips chips--static" role="list">{% for label in policy.payment_method_labels %}<li class="chip">{{ label }}</li>{% endfor %}</ul>{% endif %}
+    {% if payment_text %}<div class="prose small">{{ payment_text|linebreaks }}</div>{% endif %}
+  </article>
+
+  <article class="policy-card">
+    <h3>{% icon "calendar-range" %} {% translate "Cancellation" %}</h3>
+    {% if not policy.refundable %}
+      <p>{% translate "Non-refundable: cancellations are not refunded." %}</p>
+    {% else %}
+      {% if policy.free_cancellation_days %}
+        <p>{% blocktranslate count counter=policy.free_cancellation_days %}Free cancellation up to {{ counter }} day before arrival.{% plural %}Free cancellation up to {{ counter }} days before arrival.{% endblocktranslate %}</p>
+      {% else %}
+        <p>{% translate "Free cancellation until the day of arrival." %}</p>
+      {% endif %}
+      {% if policy.cancellation_fee_percent and policy.free_cancellation_days %}
+        {% if policy.cancellation_fee_percent >= 100 %}
+          <p>{% translate "After that, the full amount is charged." %}</p>
+        {% else %}
+          <p>{% blocktranslate with percent=policy.cancellation_fee_percent %}After that, {{ percent }}% of the total is charged.{% endblocktranslate %}</p>
+        {% endif %}
+      {% endif %}
+    {% endif %}
+    {% if cancellation_text %}<div class="prose small">{{ cancellation_text|linebreaks }}</div>{% endif %}
+  </article>
+
+  <article class="policy-card">
+    <h3>{% icon "dog" %} {% translate "Pets" %}</h3>
+    <p>{% if policy.pets_allowed %}{% translate "Pets are welcome." %}{% else %}{% translate "Pets are not allowed." %}{% endif %}</p>
+    {% if pets_text %}<div class="prose small">{{ pets_text|linebreaks }}</div>{% endif %}
+  </article>
+</div>
+{% if rules_text %}
+<details class="rules">
+  <summary>{% icon "scroll-text" %} {% translate "Camping rules" %}</summary>
+  <div class="prose">{{ rules_text|linebreaks }}</div>
+</details>
+{% endif %}
+{% endwith %}

@@ -1,0 +1,24 @@
+{% load i18n core_tags %}
+<section class="card">
+  <div class="table-scroll table-scroll--flat">
+    <table class="table price-matrix">
+      <caption>{{ title }}</caption>
+      <thead>
+        <tr>
+          <th scope="col">{% translate "Item" %}</th>
+          <th scope="col">{% translate "Base price" %}</th>
+          {% for season in seasons %}<th scope="col"><span class="season-dot" style="--dot: {{ season.color }}"></span>{{ season.name|tr }}<small>{{ season.start_date|date:"j/m" }}–{{ season.end_date|date:"j/m/y" }}</small></th>{% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in rows %}
+        <tr>
+          <th scope="row"><strong>{{ row.item.display_name }}</strong><small class="muted">{% if row.item.get_price_unit_display %}{{ row.item.get_price_unit_display }}{% else %}{{ row.item.get_unit_display }}{% endif %}</small></th>
+          <td><input class="price-input" type="text" inputmode="decimal" name="{{ row.base_name }}" value="{{ row.base|stringformat:'s' }}" aria-label="{% translate 'Base price' %}"></td>
+          {% for cell in row.cells %}<td><input class="price-input" type="text" inputmode="decimal" name="{{ cell.name }}" value="{{ cell.value|stringformat:'s' }}" placeholder="{{ row.base|stringformat:'s' }}"></td>{% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>

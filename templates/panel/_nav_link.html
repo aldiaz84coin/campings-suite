@@ -1,0 +1,1 @@
+{% load core_tags %}{% with url_name="panel:"|add:name %}<a class="sidebar-nav__link{% if section == name %} is-active{% endif %}" href="{% url url_name slug=camping.slug %}"{% if section == name %} aria-current="page"{% endif %}>{% icon icon %}<span>{{ label }}</span>{% if badge %}<span class="count">{{ badge }}</span>{% endif %}</a>{% endwith %}

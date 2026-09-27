@@ -1,0 +1,17 @@
+{% extends "panel/auth/base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Sign in" %} · {{ PLATFORM_NAME }}{% endblock %}
+{% block content %}
+<h1>{% translate "Camping area" %}</h1>
+<p class="muted">{% translate "Sign in to manage your camping's page, prices and booking requests." %}</p>
+{% include "partials/form_errors.html" %}
+<form method="post" novalidate>
+  {% csrf_token %}
+  {% include "partials/field.html" with field=form.username %}
+  {% include "partials/field.html" with field=form.password %}
+  <input type="hidden" name="next" value="{{ next }}">
+  <button class="btn btn-primary btn-block" type="submit">{% translate "Sign in" %}</button>
+</form>
+<p class="auth-links"><a href="{% url 'panel:password_reset' %}">{% translate "Forgot your password?" %}</a></p>
+{% endblock %}
+{% block below %}{% if SIGNUP_ENABLED %}<p class="auth-below">{% translate "Is your camping not listed yet?" %} <a href="{% url 'panel:signup' %}">{% translate "Create its page for free" %}</a></p>{% endif %}{% endblock %}

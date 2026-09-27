@@ -1,0 +1,4 @@
+{% load i18n core_tags %}<div class="form-actions">
+  {% if cancel_url %}<a class="btn btn-ghost" href="{{ cancel_url }}">{% translate "Cancel" %}</a>{% endif %}
+  <button class="btn btn-primary" type="submit">{% icon "check" %}<span>{{ label|default:_("Save changes") }}</span></button>
+</div>

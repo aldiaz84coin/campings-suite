@@ -1,0 +1,112 @@
+{% extends "public/camping_base.html" %}
+{% load i18n core_tags %}
+{% block title %}{% translate "Booking request" %} · {{ camping.name }}{% endblock %}
+{% block content %}
+<section class="section booking-page">
+  <div class="container">
+    <a class="back-link" href="{% camping_url 'public:camping_detail' camping %}">{% icon "arrow-left" %}<span>{{ camping.name }}</span></a>
+    <h1>{% translate "Booking request" %}</h1>
+    <p class="lead">{% translate "Tell us about your stay. The camping will check availability and answer by e-mail. You do not pay anything now." %}</p>
+
+    {% if not camping.accepts_booking_requests %}
+      <div class="alert alert-info">{% icon "info" %}<span>{% translate "This camping is not taking booking requests online at the moment. Please contact them directly." %}{% if camping.phone %} {% icon "phone" %} <a href="tel:{{ camping.phone|cut:' ' }}">{{ camping.phone }}</a>{% endif %}{% if camping.email %} {% icon "mail" %} <a href="mailto:{{ camping.email }}">{{ camping.email }}</a>{% endif %}</span></div>
+    {% elif not accommodations %}
+      <div class="alert alert-info">{% icon "info" %}<span>{% translate "Online booking requests will be available soon." %}</span></div>
+    {% else %}
+    <form method="post" class="booking-layout" data-booking-form data-quote-url="{{ quote_url }}" novalidate>
+      {% csrf_token %}
+      <div class="booking-main">
+        {% include "partials/form_errors.html" %}
+
+        <fieldset class="card form-card">
+          <legend><span class="step">1</span> {% translate "Accommodation" %}</legend>
+          <div class="acc-options">
+            {% for acc in accommodations %}
+            {% with photo=acc.photos.all|first lowest=acc.lowest_price %}
+            <label class="acc-option">
+              <input type="radio" name="accommodation" value="{{ acc.pk }}" data-max-guests="{{ acc.max_guests }}" {% if form.accommodation.value|stringformat:"s" == acc.pk|stringformat:"s" or accommodations|length == 1 %}checked{% endif %} required>
+              <span class="acc-option__media">{% if photo %}<img src="{{ photo.thumbnail.url }}" alt="" loading="lazy">{% else %}{% icon acc.kind_icon %}{% endif %}</span>
+              <span class="acc-option__text">
+                <strong>{{ acc.display_name }}</strong>
+                <span class="muted small">{{ acc.get_kind_display }} · {% blocktranslate count counter=acc.max_guests %}up to {{ counter }} guest{% plural %}up to {{ counter }} guests{% endblocktranslate %}</span>
+                {% if lowest %}<span class="small">{% blocktranslate with price=lowest|money:camping.currency %}from {{ price }}{% endblocktranslate %} {{ acc.get_price_unit_display }}</span>{% endif %}
+              </span>
+            </label>
+            {% endwith %}
+            {% endfor %}
+          </div>
+          {% for error in form.accommodation.errors %}<p class="field__error">{{ error }}</p>{% endfor %}
+        </fieldset>
+
+        <fieldset class="card form-card">
+          <legend><span class="step">2</span> {% translate "Dates and guests" %}</legend>
+          <div class="form-grid">
+            {% include "partials/field.html" with field=form.arrival %}
+            {% include "partials/field.html" with field=form.departure %}
+          </div>
+          <div class="form-grid form-grid--3">
+            {% include "partials/field.html" with field=form.adults %}
+            {% include "partials/field.html" with field=form.children %}
+            {% if form.pets %}{% include "partials/field.html" with field=form.pets %}{% endif %}
+          </div>
+          {% if form.extras.field.queryset %}
+          <div class="extras">
+            <p class="field__label">{% translate "Extras" %}</p>
+            <div class="check-list">
+              {% for service in form.extras.field.queryset %}
+              <label class="check extra-option" data-accommodations="{% for acc in service.accommodations.all %}{{ acc.pk }}{% if not forloop.last %},{% endif %}{% endfor %}">
+                <input type="checkbox" name="extras" value="{{ service.pk }}" {% if service.pk|stringformat:"s" in selected_extras %}checked{% endif %}>
+                <span>{% icon service.icon %} {{ service.display_name }} <span class="muted">· {{ service.price|money:camping.currency }} {{ service.get_unit_display }}</span></span>
+              </label>
+              {% endfor %}
+            </div>
+          </div>
+          {% endif %}
+        </fieldset>
+
+        <fieldset class="card form-card">
+          <legend><span class="step">3</span> {% translate "Your details" %}</legend>
+          <div class="form-grid">
+            {% include "partials/field.html" with field=form.name %}
+            {% include "partials/field.html" with field=form.email %}
+            {% include "partials/field.html" with field=form.phone %}
+            {% include "partials/field.html" with field=form.country %}
+          </div>
+          {% include "partials/field.html" with field=form.message %}
+          <div class="hp" aria-hidden="true">{{ form.website.label_tag }}{{ form.website }}</div>
+          {% include "partials/field.html" with field=form.accept_privacy %}
+          <p class="small muted">{% camping_url 'public:camping_privacy' camping as privacy_url %}{% blocktranslate %}Read our <a href="{{ privacy_url }}" target="_blank">privacy notice</a>.{% endblocktranslate %}</p>
+        </fieldset>
+
+        <button class="btn btn-accent btn-lg btn-block" type="submit">{% icon "send" %}<span>{% translate "Send booking request" %}</span></button>
+      </div>
+
+      <aside class="booking-summary">
+        <div class="card summary-card" data-quote-box>
+          <h2>{% translate "Price estimate" %}</h2>
+          <div data-quote-body>{% include "public/_quote.html" %}</div>
+          <p class="small muted">{% translate "Indicative price. The camping confirms the final amount when it accepts your request." %}</p>
+        </div>
+        <div class="card summary-card summary-card--policy">
+          <h3>{% translate "Good to know" %}</h3>
+          <ul class="plain-list small">
+            <li>{% icon "clock" %} {% blocktranslate with start=policy.check_in_from|time:"H:i" end=policy.check_out_until|time:"H:i" %}Check-in from {{ start }} · check-out until {{ end }}{% endblocktranslate %}</li>
+            {% if policy.deposit_percent %}<li>{% icon "wallet" %} {% blocktranslate with percent=policy.deposit_percent %}Deposit to confirm: {{ percent }}%{% endblocktranslate %}</li>{% endif %}
+            <li>{% icon "calendar-range" %} {% if not policy.refundable %}{% translate "Non-refundable" %}{% elif policy.free_cancellation_days %}{% blocktranslate count counter=policy.free_cancellation_days %}Free cancellation up to {{ counter }} day before arrival{% plural %}Free cancellation up to {{ counter }} days before arrival{% endblocktranslate %}{% else %}{% translate "Free cancellation until the day of arrival." %}{% endif %}</li>
+            <li>{% icon "dog" %} {% if policy.pets_allowed %}{% translate "Pets are welcome." %}{% else %}{% translate "Pets are not allowed." %}{% endif %}</li>
+          </ul>
+          <a class="small" href="{% camping_url 'public:camping_detail' camping %}#policies" target="_blank">{% translate "All booking policies" %}</a>
+        </div>
+      </aside>
+    </form>
+    {% endif %}
+  </div>
+</section>
+<template id="quote-messages">
+  <span data-msg="loading">{% translate "Calculating…" %}</span>
+  <span data-msg="empty">{% translate "Choose an accommodation and your dates to see the price." %}</span>
+  <span data-msg="total">{% translate "Estimated total" %}</span>
+  <span data-msg="deposit">{% translate "Deposit to confirm" %}</span>
+  <span data-msg="error">{% translate "The price could not be calculated right now." %}</span>
+</template>
+{% endblock %}

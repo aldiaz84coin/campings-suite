@@ -1,0 +1,22 @@
+{% extends camping|yesno:"public/camping_base.html,public/base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Privacy notice" %}{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container narrow prose">
+    <h1>{% translate "Privacy notice" %}</h1>
+    {% if camping %}
+      <p>{% blocktranslate with name=camping.name %}The data you send through the booking form is received by {{ name }}, which is responsible for processing it in order to answer your request and manage your stay.{% endblocktranslate %}</p>
+      {% if camping.email %}<p>{% blocktranslate with email=camping.email %}You can exercise your rights of access, rectification and erasure by writing to {{ email }}.{% endblocktranslate %}</p>{% endif %}
+    {% else %}
+      <p>{% blocktranslate with platform=PLATFORM_NAME %}{{ platform }} hosts the websites of the campings listed here. When you send a booking request, your data is passed to the camping you contact, which is responsible for processing it.{% endblocktranslate %}</p>
+    {% endif %}
+    <h2>{% translate "What data we collect" %}</h2>
+    <p>{% translate "Your name, e-mail address, phone number, country, the details of your stay and your message. We only use them to handle your request." %}</p>
+    <h2>{% translate "How long we keep it" %}</h2>
+    <p>{% translate "For as long as needed to manage your booking and meet legal obligations." %}</p>
+    <h2>{% translate "Cookies" %}</h2>
+    <p>{% translate "We only use technical cookies that are necessary for the website to work (language, security and session). We do not use advertising or tracking cookies." %}</p>
+  </div>
+</section>
+{% endblock %}

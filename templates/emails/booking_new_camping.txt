@@ -1,0 +1,17 @@
+{% load i18n %}{% autoescape off %}{% blocktranslate with name=booking.name %}{{ name }} has sent a booking request.{% endblocktranslate %}
+
+{% include "emails/_booking_summary.txt" %}
+{% translate "Guest" %}: {{ booking.name }}
+{% translate "E-mail" %}: {{ booking.email }}
+{% if booking.phone %}{% translate "Phone" %}: {{ booking.phone }}
+{% endif %}{% if booking.country %}{% translate "Country" %}: {{ booking.country }}
+{% endif %}{% if booking.message %}
+{% translate "Message" %}:
+{{ booking.message }}
+{% endif %}
+{% translate "Confirm or decline it from your panel:" %}
+{{ panel_url }}
+
+{% translate "You can reply to this e-mail to write to the guest directly." %}
+
+-- {{ platform_name }}{% endautoescape %}
