@@ -1,0 +1,8 @@
+{% extends "error_base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Page not found" %}{% endblock %}
+{% block error %}
+<p class="error-card__code">404</p>
+<h1>{% translate "Page not found" %}</h1>
+<p class="muted">{% translate "The page you are looking for does not exist or is no longer available." %}</p>
+{% endblock %}

@@ -245,3 +245,17 @@ class PhotoRenderingTests(TestCase):
             response = self.client.get(reverse("public:camping_detail", kwargs={"slug": camping.slug}))
         self.assertContains(response, photo.thumbnail.url)
         self.assertContains(response, 'alt="Piscina"')
+
+
+class ErrorPageTests(TestCase):
+    def test_translated_404(self):
+        response = self.client.get("/es/camping/no-existe/")
+        self.assertEqual(response.status_code, 404)
+        self.assertContains(response, "Página no encontrada", status_code=404)
+
+    @override_settings(PLATFORM_HOSTS=["testserver"])
+    def test_404_on_custom_domain(self):
+        cache.clear()
+        make_camping("Dominio", custom_domain="www.dominio-404.test")
+        response = self.client.get("/de/nothing-here/", HTTP_HOST="www.dominio-404.test")
+        self.assertContains(response, "Seite nicht gefunden", status_code=404)

@@ -308,3 +308,10 @@
 .camping-footer__name { font-family: var(--font-heading); font-size: 1.25rem; font-weight: 700; color: #fff; margin-bottom: 6px; }
 .camping-footer__bottom { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; padding-top: 18px; font-size: .88rem; }
 .camping-footer__bottom a { color: rgb(255 255 255 / 70%); }
+
+/* ---- Error pages ----------------------------------------------------------- */
+.error-page { min-height: 100vh; display: grid; place-items: center; padding: 24px 16px; background: radial-gradient(800px 400px at 100% 0%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 60%), var(--bg); }
+.error-card { max-width: 480px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.error-card__icon { color: var(--primary); }
+.error-card__code { margin: 0; font-size: 3.5rem; font-weight: 800; letter-spacing: -0.03em; color: var(--primary); line-height: 1; }
+.error-card .btn { margin-top: 12px; }

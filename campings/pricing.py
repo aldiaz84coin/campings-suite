@@ -256,8 +256,9 @@ def build_quote(
 
     # Services: mandatory ones plus the optional extras requested.
     extra_ids = {service.pk for service in extras}
-    for service in camping.services.all():
-        if not service.is_active or service.mode == "included" or not service.applies_to(accommodation):
+    services = camping.services.filter(is_active=True).prefetch_related("rates", "accommodations")
+    for service in services:
+        if service.mode == "included" or not service.applies_to(accommodation):
             continue
         if service.mode == "optional" and service.pk not in extra_ids:
             continue

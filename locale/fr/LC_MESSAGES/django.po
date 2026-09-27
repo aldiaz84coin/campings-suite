@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: campings-suite\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-27 14:51+0200\n"
+"POT-Creation-Date: 2026-09-27 15:10+0200\n"
 "PO-Revision-Date: 2026-09-27 14:51+0200\n"
 "Last-Translator: campings-suite\n"
 "Language-Team: fr\n"
@@ -1329,6 +1329,18 @@ msgid "Too many requests from your connection. Please try again later."
 msgstr ""
 "Trop de demandes depuis votre connexion. Veuillez réessayer plus tard."
 
+msgid "Access denied"
+msgstr "Accès refusé"
+
+msgid "You do not have permission to see this page."
+msgstr "Vous n'avez pas l'autorisation de voir cette page."
+
+msgid "Page not found"
+msgstr "Page introuvable"
+
+msgid "The page you are looking for does not exist or is no longer available."
+msgstr "La page que vous cherchez n'existe pas ou n'est plus disponible."
+
 msgid "Skip to content"
 msgstr "Aller au contenu"
 
@@ -1467,6 +1479,9 @@ msgstr "Choisissez votre mot de passe ici pour commencer :"
 
 msgid "Sign in with your usual account:"
 msgstr "Connectez-vous avec votre compte habituel :"
+
+msgid "Back to the home page"
+msgstr "Retour à l'accueil"
 
 msgid "Are you sure? This cannot be undone."
 msgstr "Êtes-vous sûr ? Cette action est irréversible."

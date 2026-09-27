@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% load i18n static core_tags %}
+{% block styles %}<link rel="stylesheet" href="{% static 'css/site.css' %}">{% endblock %}
+{% block body %}
+<main id="main" class="error-page">
+  <div class="error-card">
+    <span class="error-card__icon">{% icon "tent" "icon-xl" %}</span>
+    {% block error %}{% endblock %}
+    <a class="btn btn-primary" href="{% url 'public:home' %}">{% icon "arrow-left" %}<span>{% translate "Back to the home page" %}</span></a>
+  </div>
+</main>
+{% endblock %}

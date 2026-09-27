@@ -1,0 +1,8 @@
+{% extends "error_base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Access denied" %}{% endblock %}
+{% block error %}
+<p class="error-card__code">403</p>
+<h1>{% translate "Access denied" %}</h1>
+<p class="muted">{% translate "You do not have permission to see this page." %}</p>
+{% endblock %}
