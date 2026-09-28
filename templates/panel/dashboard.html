@@ -61,6 +61,7 @@
   <section class="card card-pad">
     <div class="card-head"><h2>{% translate "Set up your page" %}</h2><span class="muted small">{{ progress }}%</span></div>
     <div class="progress" role="progressbar" aria-valuenow="{{ progress }}" aria-valuemin="0" aria-valuemax="100"><span style="width: {{ progress }}%"></span></div>
+    {% if progress < 50 and is_owner %}<p class="small"><a href="{% url 'panel:import' slug=camping.slug %}">{% icon "download" %} {% translate "Do you already have a website? Import its texts, photos and prices" %}</a></p>{% endif %}
     <ol class="checklist">
       {% for item in checklist %}
       <li class="{% if item.done %}is-done{% endif %}">

@@ -328,3 +328,31 @@ a.stat:hover { border-color: var(--primary-muted); color: var(--text); }
 .cal-over { background-color: color-mix(in srgb, var(--danger) 30%, #ffffff); color: var(--danger); }
 .occupancy tfoot th, .occupancy tfoot td { padding: 8px 2px; font-weight: 700; background: var(--surface-2); }
 .occupancy__total { font-size: .75rem; color: var(--text-muted); }
+
+/* ---- Website import ------------------------------------------------------- */
+.import-notes p { margin: 0 0 6px; display: flex; gap: 8px; align-items: flex-start; }
+.import-notes a { word-break: break-all; }
+.import-table td { vertical-align: top; }
+.import-table td:first-child { width: 36px; }
+.import-table__value { word-break: break-word; max-width: 360px; }
+.import-table select { min-width: 150px; max-width: 240px; padding-block: 6px; font-size: .9rem; }
+.import-text { display: flex; gap: 12px; align-items: flex-start; padding: 12px 0; border-top: 1px solid var(--border); }
+.import-text:first-of-type { border-top: 0; }
+.import-text input { margin-top: 4px; flex: none; }
+.import-text__body { display: block; margin-top: 6px; max-height: 9.5em; overflow: auto; color: var(--text-muted); font-size: .92rem; }
+.import-logo { display: inline-flex; align-items: center; gap: 12px; margin-bottom: 14px; padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); }
+.import-logo img { max-height: 48px; max-width: 160px; object-fit: contain; }
+.import-photos { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; margin-bottom: 10px; }
+.import-photo { position: relative; display: block; border-radius: var(--radius-sm); overflow: hidden; background: var(--surface-2); cursor: pointer; }
+.import-photo img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block; }
+.import-photo input { position: absolute; top: 8px; left: 8px; width: 20px; height: 20px; z-index: 1; }
+.import-photo:has(input:not(:checked)) img { opacity: .4; filter: grayscale(.6); }
+.import-photo__caption { display: block; padding: 4px 8px; font-size: .78rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.check-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 1fr)); gap: 8px 16px; margin-bottom: 10px; }
+.check-grid .check .icon { color: var(--primary); }
+.link-button { background: none; border: 0; padding: 0; color: var(--primary); font: inherit; text-decoration: underline; cursor: pointer; }
+.import-progress .progress { height: 12px; margin: 8px 0 14px; }
+.import-progress form { display: inline-block; margin-right: 8px; }
+button.is-busy { opacity: .8; cursor: progress; }
+.import-photo.is-broken img { visibility: hidden; }
+.import-photo.is-broken::after { content: "⚠"; position: absolute; inset: 0; display: grid; place-items: center; font-size: 1.6rem; color: var(--text-muted); }

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: campings-suite\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-27 20:45+0200\n"
+"POT-Creation-Date: 2026-09-27 21:30+0200\n"
 "PO-Revision-Date: 2026-09-27 14:51+0200\n"
 "Last-Translator: campings-suite\n"
 "Language-Team: it\n"
@@ -226,6 +226,9 @@ msgstr "Approva i campeggi selezionati"
 
 msgid "Suspend selected campings"
 msgstr "Sospendi i campeggi selezionati"
+
+msgid "periods"
+msgstr "periodi"
 
 msgid "preview"
 msgstr "anteprima"
@@ -768,11 +771,20 @@ msgstr "membro"
 msgid "members"
 msgstr "membri"
 
-msgid "from"
-msgstr "dal"
+msgid "Low season"
+msgstr "Bassa stagione"
 
-msgid "to (inclusive)"
-msgstr "al (incluso)"
+msgid "Mid season"
+msgstr "Media stagione"
+
+msgid "High season"
+msgstr "Alta stagione"
+
+msgid "Special period"
+msgstr "Periodo speciale"
+
+msgid "type"
+msgstr "tipo"
 
 msgid "minimum nights"
 msgstr "notti minime"
@@ -789,15 +801,17 @@ msgstr "stagione"
 msgid "seasons"
 msgstr "stagioni"
 
+msgid "from"
+msgstr "dal"
+
+msgid "to (inclusive)"
+msgstr "al (incluso)"
+
+msgid "period"
+msgstr "periodo"
+
 msgid "The end date must be on or after the start date."
 msgstr "La data di fine deve essere uguale o successiva a quella di inizio."
-
-#, python-format
-msgid "These dates overlap with the season “%(season)s”."
-msgstr "Queste date si sovrappongono alla stagione «%(season)s»."
-
-msgid "type"
-msgstr "tipo"
 
 msgid "maximum guests"
 msgstr "ospiti massimi"
@@ -1084,6 +1098,68 @@ msgstr "file archiviato"
 msgid "stored files"
 msgstr "file archiviati"
 
+msgid "Website import"
+msgstr "Importazione di siti web"
+
+msgid "Enter the address of the website."
+msgstr "Inserisci l'indirizzo del sito web."
+
+msgid "Enter a valid web address, e.g. https://www.mycamping.com."
+msgstr "Inserisci un indirizzo web valido, ad es. https://www.miocampeggio.it."
+
+#, python-format
+msgid "The address %(host)s could not be found."
+msgstr "L'indirizzo %(host)s non è stato trovato."
+
+msgid "This address cannot be imported."
+msgstr "Questo indirizzo non può essere importato."
+
+msgid "The website redirected to an address that cannot be imported."
+msgstr "Il sito reindirizza a un indirizzo che non può essere importato."
+
+#, python-format
+msgid "The secure connection with %(host)s failed."
+msgstr "La connessione sicura con %(host)s non è riuscita."
+
+#, python-format
+msgid "%(host)s did not answer."
+msgstr "%(host)s non ha risposto."
+
+#, python-format
+msgid "The website answered with an error (%(status)s)."
+msgstr "Il sito ha risposto con un errore (%(status)s)."
+
+msgid "The file is too large."
+msgstr "Il file è troppo grande."
+
+msgid "The download was interrupted."
+msgstr "Il download si è interrotto."
+
+msgid "The website redirects too many times."
+msgstr "Il sito reindirizza troppe volte."
+
+msgid "Ready to review"
+msgstr "Da rivedere"
+
+msgid "Imported"
+msgstr "Importata"
+
+msgid "website import"
+msgstr "importazione di sito web"
+
+msgid "website imports"
+msgstr "importazioni di siti web"
+
+msgid "The address is not a web page."
+msgstr "L'indirizzo non è una pagina web."
+
+msgid "Some pages were skipped to finish in time."
+msgstr "Alcune pagine sono state saltate per finire in tempo."
+
+#, python-format
+msgid "%(url)s could not be read: %(error)s"
+msgstr "Impossibile leggere %(url)s: %(error)s"
+
 msgid "Camping panel"
 msgstr "Pannello del campeggio"
 
@@ -1160,6 +1236,9 @@ msgstr "Dotazioni"
 msgid "Applies to"
 msgstr "Si applica a"
 
+msgid "The periods of a season cannot overlap each other."
+msgstr "I periodi di una stagione non possono sovrapporsi."
+
 msgid "Accepted payment methods"
 msgstr "Metodi di pagamento accettati"
 
@@ -1183,6 +1262,12 @@ msgstr "Lingua principale"
 
 msgid "Optional, e.g. www.mycamping.com. You can also add it later in the camping's settings."
 msgstr "Facoltativo, ad es. www.miocampeggio.it. Puoi aggiungerlo anche più tardi nelle impostazioni del campeggio."
+
+msgid "Current website"
+msgstr "Sito web attuale"
+
+msgid "Optional: it is read to fill in the details, texts, photos, facilities and prices, which you review before importing."
+msgstr "Facoltativo: viene letto per compilare dati, testi, foto, strutture e prezzi, che controlli prima di importarli."
 
 msgid "Another camping already uses this domain."
 msgstr "Un altro campeggio usa già questo dominio."
@@ -1291,6 +1376,52 @@ msgstr "Le impostazioni sono state salvate."
 msgid "The appearance has been saved."
 msgstr "L'aspetto è stato salvato."
 
+msgid "Address of the current website"
+msgstr "Indirizzo del sito web attuale"
+
+msgid "Map location"
+msgstr "Posizione sulla mappa"
+
+msgid "Opening period"
+msgstr "Periodo di apertura"
+
+msgid "Check-in from"
+msgstr "Check-in dalle"
+
+msgid "Check-out until"
+msgstr "Check-out entro le"
+
+msgid "Category (stars)"
+msgstr "Categoria (stelle)"
+
+msgid "All year"
+msgstr "Tutto l'anno"
+
+#, python-format
+msgid "Accommodation · %(kind)s"
+msgstr "Alloggio · %(kind)s"
+
+#, python-format
+msgid "Service %(unit)s"
+msgstr "Servizio %(unit)s"
+
+msgid "Tagline"
+msgstr "Slogan"
+
+msgid "Description"
+msgstr "Descrizione"
+
+msgid "This import has already been applied."
+msgstr "Questa importazione è già stata applicata."
+
+#, python-format
+msgid "Imported: %(accommodations)s accommodation types, %(services)s services, %(seasons)s seasons and %(facilities)s facilities."
+msgstr "Importato: %(accommodations)s tipi di alloggio, %(services)s servizi, %(seasons)s stagioni e %(facilities)s strutture."
+
+#, python-format
+msgid "%(count)s period(s) were not created because they overlap with existing seasons."
+msgstr "%(count)s periodo/i non sono stati creati perché si sovrappongono a stagioni esistenti."
+
 msgid "Your facilities have been saved."
 msgstr "Le tue strutture sono state salvate."
 
@@ -1321,6 +1452,10 @@ msgstr "Il servizio è stato salvato."
 msgid "The service has been deleted."
 msgstr "Il servizio è stato eliminato."
 
+#, python-format
+msgid "The dates %(start)s – %(end)s overlap with “%(season)s”."
+msgstr "Le date %(start)s – %(end)s si sovrappongono a «%(season)s»."
+
 msgid "The season has been created."
 msgstr "La stagione è stata creata."
 
@@ -1330,16 +1465,20 @@ msgstr "La stagione è stata salvata."
 msgid "The season has been deleted."
 msgstr "La stagione è stata eliminata."
 
-msgid "There are no seasons to copy yet."
-msgstr "Non ci sono ancora stagioni da copiare."
+msgid "There are no periods to copy yet."
+msgstr "Non ci sono ancora periodi da copiare."
 
 #, python-format
-msgid "%(count)s season(s) copied to %(year)s with their prices."
-msgstr "%(count)s stagione/i copiata/e nel %(year)s con i relativi prezzi."
+msgid "%(count)s period(s) copied to %(year)s. Check the dates of special periods such as long weekends."
+msgstr "%(count)s periodo/i copiato/i al %(year)s. Controlla le date dei periodi speciali come i ponti."
 
 #, python-format
-msgid "The seasons of %(year)s already exist."
-msgstr "Le stagioni del %(year)s esistono già."
+msgid "The dates of %(year)s already exist."
+msgstr "Le date del %(year)s esistono già."
+
+#, python-format
+msgid "%(count)s period(s) were not copied because their dates were already taken."
+msgstr "%(count)s periodo/i non sono stati copiati perché le loro date erano già occupate."
 
 #, python-format
 msgid "Invalid price for %(item)s."
@@ -1553,17 +1692,32 @@ msgstr "Usa le schede delle lingue per scrivere ogni testo in tutte le lingue de
 msgid "Choose languages"
 msgstr "Scegli le lingue"
 
+msgid "Delete this period"
+msgstr "Elimina questo periodo"
+
 msgid "Item"
 msgstr "Voce"
 
 msgid "Base price"
 msgstr "Prezzo base"
 
+msgid "other dates"
+msgstr "altre date"
+
+msgid "No dates yet"
+msgstr "Ancora senza date"
+
+msgid "Dates"
+msgstr "Date"
+
+msgid "Minimum stay"
+msgstr "Soggiorno minimo"
+
+msgid "Edit"
+msgstr "Modifica"
+
 msgid "New accommodation type"
 msgstr "Nuovo tipo di alloggio"
-
-msgid "Description"
-msgstr "Descrizione"
 
 msgid "Capacity"
 msgstr "Capacità"
@@ -1598,9 +1752,6 @@ msgid "%(counter)s seasonal price"
 msgid_plural "%(counter)s seasonal prices"
 msgstr[0] "%(counter)s prezzo stagionale"
 msgstr[1] "%(counter)s prezzi stagionali"
-
-msgid "Edit"
-msgstr "Modifica"
 
 #, python-format
 msgid "Set different prices for each season in the <a href=\"%(prices_url)s\">price table</a>."
@@ -1662,6 +1813,9 @@ msgstr "Richiedi una prenotazione"
 
 msgid "Sign in"
 msgstr "Accedi"
+
+msgid "Staff access"
+msgstr "Accesso staff"
 
 msgid "Camping area"
 msgstr "Area campeggi"
@@ -1788,6 +1942,9 @@ msgstr "Amministrazione"
 
 msgid "Settings"
 msgstr "Impostazioni"
+
+msgid "Import from a website"
+msgstr "Importa da un sito web"
 
 msgid "Team"
 msgstr "Team"
@@ -1994,6 +2151,9 @@ msgstr "Nessuna partenza oggi."
 msgid "Set up your page"
 msgstr "Configura la tua pagina"
 
+msgid "Do you already have a website? Import its texts, photos and prices"
+msgstr "Hai già un sito web? Importa testi, foto e prezzi"
+
 msgid "Latest requests"
 msgstr "Ultime richieste"
 
@@ -2065,6 +2225,162 @@ msgstr "Non gestisci ancora nessun campeggio."
 msgid "Ask the owner of your camping to invite you from the Team section."
 msgstr "Chiedi al titolare del tuo campeggio di invitarti dalla sezione Team."
 
+msgid "Importing photos"
+msgstr "Importazione delle foto"
+
+msgid "The photos are downloaded and optimised a few at a time. Keep this page open until it finishes."
+msgstr "Le foto vengono scaricate e ottimizzate poche alla volta. Tieni aperta questa pagina finché non finisce."
+
+#, python-format
+msgid "%(done)s of %(total)s ready"
+msgstr "%(done)s di %(total)s pronte"
+
+#, python-format
+msgid "%(counter)s could not be downloaded"
+msgid_plural "%(counter)s could not be downloaded"
+msgstr[0] "%(counter)s non è stata scaricata"
+msgstr[1] "%(counter)s non sono state scaricate"
+
+msgid "Continue"
+msgstr "Continua"
+
+msgid "Stop and keep the photos imported so far"
+msgstr "Interrompi e conserva le foto importate finora"
+
+msgid "See the photos"
+msgstr "Vedi le foto"
+
+msgid "Go to the dashboard"
+msgstr "Vai alla bacheca"
+
+msgid "ready"
+msgstr "pronte"
+
+msgid "could not be downloaded"
+msgstr "non sono state scaricate"
+
+msgid "Finished!"
+msgstr "Finito!"
+
+msgid "Review the import"
+msgstr "Rivedi l'importazione"
+
+#, python-format
+msgid "This is what we found on %(url)s. Tick what you want to import: you can edit everything afterwards."
+msgstr "Ecco cosa abbiamo trovato su %(url)s. Seleziona cosa vuoi importare: potrai modificare tutto in seguito."
+
+msgid "Price list in PDF, enter its prices by hand:"
+msgstr "Listino in PDF, inserisci i prezzi a mano:"
+
+msgid "Details"
+msgstr "Dati"
+
+msgid "Import"
+msgstr "Importa"
+
+msgid "Field"
+msgstr "Campo"
+
+msgid "Found on the website"
+msgstr "Trovato sul sito"
+
+msgid "Current value"
+msgstr "Valore attuale"
+
+msgid "Texts"
+msgstr "Testi"
+
+msgid "replaces the current text"
+msgstr "sostituisce il testo attuale"
+
+msgid "Location and how to get there"
+msgstr "Posizione e come arrivare"
+
+msgid "Logo and photos"
+msgstr "Logo e foto"
+
+msgid "Select all"
+msgstr "Seleziona tutto"
+
+msgctxt "select none"
+msgid "None"
+msgstr "Nessuna"
+
+msgid "replaces the current logo"
+msgstr "sostituisce il logo attuale"
+
+msgid "The chosen photos are downloaded, optimised and added to your gallery after you confirm."
+msgstr "Le foto scelte vengono scaricate, ottimizzate e aggiunte alla tua galleria dopo la conferma."
+
+msgid "already added"
+msgstr "già aggiunta"
+
+msgid "Found from the words used on the website: untick any that do not apply."
+msgstr "Trovate in base alle parole usate sul sito: deseleziona quelle che non corrispondono."
+
+msgid "Season"
+msgstr "Stagione"
+
+msgid "Type"
+msgstr "Tipo"
+
+msgid "No dates found: add them afterwards"
+msgstr "Nessuna data trovata: aggiungile dopo"
+
+msgid "Periods that overlap with your current seasons are not created."
+msgstr "I periodi che si sovrappongono alle tue stagioni attuali non vengono creati."
+
+msgid "Prices"
+msgstr "Prezzi"
+
+msgid "Import as"
+msgstr "Importa come"
+
+msgid "How it is charged"
+msgstr "Come viene addebitato"
+
+msgid "Accommodation is created with 1 unit: set how many you have afterwards."
+msgstr "Gli alloggi vengono creati con 1 unità: indica dopo quante ne hai."
+
+msgid "We could not find useful information on this website. It may be built in a way we cannot read."
+msgstr "Non abbiamo trovato informazioni utili su questo sito. Forse è costruito in un modo che non riusciamo a leggere."
+
+msgid "Import selected"
+msgstr "Importa la selezione"
+
+msgid "Enter the address of the camping's current website. We read its texts, contact details, photos, facilities, seasons and prices, and you choose what to import."
+msgstr "Inserisci l'indirizzo del sito attuale del campeggio. Leggiamo testi, contatti, foto, strutture, stagioni e prezzi, e tu scegli cosa importare."
+
+msgid "Reading the website… this can take up to half a minute"
+msgstr "Lettura del sito… può richiedere fino a mezzo minuto"
+
+msgid "Read the website"
+msgstr "Leggi il sito"
+
+msgid "Only use it with the camping's own website: its texts and photos belong to the camping."
+msgstr "Usalo solo con il sito del campeggio stesso: testi e foto appartengono al campeggio."
+
+msgid "What is imported"
+msgstr "Cosa viene importato"
+
+msgid "Name, texts in every language of the website, contact details and address"
+msgstr "Nome, testi in tutte le lingue del sito, contatti e indirizzo"
+
+msgid "Facilities mentioned on the website"
+msgstr "Strutture citate sul sito"
+
+msgid "Price tables: accommodation, services and their seasons with dates"
+msgstr "Tabelle dei prezzi: alloggi, servizi e le loro stagioni con date"
+
+msgid "Check-in and check-out times and the opening period"
+msgstr "Orari di check-in e check-out e periodo di apertura"
+
+msgid "Nothing changes until you confirm it on the next screen, and everything can be edited afterwards."
+msgstr "Non cambia nulla finché non confermi nella schermata successiva, e dopo puoi modificare tutto."
+
+msgid "Previous imports"
+msgstr "Importazioni precedenti"
+
 msgid "Where you are and when you are open."
 msgstr "Dove ti trovi e quando sei aperto."
 
@@ -2076,9 +2392,6 @@ msgstr "Mappa"
 
 msgid "Map preview"
 msgstr "Anteprima mappa"
-
-msgid "Opening period"
-msgstr "Periodo di apertura"
 
 msgid "Booking requests outside these dates are not accepted."
 msgstr "Le richieste di prenotazione al di fuori di queste date non sono accettate."
@@ -2162,9 +2475,6 @@ msgstr "Campeggio"
 msgid "Owners"
 msgstr "Titolari"
 
-msgid "Created"
-msgstr "Creato"
-
 msgid "DNS pending"
 msgstr "DNS in attesa"
 
@@ -2232,33 +2542,45 @@ msgstr "Contatti"
 msgid "New season"
 msgstr "Nuova stagione"
 
+msgid "Add as many periods as you need: for example, high season in July and August and also at Christmas. Both days are included."
+msgstr "Aggiungi tutti i periodi che ti servono: per esempio alta stagione a luglio e agosto e anche a Natale. Entrambi i giorni sono inclusi."
+
+msgid "Add period"
+msgstr "Aggiungi periodo"
+
+msgid "Easter Sunday:"
+msgstr "Domenica di Pasqua:"
+
+msgid "Periods around Easter move with it when you copy the dates to the next year."
+msgstr "I periodi intorno a Pasqua si spostano con essa quando copi le date all'anno successivo."
+
 msgid "Delete this season? Its prices will be deleted too."
 msgstr "Eliminare questa stagione? Verranno eliminati anche i suoi prezzi."
 
-msgid "Periods with different prices: low, mid and high season, bank holidays… Dates cannot overlap."
-msgstr "Periodi con prezzi diversi: bassa, media e alta stagione, festività… Le date non possono sovrapporsi."
+msgid "Each season has its own prices and can repeat on several dates of the year. Special periods (Easter, long weekends, events…) take precedence over the seasons on their dates."
+msgstr "Ogni stagione ha i propri prezzi e può ripetersi in più date dell'anno. I periodi speciali (Pasqua, ponti, eventi…) hanno la precedenza sulle stagioni nelle loro date."
 
-msgid "Copy to next year"
-msgstr "Copia all'anno successivo"
+msgid "Copy dates to next year"
+msgstr "Copia le date all'anno prossimo"
 
-msgid "Season"
-msgstr "Stagione"
+msgid "New special period"
+msgstr "Nuovo periodo speciale"
 
-msgid "From"
-msgstr "Dal"
+msgid "Special periods"
+msgstr "Periodi speciali"
 
-msgid "To"
-msgstr "Al"
-
-msgid "Minimum stay"
-msgstr "Soggiorno minimo"
+msgid "Easter, long weekends, local festivals… with their own prices and minimum stay."
+msgstr "Pasqua, ponti, feste locali… con prezzi e soggiorno minimo propri."
 
 #, python-format
-msgid "Now set the price of each accommodation and service per season in the <a href=\"%(prices_url)s\">price table</a>. Days outside any season use the base price."
-msgstr "Ora imposta il prezzo di ogni alloggio e servizio per stagione nella <a href=\"%(prices_url)s\">tabella prezzi</a>. I giorni fuori stagione usano il prezzo base."
+msgid "Now set the price of each accommodation and service per season in the <a href=\"%(prices_url)s\">price table</a>. Days outside every period use the base price."
+msgstr "Ora imposta il prezzo di ogni alloggio e servizio per stagione nella <a href=\"%(prices_url)s\">tabella prezzi</a>. I giorni fuori da ogni periodo usano il prezzo base."
 
 msgid "Without seasons, the base price of each accommodation and service is used all year."
 msgstr "Senza stagioni, il prezzo base di ogni alloggio e servizio vale tutto l'anno."
+
+msgid "Create your low, mid and high seasons with their dates, and special periods for Easter or long weekends."
+msgstr "Crea le tue stagioni bassa, media e alta con le loro date, e periodi speciali per Pasqua o i ponti."
 
 msgid "New service"
 msgstr "Nuovo servizio"
@@ -2280,9 +2602,6 @@ msgstr "«Incluso»: mostrato come incluso nel prezzo, senza costi."
 
 msgid "Service"
 msgstr "Servizio"
-
-msgid "How it is charged"
-msgstr "Come viene addebitato"
 
 msgid "Always charged"
 msgstr "Sempre addebitato"
@@ -2451,6 +2770,9 @@ msgstr "Gli animali sono i benvenuti."
 msgid "Pets are not allowed."
 msgstr "Gli animali non sono ammessi."
 
+msgid "Other dates"
+msgstr "Altre date"
+
 msgid "optional"
 msgstr "facoltativo"
 
@@ -2554,9 +2876,6 @@ msgstr "La tua richiesta di prenotazione è stata inviata a %(camping)s."
 msgid "We have sent a copy to <strong>%(email)s</strong>. The camping will check availability and reply to you soon."
 msgstr "Abbiamo inviato una copia a <strong>%(email)s</strong>. Il campeggio verificherà la disponibilità e ti risponderà presto."
 
-msgid "Dates"
-msgstr "Date"
-
 msgid "What happens next?"
 msgstr "E adesso?"
 
@@ -2584,9 +2903,6 @@ msgstr "Sezioni"
 
 msgid "The camping"
 msgstr "Il campeggio"
-
-msgid "Prices"
-msgstr "Prezzi"
 
 msgid "Policies"
 msgstr "Condizioni"
@@ -2648,9 +2964,6 @@ msgstr "entro le %(time)s"
 
 msgid "Open"
 msgstr "Aperto"
-
-msgid "All year"
-msgstr "Tutto l'anno"
 
 msgid "Welcome"
 msgstr "Benvenuti"
@@ -2731,9 +3044,6 @@ msgstr "Vedi prezzo"
 
 msgid "Our new website is coming soon."
 msgstr "Il nostro nuovo sito sarà online a breve."
-
-msgid "Staff access"
-msgstr "Accesso staff"
 
 msgid "Privacy notice"
 msgstr "Informativa sulla privacy"

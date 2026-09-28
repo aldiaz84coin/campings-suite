@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import auth, bookings, camping, offer, photos, platform, team
+from .views import auth, bookings, camping, importer, offer, photos, platform, team
 
 app_name = "panel"
 
@@ -58,6 +58,10 @@ urlpatterns = [
     path("c/<slug:slug>/bookings/<int:pk>/", bookings.booking_detail, name="booking_detail"),
     path("c/<slug:slug>/bookings/<int:pk>/edit/", bookings.booking_edit, name="booking_edit"),
     path("c/<slug:slug>/calendar/", bookings.booking_calendar, name="calendar"),
+    path("c/<slug:slug>/import/", importer.import_start, name="import"),
+    path("c/<slug:slug>/import/<int:pk>/", importer.import_review, name="import_review"),
+    path("c/<slug:slug>/import/<int:pk>/photos/", importer.import_photos, name="import_photos"),
+    path("c/<slug:slug>/import/<int:pk>/photos/cancel/", importer.import_photos_cancel, name="import_photos_cancel"),
     path("c/<slug:slug>/team/", team.team, name="team"),
     path("c/<slug:slug>/team/<int:pk>/remove/", team.team_remove, name="team_remove"),
 ]

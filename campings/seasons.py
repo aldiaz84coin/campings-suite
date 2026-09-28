@@ -8,6 +8,29 @@ from core.i18n import translate_value
 from .models import Season, SeasonPeriod
 
 EASTER_NAMES = re.compile(r"semana santa|pascua|easter|p[âa]ques|ostern|pasen|pasqua", re.IGNORECASE)
+SEASON_KIND_PATTERNS = [
+    (
+        "special",
+        r"semana santa|pascua|easter|paques|ostern|pasen|pasqua|puentes?|navidad|christmas|noel|fiestas?|festival|"
+        r"ferragosto|pentecost|pfingsten|pinksteren|reveillon|fin de ano|new year",
+    ),
+    ("low", r"\bbaja\b|\blow\b|\bbasse\b|nieder|neben|\blaag|\bbassa\b"),
+    ("high", r"\balta\b|\bhigh\b|\bhaute\b|\bhoch|haupt|\bhoog"),
+    ("mid", r"\bmedia\b|\bmedio\b|\bmid\b|moyenne|mittel|zwischen|midden"),
+]
+
+
+def infer_season_kind(text):
+    """``low``, ``mid``, ``high`` or ``special`` from a season name in any language, or None."""
+    import unicodedata
+
+    folded = "".join(
+        ch for ch in unicodedata.normalize("NFKD", str(text or "")) if not unicodedata.combining(ch)
+    ).lower()
+    for kind, pattern in SEASON_KIND_PATTERNS:
+        if re.search(pattern, folded):
+            return kind
+    return None
 
 
 def easter_sunday(year):

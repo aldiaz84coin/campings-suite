@@ -1,0 +1,173 @@
+{% extends "panel/base.html" %}
+{% load i18n core_tags %}
+{% block page_title %}{% translate "Review the import" %}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <a class="back-link" href="{% url 'panel:import' slug=camping.slug %}">{% icon "arrow-left" %} {% translate "Import from a website" %}</a>
+    <h1>{% translate "Review the import" %}</h1>
+    <p class="muted">{% blocktranslate with url=site_import.url %}This is what we found on {{ url }}. Tick what you want to import: you can edit everything afterwards.{% endblocktranslate %}</p>
+  </div>
+</div>
+
+{% if data.warnings or data.pdfs %}
+<div class="card card-pad import-notes">
+  {% for warning in data.warnings %}<p class="small">{% icon "circle-alert" %} {{ warning }}</p>{% endfor %}
+  {% for pdf in data.pdfs %}<p class="small">{% icon "file-text" %} {% translate "Price list in PDF, enter its prices by hand:" %} <a href="{{ pdf }}" target="_blank" rel="noopener noreferrer">{{ pdf }}</a></p>{% endfor %}
+</div>
+{% endif %}
+
+<form method="post" class="form-stack import-review">
+  {% csrf_token %}
+
+  {% if field_rows %}
+  <section class="card card-pad">
+    <h2>{% icon "file-text" %} {% translate "Details" %}</h2>
+    <div class="table-scroll table-scroll--flat">
+      <table class="table import-table">
+        <thead><tr><th><span class="sr-only">{% translate "Import" %}</span></th><th>{% translate "Field" %}</th><th>{% translate "Found on the website" %}</th><th>{% translate "Current value" %}</th></tr></thead>
+        <tbody>
+        {% for row in field_rows %}
+          <tr>
+            <td><input type="checkbox" name="field" value="{{ row.key }}" id="field-{{ row.key }}"{% if row.checked %} checked{% endif %}></td>
+            <td><label for="field-{{ row.key }}">{{ row.label }}</label></td>
+            <td class="import-table__value">{{ row.value }}</td>
+            <td class="muted">{{ row.current|default:"—" }}</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+  {% endif %}
+
+  {% if texts or location_info %}
+  <section class="card card-pad">
+    <h2>{% icon "languages" %} {% translate "Texts" %}</h2>
+    {% for text in texts %}
+      <label class="import-text">
+        <input type="checkbox" name="text" value="{{ text.value }}"{% if text.checked %} checked{% endif %}>
+        <span>
+          <strong>{{ text.label }} · {{ text.language }}</strong>{% if text.current %} <span class="badge badge--warning">{% translate "replaces the current text" %}</span>{% endif %}
+          <span class="import-text__body">{{ text.text|linebreaksbr }}</span>
+        </span>
+      </label>
+    {% endfor %}
+    {% for code, info in location_info.items %}
+      <label class="import-text">
+        <input type="checkbox" name="location_info" value="1" checked>
+        <span><strong>{% translate "Location and how to get there" %} · {{ code|lang_name }}</strong><span class="import-text__body">{{ info|linebreaksbr }}</span></span>
+      </label>
+    {% endfor %}
+  </section>
+  {% endif %}
+
+  {% if photos or data.logo %}
+  <section class="card card-pad">
+    <div class="card-head">
+      <h2>{% icon "images" %} {% translate "Logo and photos" %}</h2>
+      {% if photos %}<span class="small"><button type="button" class="link-button" data-check-all="photo">{% translate "Select all" %}</button> · <button type="button" class="link-button" data-check-none="photo">{% translate "None" context "select none" %}</button></span>{% endif %}
+    </div>
+    {% if data.logo %}
+      <label class="import-logo"><input type="checkbox" name="logo" value="1"{% if not has_logo %} checked{% endif %}><img src="{{ data.logo }}" alt="" loading="lazy" referrerpolicy="no-referrer"><span>{% translate "Logo" %}{% if has_logo %} · {% translate "replaces the current logo" %}{% endif %}</span></label>
+    {% endif %}
+    {% if photos %}
+    <div class="import-photos">
+      {% for photo in photos %}
+        <label class="import-photo">
+          <input type="checkbox" name="photo" value="{{ photo.index }}"{% if photo.checked %} checked{% endif %}>
+          <img src="{{ photo.url }}" alt="{{ photo.alt }}" loading="lazy" referrerpolicy="no-referrer" data-import-image>
+          {% if photo.alt %}<span class="import-photo__caption">{{ photo.alt }}</span>{% endif %}
+        </label>
+      {% endfor %}
+    </div>
+    <p class="small muted">{% translate "The chosen photos are downloaded, optimised and added to your gallery after you confirm." %}</p>
+    {% endif %}
+  </section>
+  {% endif %}
+
+  {% if facilities %}
+  <section class="card card-pad">
+    <h2>{% icon "list-checks" %} {% translate "Facilities" %}</h2>
+    <div class="check-grid">
+      {% for facility in facilities %}
+        <label class="check" title="{{ facility.evidence }}"><input type="checkbox" name="facility" value="{{ facility.key }}"{% if facility.existing %} disabled{% else %} checked{% endif %}> {% icon facility.icon %} <span>{{ facility.label }}{% if facility.existing %} <small class="muted">({% translate "already added" %})</small>{% endif %}</span></label>
+      {% endfor %}
+    </div>
+    <p class="small muted">{% translate "Found from the words used on the website: untick any that do not apply." %}</p>
+  </section>
+  {% endif %}
+
+  {% if seasons %}
+  <section class="card card-pad">
+    <h2>{% icon "calendar-range" %} {% translate "Seasons" %}</h2>
+    <div class="table-scroll table-scroll--flat">
+      <table class="table import-table">
+        <thead><tr><th><span class="sr-only">{% translate "Import" %}</span></th><th>{% translate "Season" %}</th><th>{% translate "Type" %}</th><th>{% translate "Dates" %}</th></tr></thead>
+        <tbody>
+        {% for season in seasons %}
+          <tr>
+            <td><input type="checkbox" name="season" value="{{ season.key }}" id="season-{{ season.key }}" checked></td>
+            <td><label for="season-{{ season.key }}"><strong>{{ season.display_name }}</strong></label></td>
+            <td>
+              <select name="season_kind_{{ season.key }}" aria-label="{% translate 'Type' %}">
+                {% for value, label in season_kinds %}<option value="{{ value }}"{% if value == season.kind %} selected{% endif %}>{{ label }}</option>{% endfor %}
+              </select>
+            </td>
+            <td>{% for start, end in season.period_dates %}<span class="period-chip">{{ start|date:"j M Y" }} – {{ end|date:"j M Y" }}</span>{% empty %}<span class="badge badge--warning">{% translate "No dates found: add them afterwards" %}</span>{% endfor %}</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% if camping_seasons %}<p class="small muted">{% translate "Periods that overlap with your current seasons are not created." %}</p>{% endif %}
+  </section>
+  {% endif %}
+
+  {% if items %}
+  <section class="card card-pad">
+    <div class="card-head">
+      <h2>{% icon "euro" %} {% translate "Prices" %}</h2>
+      <span class="small"><button type="button" class="link-button" data-check-all="item">{% translate "Select all" %}</button> · <button type="button" class="link-button" data-check-none="item">{% translate "None" context "select none" %}</button></span>
+    </div>
+    <div class="table-scroll table-scroll--flat">
+      <table class="table import-table">
+        <thead><tr><th><span class="sr-only">{% translate "Import" %}</span></th><th>{% translate "Item" %}</th><th>{% translate "Import as" %}</th><th>{% translate "How it is charged" %}</th><th>{% translate "Prices" %} ({{ currency }})</th></tr></thead>
+        <tbody>
+        {% for item in items %}
+          <tr>
+            <td><input type="checkbox" name="item" value="{{ item.key }}" id="item-{{ item.key }}" checked></td>
+            <td><label for="item-{{ item.key }}"><strong>{{ item.label }}</strong></label>{% if item.section %}<small class="muted d-block">{{ item.section }}</small>{% endif %}</td>
+            <td>
+              <select name="item_type_{{ item.key }}" aria-label="{% translate 'Import as' %}" data-item-type="{{ item.key }}">
+                {% for value, label in item_types %}<option value="{{ value }}"{% if value == item.selected_type %} selected{% endif %}>{{ label }}</option>{% endfor %}
+              </select>
+            </td>
+            <td>
+              <select name="item_mode_{{ item.key }}" aria-label="{% translate 'How it is charged' %}" data-item-mode="{{ item.key }}">
+                {% for value, label in service_modes %}<option value="{{ value }}"{% if value == item.mode %} selected{% endif %}>{{ label }}</option>{% endfor %}
+              </select>
+            </td>
+            <td class="small">
+              {% for name, price in item.price_list %}<span class="nowrap">{{ name }}: <strong>{{ price }}</strong></span>{% if not forloop.last %}<br>{% endif %}{% empty %}<strong>{{ item.base }}</strong>{% endfor %}
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <p class="small muted">{% translate "Accommodation is created with 1 unit: set how many you have afterwards." %}</p>
+  </section>
+  {% endif %}
+
+  {% if not field_rows and not texts and not photos and not items and not facilities %}
+  <div class="card empty-state">
+    {% icon "circle-alert" "icon-xl" %}
+    <p>{% translate "We could not find useful information on this website. It may be built in a way we cannot read." %}</p>
+  </div>
+  {% endif %}
+
+  {% url 'panel:import' slug=camping.slug as cancel_url %}
+  {% include "panel/_form_actions.html" with cancel_url=cancel_url label=_("Import selected") %}
+</form>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends "panel/base.html" %}
+{% load i18n core_tags %}
+{% block page_title %}{% translate "Import from a website" %}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>{% translate "Import from a website" %}</h1>
+    <p class="muted">{% translate "Enter the address of the camping's current website. We read its texts, contact details, photos, facilities, seasons and prices, and you choose what to import." %}</p>
+  </div>
+</div>
+<div class="detail-grid">
+  <form method="post" novalidate class="form-stack" data-import-form>
+    {% csrf_token %}
+    {% include "partials/form_errors.html" %}
+    <section class="card card-pad">
+      {% include "partials/field.html" with field=form.url %}
+      <button class="btn btn-primary" type="submit" data-busy-label="{% translate 'Reading the website… this can take up to half a minute' %}">{% icon "download" %}<span>{% translate "Read the website" %}</span></button>
+    </section>
+    <p class="small muted">{% icon "info" %} {% translate "Only use it with the camping's own website: its texts and photos belong to the camping." %}</p>
+  </form>
+  <aside class="form-stack">
+    <section class="card card-pad">
+      <h2>{% translate "What is imported" %}</h2>
+      <ul class="plain-list small">
+        <li>{% translate "Name, texts in every language of the website, contact details and address" %}</li>
+        <li>{% translate "Logo and photos" %}</li>
+        <li>{% translate "Facilities mentioned on the website" %}</li>
+        <li>{% translate "Price tables: accommodation, services and their seasons with dates" %}</li>
+        <li>{% translate "Check-in and check-out times and the opening period" %}</li>
+      </ul>
+      <p class="small muted">{% translate "Nothing changes until you confirm it on the next screen, and everything can be edited afterwards." %}</p>
+    </section>
+    {% if imports %}
+    <section class="card card-pad">
+      <h2>{% translate "Previous imports" %}</h2>
+      <ul class="plain-list small">
+        {% for item in imports %}
+        <li>{% if item.status == "ready" %}<a href="{% url 'panel:import_review' slug=camping.slug pk=item.pk %}">{{ item.url }}</a>{% else %}{{ item.url }}{% endif %} · {{ item.created_at|date:"j M Y H:i" }} · {{ item.get_status_display }}</li>
+        {% endfor %}
+      </ul>
+    </section>
+    {% endif %}
+  </aside>
+</div>
+{% endblock %}

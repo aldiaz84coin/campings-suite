@@ -65,6 +65,10 @@ CAMPING_URL_SCHEME = env("CAMPING_URL_SCHEME", default="http" if DEBUG and not T
 SIGNUP_ENABLED = env.bool("SIGNUP_ENABLED", default=False)
 SIGNUP_REQUIRES_APPROVAL = env.bool("SIGNUP_REQUIRES_APPROVAL", default=True)
 MAX_PHOTOS_PER_CAMPING = env.int("MAX_PHOTOS_PER_CAMPING", default=80)
+# Importing a camping's current website: seconds spent reading pages, and
+# whether private network addresses may be read (only for local testing).
+IMPORTER_TIME_BUDGET = env.int("IMPORTER_TIME_BUDGET", default=25)
+IMPORTER_ALLOW_PRIVATE_HOSTS = env.bool("IMPORTER_ALLOW_PRIVATE_HOSTS", default=False)
 MAX_UPLOAD_MB = env.int("MAX_UPLOAD_MB", default=20)
 
 # --- Applications ------------------------------------------------------------
@@ -84,6 +88,7 @@ INSTALLED_APPS = [
     "bookings",
     "public",
     "panel",
+    "importer",
 ]
 
 MIDDLEWARE = [

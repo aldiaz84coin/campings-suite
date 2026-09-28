@@ -287,6 +287,93 @@
     refresh();
   }
 
+  // Long requests (reading a website): show that something is happening.
+  function setupBusyButtons() {
+    document.querySelectorAll("button[data-busy-label]").forEach(function (button) {
+      var form = button.form;
+      if (!form) return;
+      form.addEventListener("submit", function () {
+        var label = button.querySelector("span") || button;
+        label.textContent = button.getAttribute("data-busy-label");
+        button.classList.add("is-busy");
+        window.setTimeout(function () { button.disabled = true; }, 0);
+      });
+    });
+  }
+
+  // "Select all" / "None" for groups of checkboxes with the same name.
+  function setupCheckAll() {
+    document.addEventListener("click", function (event) {
+      var button = event.target.closest("[data-check-all], [data-check-none]");
+      if (!button) return;
+      var name = button.getAttribute("data-check-all") || button.getAttribute("data-check-none");
+      var checked = button.hasAttribute("data-check-all");
+      document.querySelectorAll('input[type="checkbox"][name="' + name + '"]').forEach(function (box) {
+        if (!box.disabled) box.checked = checked;
+      });
+    });
+  }
+
+  // Import review: photos the browser cannot load are left out, and the way a
+  // service is charged only matters for rows imported as services.
+  function setupImportReview() {
+    document.querySelectorAll("img[data-import-image]").forEach(function (image) {
+      function broken() {
+        var label = image.closest("label");
+        var box = label && label.querySelector('input[type="checkbox"]');
+        if (box) box.checked = false;
+        if (label) label.classList.add("is-broken");
+      }
+      if (image.complete && image.naturalWidth === 0 && image.getAttribute("src")) broken();
+      image.addEventListener("error", broken);
+    });
+    document.querySelectorAll("select[data-item-type]").forEach(function (select) {
+      var mode = $('select[data-item-mode="' + select.getAttribute("data-item-type") + '"]');
+      if (!mode) return;
+      function refresh() { mode.hidden = select.value.indexOf("acc:") === 0; }
+      select.addEventListener("change", refresh);
+      refresh();
+    });
+  }
+
+  // Imported photos are downloaded in small batches until none is left.
+  function setupPhotoImport() {
+    var box = $("[data-photo-import]");
+    var form = box && $("[data-progress-continue]", box);
+    if (!box || !form) return;
+    var bar = $("[data-progress-bar]", box);
+    var text = $("[data-progress-text]", box);
+    var labels = $("[data-progress-labels]");
+    form.hidden = true;
+    function step() {
+      var body = new FormData();
+      body.append("csrfmiddlewaretoken", csrfToken());
+      fetch(box.getAttribute("data-url"), {
+        method: "POST",
+        body: body,
+        headers: { "X-Requested-With": "fetch", "X-CSRFToken": csrfToken() },
+        credentials: "same-origin"
+      }).then(function (response) {
+        if (!response.ok) throw new Error(response.status);
+        return response.json();
+      }).then(function (data) {
+        var processed = data.done + data.failed;
+        bar.style.width = (data.total ? Math.round(processed * 100 / data.total) : 100) + "%";
+        text.textContent = data.done + " / " + data.total + " " + labels.getAttribute("data-ready") +
+          (data.failed ? " · " + data.failed + " " + labels.getAttribute("data-failed") : "");
+        if (data.remaining > 0) {
+          step();
+        } else {
+          text.textContent += " · " + labels.getAttribute("data-finished");
+          window.location.reload();
+        }
+      }).catch(function () {
+        form.hidden = false;
+      });
+    }
+    step();
+  }
+
   // Inline formsets (e.g. the periods of a season): "Add" clones the empty form.
   function setupFormsets() {
     document.querySelectorAll("[data-formset]").forEach(function (box) {
@@ -329,6 +416,10 @@
   }
 
   document.addEventListener("DOMContentLoaded", function () {
+    setupBusyButtons();
+    setupCheckAll();
+    setupPhotoImport();
+    setupImportReview();
     setupFormsets();
     setupSeasonKind();
     setupCalendarScroll();

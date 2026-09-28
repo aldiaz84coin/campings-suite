@@ -18,6 +18,8 @@ inglés, francés, alemán, neerlandés e italiano).
    del propietario, idioma principal y, si ya lo sabes, su dominio. El
    propietario recibe un correo con un enlace para elegir su contraseña (el
    enlace también se muestra en pantalla por si prefieres enviarlo tú).
+   Si el camping ya tiene web, pon su dirección en **Web actual**: se lee y
+   se rellenan automáticamente sus datos (ver [Importar la web actual](#importar-la-web-actual)).
 2. **Conecta su dirección web** (ver [Direcciones de los campings](#6-direcciones-de-los-campings)):
    - con **dominio propio**: `fly certs add www.sucamping.com` y el camping (o
      tú) crea el registro DNS que indican los *Ajustes* del camping;
@@ -63,8 +65,16 @@ dominio de la plataforma)
   con vista previa.
 - Instalaciones (catálogo de 46 + personalizadas), tipos de alojamiento (con
   número de unidades), servicios y extras (siempre cobrados, opcionales o
-  incluidos), temporadas (con copia al año siguiente) y **tabla de precios**
-  por temporada.
+  incluidos) y **tarifas por periodos**: temporadas baja, media y alta, cada
+  una con sus precios y con tantos periodos de fechas como haga falta (p. ej.
+  alta en verano y en Navidad), más **periodos especiales** (Semana Santa,
+  puentes, fiestas…) que tienen prioridad en sus fechas y pueden tener su
+  propia estancia mínima. «Copiar fechas al año siguiente» repite los
+  periodos (los de Semana Santa siguen a la Pascua) sin tocar los precios.
+- **Tabla de precios** por temporada, con el precio base para las fechas que
+  no cubre ningún periodo.
+- **Importar la web actual** del camping: textos, fotos, instalaciones y
+  tarifas (ver más abajo).
 - Políticas de reserva: horarios, estancia mínima/máxima, depósito, formas de
   pago, cancelación, mascotas y normas.
 - Reservas: solicitudes de la web (confirmar/rechazar con correo al cliente),
@@ -83,6 +93,35 @@ dominio de la plataforma)
   de DNS) y crédito «Powered by».
 - Administración completa de Django en `/superadmin/`.
 - Registro público de campings desactivado por defecto (`SIGNUP_ENABLED`).
+
+## Importar la web actual
+
+Al crear un camping (campo **Web actual**) o desde *Panel → Importar desde una
+web*, la app lee la web que el camping ya tiene y propone:
+
+- **Datos**: nombre, correo, teléfono, WhatsApp, Instagram, Facebook,
+  dirección, coordenadas del mapa, categoría (estrellas), horarios de entrada
+  y salida y periodo de apertura (de los datos schema.org, las etiquetas meta,
+  los enlaces `tel:`/`mailto:`, los mapas incrustados y el texto).
+- **Textos** (lema y descripción) en cada idioma que tenga la web (enlaces
+  `hreflang`) y el texto de «cómo llegar».
+- **Logotipo y fotos**: de la portada, galerías y sliders; en webs WordPress
+  descarga el original en lugar de las miniaturas.
+- **Instalaciones**, detectadas por palabras clave en seis idiomas.
+- **Tarifas**: las tablas de precios (también en filas o columnas invertidas y
+  con varias tablas), clasificando cada fila como alojamiento (parcela,
+  bungalow, mobil-home…) o servicio (adulto, niño, perro, electricidad,
+  tasa turística…) y cada columna como temporada baja, media, alta o periodo
+  especial, con sus fechas cuando aparecen en la web («Temporada alta: del 1
+  de julio al 31 de agosto», «01/07 - 31/08»…). Si las tarifas están en PDF,
+  lo indica para introducirlas a mano.
+
+Nada se guarda hasta revisarlo: una pantalla muestra lo encontrado junto al
+valor actual y permite marcar qué importar y cambiar la clasificación de cada
+precio. Las fotos se descargan y optimizan después, por tandas, con una barra
+de progreso. Solo se leen direcciones públicas de internet (nunca redes
+internas) con límites de tamaño y tiempo. Las webs que se construyen solo con
+JavaScript o que bloquean robots pueden no dar resultados.
 
 ## Tecnología
 
@@ -256,6 +295,8 @@ gestionar muchos dominios.
 | `MEDIA_PUBLIC_DOMAIN` | — | Dominio (y ruta) públicos del bucket, sin `https://`. |
 | `MEDIA_LOCATION` | `media` | Prefijo de las fotos dentro del bucket. |
 | `MAX_PHOTOS_PER_CAMPING` / `MAX_UPLOAD_MB` | `80` / `20` | Límites de fotos. |
+| `IMPORTER_TIME_BUDGET` | `25` | Segundos como máximo para leer la web de un camping. |
+| `IMPORTER_ALLOW_PRIVATE_HOSTS` | `False` | Solo para pruebas en local: permite importar desde direcciones privadas. |
 | `EMAIL_URL`, `DEFAULT_FROM_EMAIL` | consola | Envío de correos. |
 | `DJANGO_SUPERUSER_EMAIL`, `DJANGO_SUPERUSER_PASSWORD` | — | Superusuario creado en el despliegue. |
 | `DB_TRANSACTION_POOLER` | `False` | Para poolers en modo transacción (Supabase 6543, PgBouncer). |
@@ -297,6 +338,8 @@ campings/   modelos (camping, fotos, instalaciones, alojamientos, temporadas,
 bookings/   solicitudes de reserva, formularios y correos
 public/     web de cada camping, sitemap y robots
 panel/      panel de cada camping y sección de plataforma
+importer/   lectura de la web actual de un camping (descarga segura, textos,
+            fotos, instalaciones, tablas de precios y fechas)
 templates/  plantillas HTML y de correo
 static/     CSS, JavaScript e iconos (Lucide, Simple Icons)
 locale/     traducciones

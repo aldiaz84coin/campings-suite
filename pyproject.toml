@@ -11,5 +11,7 @@ ignore = ["DJ001", "DJ012"]
 known-first-party = ["accounts", "bookings", "campings", "config", "core", "panel", "public", "tests"]
 
 [tool.ruff.lint.per-file-ignores]
-# Long multilingual demo texts.
+# Long multilingual demo texts and keyword patterns.
 "campings/demo.py" = ["E501"]
+"importer/extract.py" = ["E501"]
+"importer/dates.py" = ["E501"]

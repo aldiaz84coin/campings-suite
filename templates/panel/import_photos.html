@@ -1,0 +1,19 @@
+{% extends "panel/base.html" %}
+{% load i18n core_tags %}
+{% block page_title %}{% translate "Importing photos" %}{% endblock %}
+{% block content %}
+<div class="page-header"><div><h1>{% translate "Importing photos" %}</h1><p class="muted">{% translate "The photos are downloaded and optimised a few at a time. Keep this page open until it finishes." %}</p></div></div>
+<section class="card card-pad import-progress" data-photo-import data-url="{% url 'panel:import_photos' slug=camping.slug pk=site_import.pk %}" data-total="{{ site_import.photos_total }}" data-done-url="{% url 'panel:photos' slug=camping.slug %}">
+  <div class="progress"><span class="progress__bar" data-progress-bar style="width: {% widthratio site_import.photos_done|add:site_import.photos_failed site_import.photos_total|default:1 100 %}%"></span></div>
+  <p data-progress-text>
+    {% blocktranslate with done=site_import.photos_done total=site_import.photos_total %}{{ done }} of {{ total }} ready{% endblocktranslate %}{% if site_import.photos_failed %} · {% blocktranslate count counter=site_import.photos_failed %}{{ counter }} could not be downloaded{% plural %}{{ counter }} could not be downloaded{% endblocktranslate %}{% endif %}
+  </p>
+  {% if site_import.photo_queue %}
+    <form method="post" data-progress-continue>{% csrf_token %}<button class="btn btn-primary" type="submit">{% icon "download" %}<span>{% translate "Continue" %}</span></button></form>
+    <form method="post" action="{% url 'panel:import_photos_cancel' slug=camping.slug pk=site_import.pk %}">{% csrf_token %}<button class="btn btn-ghost btn-sm" type="submit">{% translate "Stop and keep the photos imported so far" %}</button></form>
+  {% else %}
+    <p><a class="btn btn-primary" href="{% url 'panel:photos' slug=camping.slug %}">{% icon "images" %}<span>{% translate "See the photos" %}</span></a> <a class="btn btn-ghost" href="{% url 'panel:dashboard' slug=camping.slug %}">{% translate "Go to the dashboard" %}</a></p>
+  {% endif %}
+</section>
+<template data-progress-labels data-ready="{% translate 'ready' %}" data-failed="{% translate 'could not be downloaded' %}" data-finished="{% translate 'Finished!' %}"></template>
+{% endblock %}

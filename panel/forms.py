@@ -485,6 +485,16 @@ class PlatformCampingForm(forms.Form):
         label=_("Own domain"),
         help_text=_("Optional, e.g. www.mycamping.com. You can also add it later in the camping's settings."),
     )
+    website_url = forms.CharField(
+        label=_("Current website"),
+        max_length=500,
+        required=False,
+        widget=forms.TextInput(attrs={"placeholder": "https://www.mycamping.com", "inputmode": "url"}),
+        help_text=_(
+            "Optional: it is read to fill in the details, texts, photos, facilities and prices, "
+            "which you review before importing."
+        ),
+    )
 
     def clean_custom_domain(self):
         domain = self.cleaned_data.get("custom_domain")

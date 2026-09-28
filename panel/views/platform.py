@@ -16,6 +16,7 @@ from campings.models import Camping, Membership
 
 from ..forms import PlatformCampingForm
 from ..utils import panel_render, platform_only
+from .importer import start_import
 from .team import invite_user
 
 
@@ -87,6 +88,10 @@ def platform_new(request):
             messages.info(
                 request, _("Send this link to the owner so they can choose a password: %(link)s") % {"link": link}
             )
+        if form.cleaned_data.get("website_url"):
+            response = start_import(request, camping, form.cleaned_data["website_url"])
+            if response is not None:
+                return response
         # Its settings show the web address and, with an own domain, the DNS steps.
         return redirect("panel:settings", slug=camping.slug)
     return panel_render(request, "panel/platform_new.html", {"form": form}, section="platform")
