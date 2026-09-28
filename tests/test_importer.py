@@ -113,6 +113,23 @@ class ParserTests(SimpleTestCase):
         self.assertEqual(classify("Electricity 10A")["mode"], "optional")
 
 
+class ChooseLinksTests(SimpleTestCase):
+    def test_legal_notice_is_read_but_not_privacy_or_cookies(self):
+        html = (
+            '<a href="/aviso-legal-y-politica-de-privacidad/">Aviso legal</a>'
+            '<a href="/politica-de-cookies/">Cookies</a><a href="/privacidad/">Privacidad</a>'
+            '<a href="/tarifas/">Tarifas</a>'
+        )
+        home = service.extract.Page.from_html("https://www.marblava.test/", html, "home")
+        self.assertEqual(
+            service.choose_links(home),
+            [
+                ("https://www.marblava.test/tarifas/", "prices"),
+                ("https://www.marblava.test/aviso-legal-y-politica-de-privacidad/", "legal"),
+            ],
+        )
+
+
 class ExtractionTests(TestCase):
     def read(self):
         web = FakeWeb()
@@ -146,6 +163,12 @@ class ExtractionTests(TestCase):
         self.assertNotIn("cookies", data["texts"]["es"]["description"])
         self.assertIn("200 metres from the beach", data["texts"]["en"]["description"])
         self.assertIn("AP-7", data["location_info"]["es"])
+        self.assertEqual(fields["legal_name"], "Mar Blava Turisme, S.L.")
+        self.assertEqual(fields["tax_id"], "B-17123456")
+        self.assertEqual(fields["tourism_registration"], "KG-000123")
+        self.assertIn("Registro Mercantil de Girona", fields["registry_info"])
+        self.assertEqual(fields["ga_measurement_id"], "G-MB12345XYZ")
+        self.assertEqual(fields["search_console_verification"], "AbCdEf123456_ghIJkl-789XYZ")
         self.assertTrue(data["logo"].endswith("logo-mar-blava.png"))
 
     def test_photos_and_facilities(self):
@@ -223,7 +246,8 @@ class ImportFlowTests(TestCase):
         data = site_import.data
         post = {
             "field": ["email", "phone", "address", "postal_code", "city", "region", "country", "location", "stars"]
-            + ["opening", "check_in_from", "check_out_until", "instagram"],
+            + ["opening", "check_in_from", "check_out_until", "instagram"]
+            + ["legal_name", "tax_id", "tourism_registration", "ga_measurement_id", "search_console_verification"],
             "text": ["es:tagline", "es:description", "en:description"],
             "location_info": "1",
             "facility": ["pool", "wifi", "restaurant"],
@@ -243,6 +267,8 @@ class ImportFlowTests(TestCase):
         self.assertEqual(camping.email, "info@marblava.test")
         self.assertEqual(camping.city, "Platja d'Aro")
         self.assertEqual(camping.stars, 3)
+        self.assertEqual((camping.legal_name, camping.tax_id), ("Mar Blava Turisme, S.L.", "B-17123456"))
+        self.assertEqual(camping.ga_measurement_id, "G-MB12345XYZ")
         self.assertEqual((camping.latitude, camping.longitude), (Decimal("41.812300"), Decimal("3.065400")))
         self.assertEqual((camping.opening_date, camping.closing_date), (date(2026, 4, 1), date(2026, 10, 12)))
         self.assertIn("en", camping.languages)

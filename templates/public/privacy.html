@@ -1,22 +1,36 @@
 {% extends camping|yesno:"public/camping_base.html,public/base.html" %}
-{% load i18n %}
-{% block title %}{% translate "Privacy notice" %}{% endblock %}
+{% load i18n core_tags %}
+{% block title %}{% translate "Privacy notice" %}{% if camping %} · {{ camping.name }}{% endif %}{% endblock %}
 {% block content %}
 <section class="section">
   <div class="container narrow prose">
     <h1>{% translate "Privacy notice" %}</h1>
     {% if camping %}
-      <p>{% blocktranslate with name=camping.name %}The data you send through the booking form is received by {{ name }}, which is responsible for processing it in order to answer your request and manage your stay.{% endblocktranslate %}</p>
-      {% if camping.email %}<p>{% blocktranslate with email=camping.email %}You can exercise your rights of access, rectification and erasure by writing to {{ email }}.{% endblocktranslate %}</p>{% endif %}
+      <h2>{% translate "Who is responsible for your data" %}</h2>
+      {% include "public/_legal_owner.html" %}
     {% else %}
       <p>{% blocktranslate with platform=PLATFORM_NAME %}{{ platform }} provides the websites and booking tools of the campings that use it. When you send a booking request through a camping's website, your data is passed to that camping, which is responsible for processing it.{% endblocktranslate %}</p>
     {% endif %}
     <h2>{% translate "What data we collect" %}</h2>
     <p>{% translate "Your name, e-mail address, phone number, country, the details of your stay and your message. We only use them to handle your request." %}</p>
+    {% if camping %}
+      <h2>{% translate "What we use it for" %}</h2>
+      <p>{% blocktranslate with name=camping.owner_name %}{{ name }} uses the data you send to answer your booking requests and questions and to manage your stay (pre-contractual and contractual measures, article 6.1.b GDPR), and to meet its legal obligations, such as the registration of guests (article 6.1.c GDPR).{% endblocktranslate %}</p>
+    {% endif %}
     <h2>{% translate "How long we keep it" %}</h2>
     <p>{% translate "For as long as needed to manage your booking and meet legal obligations." %}</p>
-    <h2>{% translate "Cookies" %}</h2>
-    <p>{% translate "We only use technical cookies that are necessary for the website to work (language, security and session). We do not use advertising or tracking cookies." %}</p>
+    {% if camping %}
+      <h2>{% translate "Who we share it with" %}</h2>
+      <p>{% translate "Nobody, except when the law requires it. The company that provides this website and its booking system processes the data on behalf of the camping, only to provide that service." %}</p>
+      <h2>{% translate "Your rights" %}</h2>
+      <p>{% if camping.email %}{% blocktranslate with email=camping.email %}You can access, rectify or erase your data, restrict or object to its processing and ask for its portability by writing to {{ email }}.{% endblocktranslate %}{% else %}{% translate "You can access, rectify or erase your data, restrict or object to its processing and ask for its portability by contacting the camping." %}{% endif %} {% translate "You can also file a complaint with the data protection authority (in Spain, the AEPD, www.aepd.es)." %}</p>
+      <h2>{% translate "Cookies" %}</h2>
+      <p>{% camping_url 'public:camping_cookies' camping as cookies_url %}{% blocktranslate %}See our <a href="{{ cookies_url }}">cookie policy</a>.{% endblocktranslate %}</p>
+      {% with extra=camping.privacy_extra|tr:camping.default_language %}{% if extra %}<h2>{% translate "More information" %}</h2>{{ extra|linebreaks }}{% endif %}{% endwith %}
+    {% else %}
+      <h2>{% translate "Cookies" %}</h2>
+      <p>{% translate "We only use technical cookies that are necessary for the website to work (language, security and session). We do not use advertising or tracking cookies." %}</p>
+    {% endif %}
   </div>
 </section>
 {% endblock %}

@@ -2,7 +2,7 @@
 {% load i18n static core_tags %}
 {% block title %}{{ camping.name }}{% endblock %}
 {% block styles %}<link rel="stylesheet" href="{% static 'css/site.css' %}">{% endblock %}
-{% block meta %}{% for code, url in alternates %}<link rel="alternate" hreflang="{{ code }}" href="{{ url }}">{% endfor %}{% if canonical %}<link rel="canonical" href="{{ canonical }}">{% endif %}{% if camping.logo %}<link rel="icon" href="{{ camping.logo.url }}">{% endif %}<meta name="theme-color" content="{{ camping.primary_color }}">{% endblock %}
+{% block meta %}{% for code, url in alternates %}<link rel="alternate" hreflang="{{ code }}" href="{{ url }}">{% endfor %}{% if canonical %}<link rel="canonical" href="{{ canonical }}">{% endif %}{% if camping.logo %}<link rel="icon" href="{{ camping.logo.url }}">{% endif %}<meta name="theme-color" content="{{ camping.primary_color }}">{% if camping.search_console_verification %}<meta name="google-site-verification" content="{{ camping.search_console_verification }}">{% endif %}{% endblock %}
 {% block body_class %}camping-site font-{{ camping.font_style }}{% endblock %}
 {% block body_attrs %} style="--primary: {{ camping.primary_color }}; --on-primary: {{ camping.primary_color|contrast_text }}; --accent: {{ camping.accent_color }}; --on-accent: {{ camping.accent_color|contrast_text }};"{% endblock %}
 {% block body %}
@@ -53,10 +53,25 @@
     </ul>
   </div>
   <div class="container camping-footer__bottom">
-    <a href="{% camping_url 'public:camping_privacy' camping %}">{% translate "Privacy" %}</a>
+    <nav class="camping-footer__legal" aria-label="{% translate 'Legal information' %}">
+      <a href="{% camping_url 'public:camping_legal' camping %}">{% translate "Legal notice" %}</a>
+      <a href="{% camping_url 'public:camping_privacy' camping %}">{% translate "Privacy" %}</a>
+      <a href="{% camping_url 'public:camping_cookies' camping %}">{% translate "Cookies" %}</a>
+      {% if camping.ga_measurement_id %}<button type="button" class="link-button" data-consent-reset>{% translate "Cookie settings" %}</button>{% endif %}
+      {% if camping.tourism_registration %}<span>{% blocktranslate with number=camping.tourism_registration %}Tourism reg. no. {{ number }}{% endblocktranslate %}</span>{% endif %}
+    </nav>
     {% if camping.show_platform_credit %}<span>{% blocktranslate with platform=PLATFORM_NAME asvar credit %}Powered by {{ platform }}{% endblocktranslate %}{% if PLATFORM_CREDIT_URL %}<a href="{{ PLATFORM_CREDIT_URL }}" rel="noopener">{{ credit }}</a>{% else %}{{ credit }}{% endif %}</span>{% endif %}
   </div>
 </footer>
+{% if camping.ga_measurement_id and not is_preview %}
+<div class="consent" data-consent data-ga="{{ camping.ga_measurement_id }}" role="dialog" aria-live="polite" aria-label="{% translate 'Cookies' %}" hidden>
+  <p>{% translate "We would like to use statistics cookies (Google Analytics) to know how our website is used. Do you accept them?" %} <a href="{% camping_url 'public:camping_cookies' camping %}">{% translate "More information" %}</a></p>
+  <div class="consent__actions">
+    <button type="button" class="btn btn-ghost btn-sm" data-consent-choice="denied">{% translate "Reject" %}</button>
+    <button type="button" class="btn btn-primary btn-sm" data-consent-choice="granted">{% translate "Accept" %}</button>
+  </div>
+</div>
+{% endif %}
 <dialog class="lightbox" data-lightbox-dialog aria-label="{% translate 'Photo viewer' %}">
   <figure class="lightbox__figure"><img alt="" data-lightbox-image><figcaption data-lightbox-caption></figcaption></figure>
   <button class="lightbox__btn lightbox__close" type="button" data-lightbox-close aria-label="{% translate 'Close' %}">{% icon "x" %}</button>

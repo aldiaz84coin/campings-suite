@@ -17,6 +17,7 @@ from campings import catalog
 from campings.models import (
     AccommodationRate,
     AccommodationType,
+    Camping,
     Facility,
     Photo,
     Season,
@@ -40,7 +41,12 @@ TEXT_FIELDS = {
     "city": 100,
     "region": 100,
     "country": 100,
+    "legal_name": 200,
+    "tax_id": 30,
+    "registry_info": 300,
+    "tourism_registration": 60,
 }
+CODE_FIELDS = ("ga_measurement_id", "search_console_verification")
 URL_FIELDS = ("instagram", "facebook")
 SERVICE_ICON_KEYS = {key for key, _label in catalog.SERVICE_ICONS}
 SERVICE_UNIT_KEYS = {key for key, _label in catalog.SERVICE_UNITS}
@@ -90,6 +96,12 @@ def _apply_fields(camping, data, chosen):
             except ValidationError:
                 continue
             camping.email = value
+        elif key in CODE_FIELDS:
+            try:
+                Camping._meta.get_field(key).run_validators(value)
+            except ValidationError:
+                continue
+            setattr(camping, key, value)
         elif key in URL_FIELDS:
             try:
                 URLValidator()(value)

@@ -51,6 +51,14 @@ inglés, francés, alemán, neerlandés e italiano).
   cliente salen **a nombre del camping** y las respuestas le llegan a él.
 - SEO propio de cada dominio: `sitemap.xml`, `robots.txt`, `hreflang`,
   `canonical`, Open Graph y datos estructurados schema.org `Campground`.
+- **Páginas legales** redactadas con los datos del camping: aviso legal
+  (LSSI-CE), política de privacidad (RGPD: responsable, finalidades, bases
+  legales, conservación, derechos y AEPD) y política de cookies, enlazadas en
+  el pie junto al número de registro de turismo.
+- **Google Analytics 4** opcional con **aviso de consentimiento**: no se carga
+  nada hasta que el visitante acepta, al rechazar se borran las cookies `_ga`
+  y se puede cambiar la elección desde el pie («Configurar cookies»). También
+  admite el código de verificación de **Google Search Console**.
 - Página «Próximamente» mientras la web no está publicada.
 
 **Panel de cada camping** (`/es/panel/` en su propio dominio; también en el
@@ -83,7 +91,12 @@ dominio de la plataforma)
   ocupación** mensual, filtros y **exportación a CSV**.
 - Equipo: invitar personas (propietario o personal) con enlace para elegir
   contraseña.
-- Ajustes: dirección web, idiomas de la página, moneda y avisos de reservas.
+- **Datos legales**: titular, NIF/CIF, domicilio social, datos registrales y
+  número de registro de turismo, más textos adicionales para el aviso legal y
+  la privacidad (son un punto de partida: conviene que los revise su asesor).
+- Ajustes: dirección web, idiomas de la página, moneda, avisos de reservas e
+  IDs de Google Analytics y Search Console (se puede pegar la etiqueta meta
+  entera: se extrae el código).
 
 **Plataforma** (para ti, en el dominio de la plataforma)
 
@@ -103,6 +116,10 @@ web*, la app lee la web que el camping ya tiene y propone:
   dirección, coordenadas del mapa, categoría (estrellas), horarios de entrada
   y salida y periodo de apertura (de los datos schema.org, las etiquetas meta,
   los enlaces `tel:`/`mailto:`, los mapas incrustados y el texto).
+- **Datos legales** del aviso legal de la web: titular, NIF/CIF, datos del
+  Registro Mercantil y número de registro de turismo; y el ID de Google
+  Analytics y el código de Search Console que ya use, para no perder las
+  estadísticas ni la verificación al cambiar de web.
 - **Textos** (lema y descripción) en cada idioma que tenga la web (enlaces
   `hreflang`) y el texto de «cómo llegar».
 - **Logotipo y fotos**: de la portada, galerías y sliders; en webs WordPress

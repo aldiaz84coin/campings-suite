@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: campings-suite\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-27 21:30+0200\n"
+"POT-Creation-Date: 2026-09-28 08:13+0200\n"
 "PO-Revision-Date: 2026-09-27 14:51+0200\n"
 "Last-Translator: campings-suite\n"
 "Language-Team: es\n"
@@ -615,6 +615,12 @@ msgstr "Usa un código de color como #2f6f4e."
 msgid "Enter a domain such as www.mycamping.com (without https://)."
 msgstr "Introduce un dominio como www.micamping.com (sin https://)."
 
+msgid "Use the measurement ID of Google Analytics 4, e.g. G-AB12CD34EF."
+msgstr "Usa el ID de medición de Google Analytics 4, p. ej. G-AB12CD34EF."
+
+msgid "Paste only the code from the content=\"...\" part."
+msgstr "Pega solo el código de la parte content=\"...\"."
+
 msgid "Use lowercase letters, numbers and hyphens (up to 63 characters, not starting or ending with a hyphen)."
 msgstr "Usa minúsculas, números y guiones (hasta 63 caracteres, sin empezar ni terminar en guion)."
 
@@ -743,6 +749,54 @@ msgstr "mostrar el crédito de la plataforma"
 
 msgid "“Powered by” link in the footer of the camping's website."
 msgstr "Enlace «Powered by» en el pie de la web del camping."
+
+msgid "legal name"
+msgstr "titular"
+
+msgid "Company or person that owns the camping."
+msgstr "Empresa o persona titular del camping."
+
+msgid "tax ID"
+msgstr "NIF / CIF"
+
+msgid "NIF / CIF / VAT number."
+msgstr "NIF / CIF / número de IVA."
+
+msgid "registered address"
+msgstr "domicilio social"
+
+msgid "Leave it empty if it is the camping's address."
+msgstr "Déjalo vacío si es la dirección del camping."
+
+msgid "company registry"
+msgstr "datos registrales"
+
+msgid "E.g. Registro Mercantil de Girona, tomo 1234, folio 56, hoja GI-7890."
+msgstr "P. ej. Registro Mercantil de Girona, tomo 1234, folio 56, hoja GI-7890."
+
+msgid "tourism registration number"
+msgstr "número de registro de turismo"
+
+msgid "Registration number in the regional tourism register, shown in the footer."
+msgstr "Número de inscripción en el registro de turismo de tu comunidad; se muestra en el pie de la web."
+
+msgid "additional legal notice text"
+msgstr "texto adicional del aviso legal"
+
+msgid "additional privacy text"
+msgstr "texto adicional de privacidad"
+
+msgid "Google Analytics measurement ID"
+msgstr "ID de medición de Google Analytics"
+
+msgid "G-XXXXXXXXXX. Only loaded when the visitor accepts statistics cookies."
+msgstr "G-XXXXXXXXXX. Solo se carga si el visitante acepta las cookies de estadística."
+
+msgid "Google Search Console verification code"
+msgstr "Código de verificación de Google Search Console"
+
+msgid "The content of the google-site-verification meta tag."
+msgstr "El contenido de la etiqueta meta google-site-verification."
 
 msgid "created"
 msgstr "creado"
@@ -1359,6 +1413,9 @@ msgstr "Crea tus tipos de alojamiento con precios"
 msgid "Define seasons or services and extras"
 msgstr "Define temporadas o servicios y extras"
 
+msgid "Add the legal details of your business"
+msgstr "Añade los datos legales de tu empresa"
+
 msgid "Publish your page"
 msgstr "Publica tu página"
 
@@ -1376,6 +1433,9 @@ msgstr "Los datos del camping se han guardado."
 
 msgid "The location has been saved."
 msgstr "La ubicación se ha guardado."
+
+msgid "The legal details have been saved."
+msgstr "Se han guardado los datos legales."
 
 msgid "The settings have been saved."
 msgstr "Los ajustes se han guardado."
@@ -1956,6 +2016,9 @@ msgstr "Administración"
 msgid "Settings"
 msgstr "Ajustes"
 
+msgid "Legal information"
+msgstr "Datos legales"
+
 msgid "Import from a website"
 msgstr "Importar desde una web"
 
@@ -2396,6 +2459,27 @@ msgstr "No cambia nada hasta que lo confirmes en la siguiente pantalla, y despu�
 msgid "Previous imports"
 msgstr "Importaciones anteriores"
 
+msgid "The legal notice, privacy and cookie pages of your website are written automatically with these details."
+msgstr "El aviso legal y las páginas de privacidad y cookies de tu web se redactan automáticamente con estos datos."
+
+msgid "Legal notice"
+msgstr "Aviso legal"
+
+msgid "Privacy"
+msgstr "Privacidad"
+
+msgid "Cookies"
+msgstr "Cookies"
+
+msgid "Owner of the website"
+msgstr "Titular de la web"
+
+msgid "Additional texts"
+msgstr "Textos adicionales"
+
+msgid "These texts are a starting point: have them checked by your legal adviser."
+msgstr "Estos textos son un punto de partida: haz que los revise tu asesor legal."
+
 msgid "Where you are and when you are open."
 msgstr "Dónde estás y cuándo abres."
 
@@ -2675,6 +2759,12 @@ msgstr "¿Quieres usar tu propio dominio (www.tucamping.com)? Contacta con el ad
 msgid "Languages and currency"
 msgstr "Idiomas y moneda"
 
+msgid "Statistics and Google"
+msgstr "Estadísticas y Google"
+
+msgid "Visitors are asked for their consent before Google Analytics is loaded, as the law requires."
+msgstr "Se pide el consentimiento de los visitantes antes de cargar Google Analytics, como exige la ley."
+
 msgid "People who can manage this camping. Owners can also change settings and invite others."
 msgstr "Personas que pueden gestionar este camping. Los propietarios además pueden cambiar los ajustes e invitar a otros."
 
@@ -2717,6 +2807,19 @@ msgstr "Página %(number)s de %(total)s"
 
 msgid "Next"
 msgstr "Siguiente"
+
+msgctxt "legal notice"
+msgid "Owner"
+msgstr "Titular"
+
+msgid "Tax ID"
+msgstr "NIF/CIF"
+
+msgid "Registry details"
+msgstr "Datos registrales"
+
+msgid "Tourism registration number"
+msgstr "Número de registro de turismo"
 
 #, python-format
 msgid "Check-in from %(start)s"
@@ -2805,9 +2908,6 @@ msgstr "Mi panel"
 
 msgid "Footer"
 msgstr "Pie de página"
-
-msgid "Privacy"
-msgstr "Privacidad"
 
 msgid "Booking request"
 msgstr "Solicitud de reserva"
@@ -2936,9 +3036,28 @@ msgstr "Reservar"
 msgid "Menu"
 msgstr "Menú"
 
+msgid "Cookie settings"
+msgstr "Configurar cookies"
+
+#, python-format
+msgid "Tourism reg. no. %(number)s"
+msgstr "Nº registro turismo %(number)s"
+
 #, python-format
 msgid "Powered by %(platform)s"
 msgstr "Con la tecnología de %(platform)s"
+
+msgid "We would like to use statistics cookies (Google Analytics) to know how our website is used. Do you accept them?"
+msgstr "Nos gustaría usar cookies de estadística (Google Analytics) para saber cómo se usa nuestra web. ¿Las aceptas?"
+
+msgid "More information"
+msgstr "Más información"
+
+msgid "Reject"
+msgstr "Rechazar"
+
+msgid "Accept"
+msgstr "Aceptar"
 
 msgid "Photo viewer"
 msgstr "Visor de fotos"
@@ -3069,16 +3188,78 @@ msgstr "Ver precio"
 msgid "Our new website is coming soon."
 msgstr "Muy pronto estrenamos nuestra nueva web."
 
+msgid "Cookie policy"
+msgstr "Política de cookies"
+
+msgid "Cookies are small files that websites store in your browser. These are the ones this website uses:"
+msgstr "Las cookies son pequeños archivos que las webs guardan en tu navegador. Estas son las que usa esta web:"
+
+msgid "Cookie"
+msgstr "Cookie"
+
+msgid "Purpose"
+msgstr "Finalidad"
+
+msgid "Duration"
+msgstr "Duración"
+
+msgid "Technical: protects the forms (booking request) against fraud."
+msgstr "Técnica: protege los formularios (solicitud de reserva) contra el fraude."
+
+msgid "1 year"
+msgstr "1 año"
+
+msgid "Technical: only for the camping's staff when they sign in to its management area."
+msgstr "Técnica: solo para el personal del camping cuando entra en su área de gestión."
+
+msgid "2 weeks"
+msgstr "2 semanas"
+
+msgid "Technical: remembers whether you accepted statistics cookies."
+msgstr "Técnica: recuerda si aceptaste las cookies de estadística."
+
+msgid "Statistics (Google Analytics): count visits and how the website is used. Only if you accept them."
+msgstr "Estadística (Google Analytics): cuenta las visitas y cómo se usa la web. Solo si las aceptas."
+
+msgid "2 years"
+msgstr "2 años"
+
+msgid "Technical cookies are needed for the website to work and do not require your consent. We do not use advertising cookies."
+msgstr "Las cookies técnicas son necesarias para que la web funcione y no requieren tu consentimiento. No usamos cookies publicitarias."
+
+msgid "Statistics cookies are only stored if you accept them, and you can change your choice at any time."
+msgstr "Las cookies de estadística solo se guardan si las aceptas, y puedes cambiar tu elección en cualquier momento."
+
+msgid "You can also delete or block cookies in your browser settings."
+msgstr "También puedes borrar o bloquear las cookies en la configuración de tu navegador."
+
+msgid "In compliance with the information duties of the legislation on information society services (in Spain, Law 34/2002, LSSI-CE), these are the details of the owner of this website:"
+msgstr "En cumplimiento del deber de información de la normativa de servicios de la sociedad de la información (en España, la Ley 34/2002, LSSI-CE), estos son los datos del titular de esta web:"
+
+msgid "Use of the website"
+msgstr "Uso de la web"
+
+msgid "This website offers information about the camping and lets you send booking requests. Using it implies accepting this notice. Users agree to use it lawfully and not to harm its operation."
+msgstr "Esta web ofrece información sobre el camping y permite enviar solicitudes de reserva. Su uso implica la aceptación de este aviso. Los usuarios se comprometen a usarla de forma lícita y a no perjudicar su funcionamiento."
+
+msgid "Intellectual property"
+msgstr "Propiedad intelectual"
+
+#, python-format
+msgid "The texts, photos, logos and other contents of this website belong to %(owner)s or are used with permission. They may not be reproduced without authorisation."
+msgstr "Los textos, fotos, logotipos y demás contenidos de esta web pertenecen a %(owner)s o se usan con autorización. No pueden reproducirse sin permiso."
+
+msgid "Liability"
+msgstr "Responsabilidad"
+
+msgid "The information on this website is updated regularly, but prices and availability are only confirmed when the camping accepts a booking request. The camping is not responsible for the content of other websites linked from here."
+msgstr "La información de esta web se actualiza con regularidad, pero los precios y la disponibilidad solo se confirman cuando el camping acepta una solicitud de reserva. El camping no se hace responsable del contenido de otras webs enlazadas desde aquí."
+
 msgid "Privacy notice"
 msgstr "Aviso de privacidad"
 
-#, python-format
-msgid "The data you send through the booking form is received by %(name)s, which is responsible for processing it in order to answer your request and manage your stay."
-msgstr "Los datos que envías mediante el formulario de reserva los recibe %(name)s, responsable de tratarlos para responder a tu solicitud y gestionar tu estancia."
-
-#, python-format
-msgid "You can exercise your rights of access, rectification and erasure by writing to %(email)s."
-msgstr "Puedes ejercer tus derechos de acceso, rectificación y supresión escribiendo a %(email)s."
+msgid "Who is responsible for your data"
+msgstr "Quién es el responsable de tus datos"
 
 #, python-format
 msgid "%(platform)s provides the websites and booking tools of the campings that use it. When you send a booking request through a camping's website, your data is passed to that camping, which is responsible for processing it."
@@ -3090,14 +3271,41 @@ msgstr "Qué datos recogemos"
 msgid "Your name, e-mail address, phone number, country, the details of your stay and your message. We only use them to handle your request."
 msgstr "Tu nombre, correo electrónico, teléfono, país, los datos de tu estancia y tu mensaje. Solo los usamos para gestionar tu solicitud."
 
+msgid "What we use it for"
+msgstr "Para qué los usamos"
+
+#, python-format
+msgid "%(name)s uses the data you send to answer your booking requests and questions and to manage your stay (pre-contractual and contractual measures, article 6.1.b GDPR), and to meet its legal obligations, such as the registration of guests (article 6.1.c GDPR)."
+msgstr "%(name)s usa los datos que envías para responder a tus solicitudes de reserva y consultas y gestionar tu estancia (medidas precontractuales y contractuales, artículo 6.1.b RGPD), y para cumplir sus obligaciones legales, como el registro de viajeros (artículo 6.1.c RGPD)."
+
 msgid "How long we keep it"
 msgstr "Cuánto tiempo los conservamos"
 
 msgid "For as long as needed to manage your booking and meet legal obligations."
 msgstr "El tiempo necesario para gestionar tu reserva y cumplir las obligaciones legales."
 
-msgid "Cookies"
-msgstr "Cookies"
+msgid "Who we share it with"
+msgstr "Con quién los compartimos"
+
+msgid "Nobody, except when the law requires it. The company that provides this website and its booking system processes the data on behalf of the camping, only to provide that service."
+msgstr "Con nadie, salvo obligación legal. La empresa que proporciona esta web y su sistema de reservas trata los datos por cuenta del camping, solo para prestar ese servicio."
+
+msgid "Your rights"
+msgstr "Tus derechos"
+
+#, python-format
+msgid "You can access, rectify or erase your data, restrict or object to its processing and ask for its portability by writing to %(email)s."
+msgstr "Puedes acceder a tus datos, rectificarlos o suprimirlos, limitar u oponerte a su tratamiento y solicitar su portabilidad escribiendo a %(email)s."
+
+msgid "You can access, rectify or erase your data, restrict or object to its processing and ask for its portability by contacting the camping."
+msgstr "Puedes acceder a tus datos, rectificarlos o suprimirlos, limitar u oponerte a su tratamiento y solicitar su portabilidad contactando con el camping."
+
+msgid "You can also file a complaint with the data protection authority (in Spain, the AEPD, www.aepd.es)."
+msgstr "También puedes presentar una reclamación ante la autoridad de protección de datos (en España, la AEPD, www.aepd.es)."
+
+#, python-format
+msgid "See our <a href=\"%(cookies_url)s\">cookie policy</a>."
+msgstr "Consulta nuestra <a href=\"%(cookies_url)s\">política de cookies</a>."
 
 msgid "We only use technical cookies that are necessary for the website to work (language, security and session). We do not use advertising or tracking cookies."
 msgstr "Solo usamos cookies técnicas necesarias para el funcionamiento de la web (idioma, seguridad y sesión). No usamos cookies publicitarias ni de seguimiento."

@@ -18,7 +18,7 @@ from .text import fold
 logger = logging.getLogger(__name__)
 
 MAX_PAGE_BYTES = 3 * 1024 * 1024
-MAX_LINKED_PAGES = 8
+MAX_LINKED_PAGES = 9
 ROLE_PATTERNS = {
     "prices": r"tarifa|precio|prices?|rates|tarif|preise|prijzen|prezzi|listino",
     "accommodation": r"alojamiento|bungalow|mobil|cabana|glamping|parcela|pitch|accommodation|hebergement|emplacement|"
@@ -29,13 +29,20 @@ ROLE_PATTERNS = {
     r"ligging|route|dove",
     "gallery": r"galeria|galerie|gallery|fotos|photos|foto",
     "policies": r"condiciones|normas|reglamento|conditions|policies|policy|reglement|regeln|voorwaarden|regolamento",
+    "legal": r"aviso[- ]legal|legal notice|legal-notice|mentions[- ]legales|impressum|colofon|note[- ]legali|"
+    r"informacion[- ]legal|legal",
 }
 ROLE_REGEXES = {role: re.compile(pattern, re.IGNORECASE) for role, pattern in ROLE_PATTERNS.items()}
-ROLE_LIMITS = {"prices": 3, "accommodation": 2, "facilities": 1, "contact": 1, "gallery": 1, "policies": 1}
+ROLE_LIMITS = {"prices": 3, "accommodation": 2, "facilities": 1, "contact": 1, "gallery": 1, "policies": 1, "legal": 1}
 SKIP_LINKS = re.compile(
     r"\.(?:pdf|jpe?g|png|gif|webp|zip|docx?|xlsx?)$|wp-admin|wp-login|/feed|/tag/|/author/|/cart|/checkout|/carrito|"
-    r"/cesta|/blog/|/noticias/|/news/|politica-de|privacy|cookies|aviso-legal|legal",
+    r"/cesta|/blog/|/noticias/|/news/|politica-de|privacy|privacidad|cookies",
     re.IGNORECASE,
+)
+# Legal notices are read (owner, tax ID...) even when the address also mentions
+# privacy, e.g. /aviso-legal-y-politica-de-privacidad/.
+LEGAL_NOTICE_PATH = re.compile(
+    r"aviso[-_]legal|legal[-_]notice|mentions[-_]legales|impressum|note[-_]legali", re.IGNORECASE
 )
 LANGUAGE_SEGMENT = re.compile(r"^/([a-z]{2})(?:[-_][a-z]{2})?(?:/|$)", re.IGNORECASE)
 
@@ -58,7 +65,8 @@ def choose_links(home):
         url = home.absolute(link["href"]).split("#")[0]
         if not url.startswith(("http://", "https://")) or _host(url) != _host(home.url):
             continue
-        if SKIP_LINKS.search(urlsplit(url).path) or url.rstrip("/") == home.url.rstrip("/"):
+        path = urlsplit(url).path
+        if (SKIP_LINKS.search(path) and not LEGAL_NOTICE_PATH.search(path)) or url.rstrip("/") == home.url.rstrip("/"):
             continue
         link_language = _language_of(url)
         if link_language and home_language and link_language != home_language:
@@ -104,6 +112,7 @@ def build_data(pages, alternates, today):
         "stars": extract.stars(pages, objects),
         **extract.check_times(pages, objects),
         **extract.opening(pages, today),
+        **extract.legal_details(pages),
     }
     if coordinates:
         fields["latitude"], fields["longitude"] = coordinates

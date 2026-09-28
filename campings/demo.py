@@ -229,6 +229,10 @@ def create_demo_camping(slug="los-pinos-demo", year=None, with_photos=True):
         closing_date=date(year, 10, 31),
         default_language="es",
         languages=["es", "en", "fr", "de", "nl", "it"],
+        legal_name="Càmping Los Pinos Costa Brava, S.L. (demo)",
+        tax_id="B00000000",
+        registry_info="Registro Mercantil de Girona, tomo 0000, folio 0, hoja GI-00000",
+        tourism_registration="KG-000000",
         is_published=True,
         is_approved=True,
     )

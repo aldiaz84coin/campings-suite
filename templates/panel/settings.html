@@ -52,6 +52,14 @@
     {% include "partials/field.html" with field=form.accepts_booking_requests %}
     {% include "partials/field.html" with field=form.notification_email %}
   </section>
+  <section class="card card-pad">
+    <h2>{% translate "Statistics and Google" %}</h2>
+    <div class="form-grid">
+      {% include "partials/field.html" with field=form.ga_measurement_id %}
+      {% include "partials/field.html" with field=form.search_console_verification %}
+    </div>
+    <p class="small muted">{% translate "Visitors are asked for their consent before Google Analytics is loaded, as the law requires." %}</p>
+  </section>
   {% include "panel/_form_actions.html" %}
 </form>
 {% endblock %}

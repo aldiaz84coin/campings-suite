@@ -27,6 +27,7 @@ urlpatterns = [
     path("c/<slug:slug>/location/", camping.location, name="location"),
     path("c/<slug:slug>/appearance/", camping.appearance, name="appearance"),
     path("c/<slug:slug>/settings/", camping.camping_settings, name="settings"),
+    path("c/<slug:slug>/legal/", camping.legal_details, name="legal"),
     path("c/<slug:slug>/photos/", photos.photos, name="photos"),
     path("c/<slug:slug>/photos/reorder/", photos.photo_reorder, name="photo_reorder"),
     path("c/<slug:slug>/photos/<int:pk>/", photos.photo_edit, name="photo_edit"),

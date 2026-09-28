@@ -1,0 +1,19 @@
+{% extends "public/camping_base.html" %}
+{% load i18n core_tags %}
+{% block title %}{% translate "Legal notice" %} · {{ camping.name }}{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container narrow prose">
+    <h1>{% translate "Legal notice" %}</h1>
+    <p>{% translate "In compliance with the information duties of the legislation on information society services (in Spain, Law 34/2002, LSSI-CE), these are the details of the owner of this website:" %}</p>
+    {% include "public/_legal_owner.html" %}
+    <h2>{% translate "Use of the website" %}</h2>
+    <p>{% translate "This website offers information about the camping and lets you send booking requests. Using it implies accepting this notice. Users agree to use it lawfully and not to harm its operation." %}</p>
+    <h2>{% translate "Intellectual property" %}</h2>
+    <p>{% blocktranslate with owner=camping.owner_name %}The texts, photos, logos and other contents of this website belong to {{ owner }} or are used with permission. They may not be reproduced without authorisation.{% endblocktranslate %}</p>
+    <h2>{% translate "Liability" %}</h2>
+    <p>{% translate "The information on this website is updated regularly, but prices and availability are only confirmed when the camping accepts a booking request. The camping is not responsible for the content of other websites linked from here." %}</p>
+    {% with extra=camping.legal_notice_extra|tr:camping.default_language %}{% if extra %}<h2>{% translate "More information" %}</h2>{{ extra|linebreaks }}{% endif %}{% endwith %}
+  </div>
+</section>
+{% endblock %}

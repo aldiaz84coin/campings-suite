@@ -1,4 +1,5 @@
 import json
+import re
 
 from django import forms
 from django.conf import settings
@@ -200,6 +201,8 @@ class SettingsForm(forms.ModelForm):
             "notification_email",
             "custom_domain",
             "show_platform_credit",
+            "ga_measurement_id",
+            "search_console_verification",
         ]
 
     def __init__(self, *args, allow_domain=False, **kwargs):
@@ -212,6 +215,15 @@ class SettingsForm(forms.ModelForm):
     def clean_slug(self):
         return self.cleaned_data["slug"].strip().lower()
 
+    def clean_ga_measurement_id(self):
+        return self.cleaned_data["ga_measurement_id"].strip().upper()
+
+    def clean_search_console_verification(self):
+        value = self.cleaned_data["search_console_verification"].strip()
+        # Accept the whole <meta ... content="..."> tag as pasted from Google.
+        match = re.search(r'content=["\']([^"\']+)["\']', value)
+        return match.group(1).strip() if match else value
+
     def clean(self):
         cleaned = super().clean()
         default = cleaned.get("default_language")
@@ -220,6 +232,26 @@ class SettingsForm(forms.ModelForm):
             languages.insert(0, default)
         cleaned["languages"] = languages
         return cleaned
+
+
+class LegalForm(CampingContentForm):
+    class Meta:
+        model = Camping
+        fields = [
+            "legal_name",
+            "tax_id",
+            "legal_address",
+            "registry_info",
+            "tourism_registration",
+            "legal_notice_extra",
+            "privacy_extra",
+        ]
+
+    def __init__(self, *args, camping, **kwargs):
+        super().__init__(*args, camping=camping, **kwargs)
+        self.fields["legal_name"].widget.attrs["placeholder"] = camping.name
+        if camping.owner_address and not camping.legal_address:
+            self.fields["legal_address"].widget.attrs["placeholder"] = camping.owner_address
 
 
 class AppearanceForm(forms.ModelForm):

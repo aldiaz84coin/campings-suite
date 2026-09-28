@@ -14,7 +14,7 @@ from core.i18n import has_translation
 from core.images import ImageProcessingError, process_logo
 from core.urlutils import platform_url, request_camping_id
 
-from ..forms import AppearanceForm, LocationForm, ProfileForm, SettingsForm
+from ..forms import AppearanceForm, LegalForm, LocationForm, ProfileForm, SettingsForm
 from ..utils import camping_view, panel_render, user_campings
 
 
@@ -68,6 +68,11 @@ def setup_checklist(camping):
             "done": camping.seasons.exists() or camping.services.exists(),
             "label": _("Define seasons or services and extras"),
             "url_name": "panel:seasons",
+        },
+        {
+            "done": bool(camping.legal_name and camping.tax_id),
+            "label": _("Add the legal details of your business"),
+            "url_name": "panel:legal",
         },
         {
             "done": camping.is_published,
@@ -160,6 +165,13 @@ def profile(request, camping):
 def location(request, camping):
     return _content_form_view(
         request, camping, LocationForm, "panel/location.html", "location", _("The location has been saved.")
+    )
+
+
+@camping_view(owner_only=True)
+def legal_details(request, camping):
+    return _content_form_view(
+        request, camping, LegalForm, "panel/legal.html", "legal", _("The legal details have been saved.")
     )
 
 

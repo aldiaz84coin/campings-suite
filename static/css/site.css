@@ -254,6 +254,31 @@
 .camping-footer__name { font-family: var(--font-heading); font-size: 1.25rem; font-weight: 700; color: #fff; margin-bottom: 6px; }
 .camping-footer__bottom { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; padding-top: 18px; font-size: .88rem; }
 .camping-footer__bottom a { color: rgb(255 255 255 / 70%); }
+.camping-footer__legal { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; }
+.camping-footer__legal span { color: rgb(255 255 255 / 55%); }
+.camping-footer .link-button { background: none; border: 0; padding: 0; font: inherit; color: rgb(255 255 255 / 70%); text-decoration: underline; cursor: pointer; }
+
+/* ---- Legal pages and cookie consent ---------------------------------------- */
+.legal-data { list-style: none; padding: 16px 20px; margin: 0 0 24px; border-radius: var(--radius); background: var(--surface-2); display: grid; gap: 6px; }
+.prose .table-scroll { margin: 0 0 20px; }
+.cookie-table { min-width: 0; }
+.cookie-table th, .cookie-table td { text-align: left; vertical-align: top; }
+.cookie-table tbody td { white-space: normal; font-weight: 400; }
+.cookie-table tbody td:last-child { white-space: nowrap; }
+.cookie-table code { font-size: .88rem; }
+@media (max-width: 600px) {
+  /* One block per cookie: name and duration, then the purpose. */
+  .cookie-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); }
+  .cookie-table tbody tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; padding: 12px 16px; border-bottom: 1px solid var(--border); }
+  .cookie-table tbody tr:last-child { border-bottom: 0; }
+  .cookie-table tbody tr > * { padding: 0; border: 0; }
+  .cookie-table tbody td:nth-child(2) { grid-row: 2; grid-column: 1 / -1; }
+  .cookie-table tbody td:last-child { grid-row: 1; grid-column: 2; color: var(--text-muted); font-size: .88rem; }
+}
+.consent { position: fixed; z-index: 60; left: 16px; right: 16px; bottom: 16px; max-width: 680px; margin-inline: auto; display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; padding: 16px 20px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); }
+.consent[hidden] { display: none; }
+.consent p { flex: 1 1 320px; margin: 0; font-size: .94rem; }
+.consent__actions { display: flex; gap: 8px; margin-left: auto; }
 
 /* ---- Error pages ----------------------------------------------------------- */
 .error-page { min-height: 100vh; display: grid; place-items: center; padding: 24px 16px; background: radial-gradient(800px 400px at 100% 0%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 60%), var(--bg); }

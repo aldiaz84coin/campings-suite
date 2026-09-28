@@ -775,6 +775,84 @@ def stars(pages, objects):
     return None
 
 
+TAX_ID = re.compile(
+    r"\b(?:n\.?\s?i\.?\s?f\.?|c\.?\s?i\.?\s?f\.?|nie|vat(?: number| no\.?)?|tva|ust-?idnr\.?|p\.?\s?iva|partita iva|"
+    r"btw(?:-nummer)?|siret|siren)\s*[:.º°-]*\s*((?:[a-z]{2} ?)?[a-z0-9](?:[-.]?[a-z0-9]){6,13})\b",
+    re.IGNORECASE,
+)
+LEGAL_NAME = re.compile(
+    r"(?:titular(?: del sitio web| de la web)?|raz[oó]n social|denominaci[oó]n(?: social)?|empresa titular|company name|"
+    r"owner|raison sociale|firmenname|bedrijfsnaam|ragione sociale)\s*[:.-]\s*([^\n;|]{3,120})",
+    re.IGNORECASE,
+)
+COMPANY = re.compile(
+    r"\b([A-ZÀ-Ý][\w&'’.-]*(?:\s+[\w&'’.-]+){0,6}?,?\s+(?:S\.\s?L\.(?:\s?U\.)?|S\.\s?A\.|S\.\s?C\.\s?P\.|C\.\s?B\.|"
+    r"SL|SLU|SA|SARL|SAS|GmbH|B\.V\.|S\.r\.l\.))(?=[\s,.;)]|$)"
+)
+REGISTRY = re.compile(
+    r"registro mercantil|registre mercantil|commercial regist|rcs |handelsregister|kamer van koophandel|\bkvk\b|"
+    r"registro delle imprese",
+    re.IGNORECASE,
+)
+TOURISM_ID = re.compile(
+    r"(?:registro (?:general )?de (?:empresas |establecimientos )?(?:y actividades )?tur[ií]stic\w*|"
+    r"reg(?:istro)?\.?\s*(?:de\s+)?tur[ií]s(?:mo|tico)|n[.ºo°]*\s*(?:de )?registro(?: tur[ií]stico)?|"
+    r"n[uú]mero de registro|signatura)\s*[:.-]?\s*"
+    r"([A-Z]{1,4}[-/ ]?\d[\dA-Z/.-]{2,15})",
+    re.IGNORECASE,
+)
+CATALAN_TOURISM_ID = re.compile(r"\b(K[GBTL]-\d{3,6})\b")
+GA_ID = re.compile(r"(?:gtag\(\s*['\"]config['\"]\s*,\s*['\"]|googletagmanager\.com/gtag/js\?id=)(G-[A-Z0-9]{4,16})")
+
+
+def legal_details(pages):
+    """Owner, tax ID and registrations (legal notice), plus Google Analytics / Search Console codes."""
+    result = {}
+    ordered = sorted(pages, key=lambda page: page.role != "legal")
+    for page in ordered:
+        text = page.text
+        if "tax_id" not in result and (match := TAX_ID.search(text)):
+            value = re.sub(r"[\s.]", "", match.group(1)).upper()
+            if 8 <= len(value.replace("-", "")) <= 15 and re.search(r"\d{5}", value):
+                result["tax_id"] = value
+        if "legal_name" not in result and page.role == "legal":
+            match = LEGAL_NAME.search(text) or COMPANY.search(text)
+            if match:
+                name = clean(match.group(1)).strip(" ,;:")
+                if name.endswith(".") and not re.search(r"\b[A-Z]\.$", name):
+                    name = name[:-1]  # end of sentence, not "S.L."
+                if 3 <= len(name) <= 120 and not EMAIL.search(name):
+                    result["legal_name"] = name
+        if "registry_info" not in result and page.role == "legal":
+            for line in text.splitlines():
+                if REGISTRY.search(line) and len(line) <= 300:
+                    result["registry_info"] = clean(line).strip(" .")
+                    break
+        if "tourism_registration" not in result:
+            match = TOURISM_ID.search(text) or CATALAN_TOURISM_ID.search(text)
+            if match:
+                result["tourism_registration"] = clean(match.group(1)).strip(" .")
+    if "legal_name" not in result:
+        for page in pages:
+            footer = page.soup.find("footer")
+            match = COMPANY.search(clean(footer.get_text(" "))) if footer else None
+            if match:
+                result["legal_name"] = clean(match.group(1))
+                break
+    home = pages[0]
+    for script in home.soup.find_all("script"):
+        match = GA_ID.search((script.get("src") or "") + " " + (script.string or ""))
+        if match:
+            result["ga_measurement_id"] = match.group(1)
+            break
+    verification = home.soup.find("meta", attrs={"name": "google-site-verification"})
+    if verification and verification.get("content"):
+        code = clean(verification["content"])
+        if re.fullmatch(r"[A-Za-z0-9_-]{10,100}", code):
+            result["search_console_verification"] = code
+    return result
+
+
 def language_alternates(page):
     """``{language: url}`` of the same page in other languages (hreflang)."""
     found = {}
@@ -794,5 +872,6 @@ facilities = _safe(facilities, {})
 check_times = _safe(check_times, {})
 opening = _safe(opening, {})
 stars = _safe(stars)
+legal_details = _safe(legal_details, {})
 texts_for = _safe(texts_for, {"tagline": "", "description": ""})
 camping_name = _safe(camping_name, "")

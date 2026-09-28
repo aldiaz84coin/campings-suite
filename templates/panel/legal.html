@@ -1,0 +1,38 @@
+{% extends "panel/base.html" %}
+{% load i18n core_tags %}
+{% block page_title %}{% translate "Legal information" %}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>{% translate "Legal information" %}</h1>
+    <p class="muted">{% translate "The legal notice, privacy and cookie pages of your website are written automatically with these details." %}</p>
+  </div>
+  <div class="page-header__actions">
+    <a class="btn btn-ghost btn-sm" href="{% public_url camping 'public:camping_legal' %}" target="_blank" rel="noopener">{% icon "external-link" %}<span>{% translate "Legal notice" %}</span></a>
+    <a class="btn btn-ghost btn-sm" href="{% public_url camping 'public:camping_privacy' %}" target="_blank" rel="noopener">{% icon "external-link" %}<span>{% translate "Privacy" %}</span></a>
+    <a class="btn btn-ghost btn-sm" href="{% public_url camping 'public:camping_cookies' %}" target="_blank" rel="noopener">{% icon "external-link" %}<span>{% translate "Cookies" %}</span></a>
+  </div>
+</div>
+<form method="post" novalidate class="form-stack narrow-form">
+  {% csrf_token %}
+  {% include "partials/form_errors.html" %}
+  <section class="card card-pad">
+    <h2>{% translate "Owner of the website" %}</h2>
+    <div class="form-grid">
+      {% include "partials/field.html" with field=form.legal_name %}
+      {% include "partials/field.html" with field=form.tax_id %}
+    </div>
+    {% include "partials/field.html" with field=form.legal_address %}
+    {% include "partials/field.html" with field=form.registry_info %}
+    {% include "partials/field.html" with field=form.tourism_registration %}
+  </section>
+  <section class="card card-pad">
+    <h2>{% translate "Additional texts" %}</h2>
+    {% include "panel/_lang_hint.html" %}
+    {% include "partials/field.html" with field=form.legal_notice_extra %}
+    {% include "partials/field.html" with field=form.privacy_extra %}
+  </section>
+  <p class="small muted">{% icon "info" %} {% translate "These texts are a starting point: have them checked by your legal adviser." %}</p>
+  {% include "panel/_form_actions.html" %}
+</form>
+{% endblock %}

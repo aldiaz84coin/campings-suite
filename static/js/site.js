@@ -225,7 +225,69 @@
     if (!body.querySelector(".quote-lines, .quote-errors")) update();
   }
 
+  // Statistics (Google Analytics) only after the visitor accepts them.
+  function setupConsent() {
+    var box = document.querySelector("[data-consent]");
+    if (!box) return;
+    var id = box.getAttribute("data-ga") || "";
+    function read() {
+      var match = document.cookie.match(/(?:^|;\s*)cookie_consent=(granted|denied)/);
+      return match ? match[1] : null;
+    }
+    function save(value) {
+      document.cookie = "cookie_consent=" + value + "; max-age=31536000; path=/; SameSite=Lax" +
+        (location.protocol === "https:" ? "; Secure" : "");
+    }
+    function forgetAnalytics() {
+      // Stops an already loaded gtag from sending hits or writing cookies again.
+      window["ga-disable-" + id] = true;
+      // Analytics sets its cookies on the widest domain it can, so try them all.
+      var parts = location.hostname.split(".");
+      var domains = [""];
+      for (var i = 0; i < parts.length - 1; i++) {
+        domains.push(parts.slice(i).join("."), "." + parts.slice(i).join("."));
+      }
+      document.cookie.split(";").forEach(function (item) {
+        var name = item.split("=")[0].trim();
+        if (name.indexOf("_ga") !== 0) return;
+        domains.forEach(function (domain) {
+          document.cookie = name + "=; max-age=0; path=/" + (domain ? "; domain=" + domain : "");
+        });
+      });
+    }
+    function loadAnalytics() {
+      if (!/^G-[A-Z0-9]{4,16}$/.test(id)) return;
+      window["ga-disable-" + id] = false;
+      if (window.__campingAnalytics) return;
+      window.__campingAnalytics = true;
+      window.dataLayer = window.dataLayer || [];
+      window.gtag = function () { window.dataLayer.push(arguments); };
+      window.gtag("js", new Date());
+      window.gtag("config", id);
+      var script = document.createElement("script");
+      script.async = true;
+      script.src = "https://www.googletagmanager.com/gtag/js?id=" + encodeURIComponent(id);
+      document.head.appendChild(script);
+    }
+    var choice = read();
+    if (choice === "granted") loadAnalytics();
+    else box.hidden = choice === "denied";
+    box.addEventListener("click", function (event) {
+      var button = event.target.closest("[data-consent-choice]");
+      if (!button) return;
+      var value = button.getAttribute("data-consent-choice");
+      save(value);
+      box.hidden = true;
+      if (value === "granted") loadAnalytics();
+      else forgetAnalytics();
+    });
+    document.addEventListener("click", function (event) {
+      if (event.target.closest("[data-consent-reset]")) box.hidden = false;
+    });
+  }
+
   document.addEventListener("DOMContentLoaded", function () {
+    setupConsent();
     setupDropdowns();
     setupNav();
     setupLightbox();

@@ -1,0 +1,30 @@
+{% extends "public/camping_base.html" %}
+{% load i18n core_tags %}
+{% block title %}{% translate "Cookie policy" %} · {{ camping.name }}{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container narrow prose">
+    <h1>{% translate "Cookie policy" %}</h1>
+    <p>{% translate "Cookies are small files that websites store in your browser. These are the ones this website uses:" %}</p>
+    <div class="table-scroll">
+      <table class="price-table cookie-table">
+        <thead><tr><th scope="col">{% translate "Cookie" %}</th><th scope="col">{% translate "Purpose" %}</th><th scope="col">{% translate "Duration" %}</th></tr></thead>
+        <tbody>
+          <tr><th scope="row"><code>csrftoken</code></th><td>{% translate "Technical: protects the forms (booking request) against fraud." %}</td><td>{% translate "1 year" %}</td></tr>
+          <tr><th scope="row"><code>sessionid</code></th><td>{% translate "Technical: only for the camping's staff when they sign in to its management area." %}</td><td>{% translate "2 weeks" %}</td></tr>
+          {% if camping.ga_measurement_id %}
+          <tr><th scope="row"><code>cookie_consent</code></th><td>{% translate "Technical: remembers whether you accepted statistics cookies." %}</td><td>{% translate "1 year" %}</td></tr>
+          <tr><th scope="row"><code>_ga, _ga_*</code></th><td>{% translate "Statistics (Google Analytics): count visits and how the website is used. Only if you accept them." %}</td><td>{% translate "2 years" %}</td></tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+    <p>{% translate "Technical cookies are needed for the website to work and do not require your consent. We do not use advertising cookies." %}</p>
+    {% if camping.ga_measurement_id %}
+      <p>{% translate "Statistics cookies are only stored if you accept them, and you can change your choice at any time." %}</p>
+      <p><button type="button" class="btn btn-outline btn-sm" data-consent-reset>{% translate "Cookie settings" %}</button></p>
+    {% endif %}
+    <p>{% translate "You can also delete or block cookies in your browser settings." %}</p>
+  </div>
+</section>
+{% endblock %}

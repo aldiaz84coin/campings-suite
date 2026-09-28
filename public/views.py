@@ -350,6 +350,21 @@ def privacy(request, slug=None):
     return render(request, "public/privacy.html", {"camping": camping})
 
 
+def _legal_page(request, slug, template):
+    camping = get_camping(request, slug)
+    if response := canonical_redirect(request, camping):
+        return response
+    return render(request, template, {"camping": camping})
+
+
+def legal_notice(request, slug=None):
+    return _legal_page(request, slug, "public/legal_notice.html")
+
+
+def cookies_policy(request, slug=None):
+    return _legal_page(request, slug, "public/cookies.html")
+
+
 # --- SEO -----------------------------------------------------------------------
 
 

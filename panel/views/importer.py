@@ -88,6 +88,12 @@ def _field_rows(camping, fields):
         "opening",
         "check_in_from",
         "check_out_until",
+        "legal_name",
+        "tax_id",
+        "registry_info",
+        "tourism_registration",
+        "ga_measurement_id",
+        "search_console_verification",
     ):
         checked = False
         if key == "location":

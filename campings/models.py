@@ -22,6 +22,13 @@ domain_validator = RegexValidator(
     _("Enter a domain such as www.mycamping.com (without https://)."),
 )
 
+ga_id_validator = RegexValidator(
+    r"^G-[A-Z0-9]{4,16}$", _("Use the measurement ID of Google Analytics 4, e.g. G-AB12CD34EF.")
+)
+verification_validator = RegexValidator(
+    r"^[A-Za-z0-9_-]{10,100}$", _('Paste only the code from the content="..." part.')
+)
+
 # The slug is also the camping's subdomain (see CAMPING_DOMAIN_SUFFIX), so it
 # must be a valid DNS label.
 slug_validator = RegexValidator(
@@ -200,6 +207,48 @@ class Camping(models.Model):
         help_text=_("“Powered by” link in the footer of the camping's website."),
     )
 
+    # Legal information shown in the legal notice and privacy policy.
+    legal_name = models.CharField(
+        _("legal name"), max_length=200, blank=True, help_text=_("Company or person that owns the camping.")
+    )
+    tax_id = models.CharField(_("tax ID"), max_length=30, blank=True, help_text=_("NIF / CIF / VAT number."))
+    legal_address = models.CharField(
+        _("registered address"),
+        max_length=255,
+        blank=True,
+        help_text=_("Leave it empty if it is the camping's address."),
+    )
+    registry_info = models.CharField(
+        _("company registry"),
+        max_length=300,
+        blank=True,
+        help_text=_("E.g. Registro Mercantil de Girona, tomo 1234, folio 56, hoja GI-7890."),
+    )
+    tourism_registration = models.CharField(
+        _("tourism registration number"),
+        max_length=60,
+        blank=True,
+        help_text=_("Registration number in the regional tourism register, shown in the footer."),
+    )
+    legal_notice_extra = TranslatedField(_("additional legal notice text"), textarea=True)
+    privacy_extra = TranslatedField(_("additional privacy text"), textarea=True)
+
+    # Statistics
+    ga_measurement_id = models.CharField(
+        _("Google Analytics measurement ID"),
+        max_length=20,
+        blank=True,
+        validators=[ga_id_validator],
+        help_text=_("G-XXXXXXXXXX. Only loaded when the visitor accepts statistics cookies."),
+    )
+    search_console_verification = models.CharField(
+        _("Google Search Console verification code"),
+        max_length=100,
+        blank=True,
+        validators=[verification_validator],
+        help_text=_("The content of the google-site-verification meta tag."),
+    )
+
     created_at = models.DateTimeField(_("created"), auto_now_add=True)
     updated_at = models.DateTimeField(_("updated"), auto_now=True)
 
@@ -248,6 +297,18 @@ class Camping(models.Model):
         """``https://host`` of the camping's own website (no trailing slash) or ""."""
         host = self.site_host
         return f"{settings.CAMPING_URL_SCHEME}://{host}" if host else ""
+
+    @property
+    def owner_name(self):
+        """Who is responsible for the website and the guests' data."""
+        return self.legal_name or self.name
+
+    @property
+    def owner_address(self):
+        if self.legal_address:
+            return self.legal_address
+        parts = [self.address, " ".join(filter(None, [self.postal_code, self.city])), self.region, self.country]
+        return ", ".join(part for part in parts if part)
 
     @property
     def domain_pending(self):

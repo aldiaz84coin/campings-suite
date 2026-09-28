@@ -1,0 +1,9 @@
+{% load i18n %}<ul class="legal-data">
+  <li><strong>{% translate "Owner" context "legal notice" %}:</strong> {{ camping.owner_name }}</li>
+  {% if camping.tax_id %}<li><strong>{% translate "Tax ID" %}:</strong> {{ camping.tax_id }}</li>{% endif %}
+  {% if camping.owner_address %}<li><strong>{% translate "Address" %}:</strong> {{ camping.owner_address }}</li>{% endif %}
+  {% if camping.email %}<li><strong>{% translate "E-mail" %}:</strong> <a href="mailto:{{ camping.email }}">{{ camping.email }}</a></li>{% endif %}
+  {% if camping.phone %}<li><strong>{% translate "Phone" %}:</strong> {{ camping.phone }}</li>{% endif %}
+  {% if camping.registry_info %}<li><strong>{% translate "Registry details" %}:</strong> {{ camping.registry_info }}</li>{% endif %}
+  {% if camping.tourism_registration %}<li><strong>{% translate "Tourism registration number" %}:</strong> {{ camping.tourism_registration }}</li>{% endif %}
+</ul>
