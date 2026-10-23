@@ -1,32 +1,46 @@
 # Danielito contra Alvarito
 
-Juego retro para móvil, en un único archivo (`index.html`), sin dependencias ni
-servidor. Se abre en el navegador del móvil y se juega tocando la pantalla.
+Juego retro para móvil para **aprender las tablas de multiplicar**, en un único
+archivo (`index.html`), sin dependencias ni servidor. Se abre en el navegador
+del móvil y se juega tocando la pantalla.
 
 ## De qué va
 
 Danielito construye un castillo y necesita **6 piezas** escondidas por la casa
 (salón, cocina, su cuarto, baño, jardín y desván). En cada habitación tiene que
-superar **3 retos** para conseguir la pieza.
+superar **3 retos de las tablas** para conseguir la pieza.
 
 Mientras piensa, **Alvarito** va acercándose desde la puerta. Si llega antes de
 que Danielito acierte, hace una **trastada** (pinta las paredes, tira los
 cereales, esconde el mando…), garabatea el tablero y Danielito pierde un
 corazón. Cada fallo hace que Alvarito se acerque 5 segundos más rápido.
 
+- En la pantalla de inicio se eligen **qué tablas** se practican (del 2 al 10,
+  o todas) y el ritmo: *Con calma* (más tiempo) o *Rápido*.
 - 3 corazones. Si terminas una habitación sin ninguna trastada, recuperas uno.
-- Las trastadas dejan la habitación manchada el resto de la partida.
 - Puntos: 10 por acierto más los segundos que sobren.
 
-## Retos (pensados para 7 años)
+## Tipos de reto
 
-- **Multiplicaciones**: en *Fácil*, tablas del 2, 5 y 10; en *Normal*, todas.
+Todos usan solo las tablas elegidas:
+
+- **Multiplicación**: `7 × 6 = ?`
+- **Cuenta los grupos**: filas de dibujos («3 filas de 5 dinosaurios»).
+- **El número escondido**: `7 × ? = 42`
+- **Contar saltando**: `7 · 14 · ? · 28`
+- **¿Verdad o mentira?**: `6 × 8 = 46`
+- **¿Qué multiplicación?**: cuál de cuatro da un número.
+- **El intruso**: qué número no está en la tabla.
 - **Problemas**: patas de perros, ruedas de bicis, galletas en platos…
-- **Cuentas**: sumas y restas (hasta 20 en Fácil, hasta 60 en Normal).
-- **Series**: qué número sigue o falta, y patrones de dibujos.
-- **El intruso**: cuál no es de la misma familia.
-- **Adivinanzas** clásicas.
-- **Lógica**: quién corre más rápido, días de la semana, pares e impares…
+
+## Para aprender, no solo para acertar
+
+- Las respuestas falsas son los errores típicos (una vez más o una vez menos,
+  la tabla de al lado, fallar por uno), así que hay que saberla de verdad.
+- Al fallar aparece una **pista** («7 × 5 = 35. Súmale 7 más»).
+- Al acertar se muestra la multiplicación completa; tras una trastada,
+  «Recuerda: 7 × 6 = 42».
+- Al terminar, una lista **Para repasar** con las multiplicaciones falladas.
 
 ## Cómo publicarlo
 

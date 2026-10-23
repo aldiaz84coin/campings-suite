@@ -43,11 +43,12 @@
     background: var(--bg);
     color: var(--ink);
     font-family: var(--body);
+    font-variant-ligatures: none; /* la ligadura «fi» de la fuente se lee como «A» */
     -webkit-tap-highlight-color: transparent;
     -webkit-user-select: none;
     user-select: none;
   }
-  button { font: inherit; color: inherit; }
+  button { font: inherit; color: inherit; font-variant-ligatures: none; }
   button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
 
   #app {
@@ -206,6 +207,10 @@
     overflow-wrap: anywhere;
   }
   .visual.emoji { font-family: var(--body); font-size: clamp(24px, 7.5vw, 32px); line-height: 1.35; letter-spacing: .05em; }
+  .visual.groups { font-family: var(--body); font-size: clamp(15px, 4.6vw, 22px); line-height: 1.3; letter-spacing: 0; white-space: pre-line; }
+  .visual.solved { color: var(--ok); }
+  .hint { margin: 0; font-size: 18px; line-height: 1.3; color: var(--gold); }
+  .hint strong { font-family: var(--display); font-size: 10px; letter-spacing: .08em; font-weight: 400; margin-right: 6px; }
   .answers { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: auto; }
   .answers .ans:last-child:nth-child(odd) { grid-column: 1 / -1; }
   .ans {
@@ -220,6 +225,7 @@
     touch-action: manipulation;
   }
   .ans.word { font-family: var(--body); font-size: 21px; font-weight: 700; }
+  .ans.expr { font-size: 16px; }
   .ans.emoji { font-family: var(--body); font-size: 36px; line-height: 1; }
   .ans:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 2px 0 var(--line); }
   .ans:disabled { cursor: default; }
@@ -272,6 +278,22 @@
   .art { width: 240px; max-width: 100%; height: auto; image-rendering: pixelated; }
   .castle { width: 144px; max-width: 100%; height: auto; image-rendering: pixelated; }
   .btns { display: grid; gap: 12px; width: 100%; }
+  .chips { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; width: 100%; }
+  .chip {
+    min-height: 46px;
+    background: var(--panel-2);
+    border: 3px solid var(--line);
+    box-shadow: 0 4px 0 var(--line);
+    font-family: var(--display);
+    font-size: 14px;
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+  .chip.all { font-size: 8px; }
+  .chip[aria-pressed="true"] { background: var(--dani); color: var(--line); }
+  .chip:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--line); }
+  .btn:disabled { background: var(--dim); color: var(--muted); cursor: default; transform: none; }
+  .repaso { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 14px; color: var(--gold); }
   .btn {
     display: grid;
     gap: 6px;
@@ -336,6 +358,7 @@
     <p class="kind" id="kind">MULTIPLICACIÓN</p>
     <h2 class="q" id="question" aria-live="polite">¿Cuánto es?</h2>
     <div class="visual" id="visual">5 × 3 = ?</div>
+    <p class="hint" id="hint" hidden></p>
     <div class="answers" id="answers"></div>
     <canvas class="scrawl" id="scrawl"></canvas>
   </section>
@@ -508,7 +531,7 @@
 
   const ROOMS = [
     {
-      id: 'salon', name: 'El salón', kinds: ['mult', 'oddOne', 'riddle'],
+      id: 'salon', name: 'El salón', kinds: ['mult', 'groups', 'mult'],
       intro: 'La primera pieza del castillo está entre los cojines del sofá. Alvarito está viendo dibujos... de momento.',
       debris: ['#e0684f', '#f3efff', '#ffd23f'],
       pranks: [
@@ -528,7 +551,7 @@
       },
     },
     {
-      id: 'cocina', name: 'La cocina', kinds: ['multStory', 'series', 'addsub'],
+      id: 'cocina', name: 'La cocina', kinds: ['multStory', 'missing', 'mult'],
       intro: 'Huele a galletas recién hechas. Alvarito también lo ha notado.',
       debris: ['#e0b25a', '#c98a3a', '#f3efff'],
       pranks: [
@@ -548,7 +571,7 @@
       },
     },
     {
-      id: 'cuarto', name: 'El cuarto de Danielito', kinds: ['mult', 'logic', 'riddle'],
+      id: 'cuarto', name: 'El cuarto de Danielito', kinds: ['skip', 'trueFalse', 'mult'],
       intro: 'La tercera pieza está debajo de la cama, junto a los dinosaurios. ¡Cuidado con los juguetes!',
       debris: ['#ff4d6d', '#ffd23f', '#5be37d', '#4aa3ff'],
       pranks: [
@@ -567,7 +590,7 @@
       },
     },
     {
-      id: 'bano', name: 'El baño', kinds: ['addsub', 'series', 'mult'],
+      id: 'bano', name: 'El baño', kinds: ['groups', 'whichMult', 'mult'],
       intro: 'Alvarito quiere llenar la bañera de espuma hasta el techo. ¡Rápido!',
       debris: ['#f3efff', '#c8f0ff', '#ffd23f'],
       pranks: [
@@ -586,7 +609,7 @@
       },
     },
     {
-      id: 'jardin', name: 'El jardín', kinds: ['multStory', 'oddOne', 'logic'],
+      id: 'jardin', name: 'El jardín', kinds: ['multStory', 'intruder', 'missing'],
       intro: 'La quinta pieza está en lo alto del árbol. Alvarito ha encontrado la manguera...',
       debris: ['#5b3a1e', '#7a4a2a', '#3a2412'],
       pranks: [
@@ -608,7 +631,7 @@
       },
     },
     {
-      id: 'desvan', name: 'El desván', kinds: ['mult', 'riddle', 'series'],
+      id: 'desvan', name: 'El desván', kinds: ['skip', 'whichMult', 'mult'],
       intro: 'La última pieza está en el cofre del desván. Alvarito no anda lejos...',
       debris: ['#9a8f80', '#b8ad9c', '#6d6458'],
       pranks: [
@@ -641,230 +664,175 @@
     for (let i = 0; i < 14; i++) R(4 + r() * 150, FLOOR + 3 + r() * 15, 2, 2, room.debris[Math.floor(r() * room.debris.length)]);
   }
 
-  // ---------- Retos ----------
+  // ---------- Retos: todos giran en torno a las tablas de multiplicar ----------
   const KIND_LABEL = {
-    mult: 'MULTIPLICACIÓN', multStory: 'PROBLEMA', addsub: 'CUENTAS', series: 'SERIES',
-    oddOne: 'EL INTRUSO', riddle: 'ADIVINANZA', logic: 'LÓGICA',
+    mult: 'MULTIPLICACIÓN', groups: 'CUENTA LOS GRUPOS', missing: 'EL NÚMERO ESCONDIDO', skip: 'CONTAR SALTANDO',
+    trueFalse: '¿VERDAD O MENTIRA?', whichMult: '¿QUÉ MULTIPLICACIÓN?', intruder: 'EL INTRUSO', multStory: 'PROBLEMA',
   };
-  const isNormal = () => S.diff === 'normal';
+  const ALL_TABLES = [2, 3, 4, 5, 6, 7, 8, 9, 10];
+  const tables = () => (S.run && S.run.tables.length ? S.run.tables : S.tables);
+  const factText = f => `${f.a} × ${f.b} = ${f.a * f.b}`;
 
   function numOptions(ans, cands, n = 4) {
     const set = new Set([ans]);
     for (const c of shuffle(cands)) {
       if (set.size >= n) break;
-      if (Number.isInteger(c) && c >= 0) set.add(c);
+      if (Number.isInteger(c) && c > 0) set.add(c);
     }
     let k = 1;
     while (set.size < n) {
       set.add(ans + k);
-      if (set.size < n && ans - k >= 0) set.add(ans - k);
+      if (set.size < n && ans - k > 0) set.add(ans - k);
       k++;
     }
     return shuffle([...set]).map(String);
   }
+  // Los errores típicos: una vez más o una vez menos, la tabla de al lado, o fallar por uno.
+  const multDistractors = (a, b) => [a * (b + 1), a * (b - 1), (a + 1) * b, (a - 1) * b, a * b + 1, a * b - 1, a * b + 10];
+
+  // a = la tabla, b = por cuánto se multiplica. Evita repetir las últimas multiplicaciones.
+  function pickFact() {
+    const r = S.run;
+    for (let i = 0; ; i++) {
+      const a = pick(tables());
+      let b = rnd(1, 10);
+      if (b === 1 && Math.random() < 0.7) b = rnd(2, 9);
+      const key = a + 'x' + b;
+      if (!r || !r.recent.includes(key) || i >= 12) {
+        if (r) { r.recent.push(key); if (r.recent.length > 6) r.recent.shift(); }
+        return { a, b };
+      }
+    }
+  }
+  function hintFor(f) {
+    const { a, b } = f;
+    if (b === 1) return `Cualquier número por 1 da ese mismo número.`;
+    if (a === 10 || b === 10) return `Para multiplicar por 10, pon un 0 al final.`;
+    if (b === 2) return `${a} × 2 es el doble: ${a} + ${a}.`;
+    return `${a} × ${b - 1} = ${a * (b - 1)}. Súmale ${a} más.`;
+  }
 
   function genMult() {
-    const a = pick(isNormal() ? [2, 3, 4, 5, 6, 7, 8, 9] : [2, 5, 10]);
-    const b = rnd(1, 10);
-    const [x, y] = Math.random() < 0.5 ? [a, b] : [b, a];
-    const ans = a * b;
+    const f = pickFact(), ans = f.a * f.b;
+    const [x, y] = Math.random() < 0.7 ? [f.a, f.b] : [f.b, f.a];
     return {
-      q: '¿Cuánto es?', visual: `${x} × ${y} = ?`, answer: String(ans),
-      options: numOptions(ans, [ans + a, ans - a, ans + b, ans - b, ans + 1, ans - 1, a + b, ans + 10]),
+      fact: f, q: '¿Cuánto es?', visual: `${x} × ${y} = ?`, solved: `${x} × ${y} = ${ans}`,
+      hint: hintFor(f), answer: String(ans), options: numOptions(ans, multDistractors(f.a, f.b)),
+    };
+  }
+
+  const THINGS = [
+    ['🍓', 'fresas', 'f'], ['🍪', 'galletas', 'f'], ['⭐', 'estrellas', 'f'], ['🍎', 'manzanas', 'f'],
+    ['⚽', 'balones', 'm'], ['🦖', 'dinosaurios', 'm'], ['🚗', 'coches', 'm'], ['🧸', 'ositos', 'm'],
+  ];
+  function genGroups() {
+    const a = pick(tables()), b = rnd(2, 5);
+    const [icon, name, g] = pick(THINGS);
+    return {
+      fact: { a, b },
+      q: `Hay ${b} filas de ${a} ${name}. ¿Cuánt${g === 'm' ? 'os' : 'as'} hay en total?`,
+      visual: Array.from({ length: b }, () => icon.repeat(a)).join('\n'), groupsVisual: true,
+      hint: `${b} filas de ${a} es ${a} × ${b}: ${Array(b).fill(a).join(' + ')}.`,
+      answer: String(a * b), options: numOptions(a * b, multDistractors(a, b)),
+    };
+  }
+
+  function genMissing() {
+    const f = pickFact(), ans = f.a * f.b;
+    const hideTable = Math.random() < 0.3;
+    const hidden = hideTable ? f.a : f.b, step = hideTable ? f.b : f.a;
+    return {
+      fact: f, q: '¿Qué número falta?',
+      visual: hideTable ? `? × ${f.b} = ${ans}` : `${f.a} × ? = ${ans}`, solved: factText(f),
+      hint: `Cuenta de ${step} en ${step} hasta llegar a ${ans}. ¿Cuántos saltos das?`,
+      answer: String(hidden), options: numOptions(hidden, [hidden + 1, hidden - 1, hidden + 2, hidden - 2]),
+    };
+  }
+
+  function genSkip() {
+    const t = pick(tables()), first = rnd(1, 6);
+    const seq = Array.from({ length: 5 }, (_, i) => t * (first + i));
+    const miss = rnd(1, 4), ans = seq[miss];
+    return {
+      fact: { a: t, b: first + miss },
+      q: `Cuenta de ${t} en ${t}. ¿Qué número ${miss === 4 ? 'sigue' : 'falta'}?`,
+      visual: seq.map((n, i) => i === miss ? '?' : n).join('  '), solved: seq.join('  '),
+      hint: `Súmale ${t} al número de antes.`,
+      answer: String(ans), options: numOptions(ans, [ans + t, ans - t, ans + 1, ans - 1, ans + 2]),
+    };
+  }
+
+  function genTrueFalse() {
+    const f = pickFact(), ans = f.a * f.b, truth = Math.random() < 0.5;
+    const shown = truth ? ans : pick([ans + f.a, ans - f.a, ans + 1, ans - 1, ans + 10].filter(x => x > 0 && x !== ans));
+    return {
+      fact: f, q: '¿Es verdad o mentira?', visual: `${f.a} × ${f.b} = ${shown}`,
+      hint: hintFor(f), answer: truth ? 'Verdad' : 'Mentira', options: ['Verdad', 'Mentira'],
+    };
+  }
+
+  function genWhichMult() {
+    const f = pickFact(), ans = f.a * f.b;
+    const opts = new Set([`${f.a} × ${f.b}`]), prods = new Set([ans]);
+    for (let i = 0; i < 300 && opts.size < 4; i++) {
+      const a = pick(tables()), b = rnd(2, 10), p = a * b;
+      if (prods.has(p) || (i < 200 && Math.abs(p - ans) > Math.max(10, ans / 2))) continue;
+      opts.add(`${a} × ${b}`); prods.add(p);
+    }
+    for (let k = 1; opts.size < 4; k++) {
+      if (!prods.has(f.a * (f.b + k))) { opts.add(`${f.a} × ${f.b + k}`); prods.add(f.a * (f.b + k)); }
+    }
+    return {
+      fact: f, q: '¿Qué multiplicación da este número?', visual: String(ans),
+      hint: `Calcula cada una y busca la que da ${ans}.`,
+      answer: `${f.a} × ${f.b}`, options: shuffle([...opts]),
+    };
+  }
+
+  function genIntruder() {
+    const t = pick(tables());
+    const ins = shuffle([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]).slice(0, 3).map(k => k * t);
+    let out;
+    do { out = rnd(t + 1, t * 10 - 1); } while (out % t === 0);
+    return {
+      q: `¿Qué número NO está en la tabla del ${t}?`,
+      hint: `La tabla del ${t}: ${[1, 2, 3, 4, 5].map(k => k * t).join(', ')}...`,
+      learn: `${out} no está en la tabla del ${t}`,
+      answer: String(out), options: shuffle([...ins, out].map(String)),
     };
   }
 
   const STORIES = [
-    { t: a => `En el jardín hay ${a} perros. ¿Cuántas patas tienen entre todos?`, b: 4, art: '🐶' },
-    { t: a => `Hay ${a} bicicletas en el garaje. ¿Cuántas ruedas hay?`, b: 2, art: '🚲' },
-    { t: a => `Alvarito ha pintado ${a} manos con ceras. ¿Cuántos dedos pintados hay?`, b: 5, art: '✋' },
-    { t: a => `Danielito tiene ${a} coches de juguete. ¿Cuántas ruedas tienen en total?`, b: 4, art: '🚗' },
-    { t: a => `En el museo hay ${a} T-rex. Cada uno camina con 2 patas. ¿Cuántas patas hay?`, b: 2, art: '🦖' },
+    { b: 4, t: a => `En el jardín hay ${a} perros. ¿Cuántas patas tienen entre todos?`, art: '🐶' },
+    { b: 2, t: a => `Hay ${a} bicicletas en el garaje. ¿Cuántas ruedas hay?`, art: '🚲' },
+    { b: 5, t: a => `Alvarito ha pintado ${a} manos con ceras. ¿Cuántos dedos pintados hay?`, art: '✋' },
+    { b: 2, t: a => `En el museo hay ${a} T-rex. Cada uno camina con 2 patas. ¿Cuántas patas hay?`, art: '🦖' },
+    { b: 3, t: a => `Hay ${a} tréboles de 3 hojas. ¿Cuántas hojas hay en total?`, art: '☘️' },
+    { b: 4, t: a => `Danielito tiene ${a} coches de juguete. ¿Cuántas ruedas tienen en total?`, art: '🚗' },
+    { b: 8, t: a => `En el desván viven ${a} arañas. Cada una tiene 8 patas. ¿Cuántas patas hay?`, art: '🕷️' },
     { t: (a, b) => `En la mesa hay ${a} platos con ${b} galletas en cada uno. ¿Cuántas galletas hay?`, art: '🍪' },
     { t: (a, b) => `Danielito tiene ${a} cajas con ${b} cromos en cada una. ¿Cuántos cromos tiene?`, art: '📦' },
-    { t: a => `Hay ${a} tréboles de 3 hojas. ¿Cuántas hojas hay en total?`, b: 3, art: '☘️' },
-    { t: a => `En el desván viven ${a} arañas. Cada una tiene 8 patas. ¿Cuántas patas hay?`, b: 8, art: '🕷️', normal: true },
+    { t: (a, b) => `Alvarito ha escondido ${a} bolsas con ${b} canicas en cada una. ¿Cuántas canicas ha escondido?`, art: '🛍️' },
   ];
   function genStory() {
-    const s = pick(STORIES.filter(x => isNormal() || !x.normal));
-    const a = isNormal() ? rnd(2, 9) : rnd(2, 5);
-    const b = s.b || (isNormal() ? rnd(2, 9) : pick([2, 5, 10]));
-    const ans = a * b;
+    const tbs = tables();
+    const s = pick(STORIES.filter(x => !x.b || tbs.includes(x.b)));
+    const t = s.b || pick(tbs), groups = rnd(2, 9);
+    const f = { a: t, b: groups }, ans = t * groups;
     return {
-      q: s.t(a, b), visual: s.art.repeat(a), emojiVisual: true, answer: String(ans),
-      options: numOptions(ans, [ans + b, ans - b, ans + a, a + b, ans + 1, ans - 1]),
+      fact: f, q: s.t(groups, t), visual: s.art.repeat(groups), emojiVisual: true,
+      hint: `Son ${groups} veces ${t}: ${t} × ${groups}. ${hintFor(f)}`,
+      answer: String(ans), options: numOptions(ans, multDistractors(t, groups)),
     };
   }
 
-  const ADDSUB = [
-    { op: '-', t: (a, b) => `Danielito tiene ${a} cromos. Alvarito le esconde ${b}. ¿Cuántos le quedan?` },
-    { op: '+', t: (a, b) => `En la bañera hay ${a} patitos de goma. Alvarito echa ${b} más. ¿Cuántos patitos hay ahora?` },
-    { op: '-', t: (a, b) => `La torre de Danielito tiene ${a} piezas. Alvarito tira ${b}. ¿Cuántas quedan en pie?` },
-    { op: '+', t: (a, b) => `Danielito ha guardado ${a} canicas y luego encuentra ${b} más. ¿Cuántas tiene ahora?` },
-    { op: '+' }, { op: '-' },
-  ];
-  function genAddSub() {
-    const max = isNormal() ? 60 : 20;
-    const s = pick(ADDSUB);
-    let a, b, ans;
-    if (s.op === '+') { a = rnd(2, max - 3); b = rnd(1, max - a); ans = a + b; }
-    else { a = rnd(5, max); b = rnd(1, a - 1); ans = a - b; }
-    return {
-      q: s.t ? s.t(a, b) : '¿Cuánto es?',
-      visual: s.t ? '' : `${a} ${s.op === '+' ? '+' : '−'} ${b} = ?`,
-      answer: String(ans),
-      options: numOptions(ans, [ans + 1, ans - 1, ans + 2, ans - 2, ans + 10, ans - 10, s.op === '+' ? a - b : a + b]),
-    };
-  }
-
-  const PATTERN_POOLS = [
-    ['🍎', '🍌', '🍇', '🍓'], ['🔴', '🔵', '🟢', '🟡'], ['⭐', '🌙', '☀️', '☁️'], ['🦖', '🦕', '🥚', '🌋'], ['🐱', '🐶', '🐭', '🐸'],
-  ];
-  function genPattern() {
-    const pool = shuffle(pick(PATTERN_POOLS));
-    const shape = pick(isNormal() ? ['AB', 'ABB', 'AAB', 'ABC'] : ['AB', 'ABB', 'AAB']);
-    const map = { A: pool[0], B: pool[1], C: pool[2] };
-    const len = Math.min(8, shape.length * 2 + rnd(0, shape.length - 1));
-    const seq = Array.from({ length: len }, (_, i) => map[shape[i % shape.length]]);
-    return {
-      q: '¿Qué va después?', visual: seq.join(' ') + ' ❓', emojiVisual: true,
-      answer: map[shape[len % shape.length]], options: shuffle(pool), emojiOpts: true,
-    };
-  }
-  function genSeries() {
-    if (Math.random() < 0.5) return genPattern();
-    const d = pick(isNormal() ? [2, 3, 4, 5, 10] : [1, 2, 5, 10]);
-    const down = isNormal() && Math.random() < 0.35;
-    const start = down ? d * rnd(5, 9) : d * rnd(0, 4) + (d === 1 ? rnd(1, 10) : 0);
-    const seq = Array.from({ length: 5 }, (_, i) => down ? start - i * d : start + i * d);
-    const miss = isNormal() ? rnd(1, 4) : 4;
-    const ans = seq[miss];
-    return {
-      q: miss === 4 ? '¿Qué número sigue?' : '¿Qué número falta?',
-      visual: seq.map((n, i) => i === miss ? '?' : n).join(' · '),
-      answer: String(ans),
-      options: numOptions(ans, [ans + d, ans - d, ans + 1, ans - 1, ans + 2 * d]),
-    };
-  }
-
-  const GROUPS = [
-    ['🍎', '🍌', '🍇', '🍓', '🍐', '🍉'],
-    ['🐶', '🐱', '🐰', '🐮', '🐷', '🐸'],
-    ['🚗', '🚌', '🚲', '🚂', '🚀', '🚜'],
-    ['👕', '👖', '🧦', '🧢', '👟', '🧤'],
-    ['🦖', '🦕', '🐊', '🐢', '🦎'],
-  ];
-  function genOddOne() {
-    if (isNormal() && Math.random() < 0.4) {
-      const t = pick([2, 3, 4, 5, 10]);
-      const ins = shuffle([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]).slice(0, 3).map(k => k * t);
-      let out;
-      do { out = rnd(t + 1, t * 10 - 1); } while (out % t === 0);
-      return { q: `¿Qué número NO está en la tabla del ${t}?`, answer: String(out), options: shuffle([...ins, out].map(String)) };
-    }
-    const gi = rnd(0, GROUPS.length - 1);
-    let oi;
-    do { oi = rnd(0, GROUPS.length - 1); } while (oi === gi);
-    const items = shuffle(GROUPS[gi]).slice(0, 3);
-    const odd = pick(GROUPS[oi]);
-    return { q: '¿Cuál no es de la misma familia?', answer: odd, options: shuffle([...items, odd]), emojiOpts: true };
-  }
-
-  const RIDDLES = [
-    { q: 'Tengo agujas y no sé coser. Tengo números y no sé leer. ¿Qué soy?', a: 'El reloj' },
-    { q: 'Oro parece, plata no es. ¿Qué es?', a: 'El plátano' },
-    { q: 'Blanco por dentro, verde por fuera. Si quieres que te lo diga, espera.', a: 'La pera' },
-    { q: 'Cuanto más la mojas, más seca. ¿Qué es?', a: 'La toalla' },
-    { q: 'Tiene dientes y no come, tiene cabeza y no es hombre.', a: 'El ajo' },
-    { q: 'Mi madre es tartamuda, mi padre es buen cantor. Tengo blanco mi vestido y amarillo el corazón.', a: 'El huevo' },
-    { q: 'Vuela sin alas, silba sin boca, y no se ve ni se toca.', a: 'El viento' },
-    { q: 'Lleva su casa a cuestas y camina muy despacito. ¿Quién es?', a: 'El caracol' },
-    { q: 'Paso por el fuego y no me quemo, paso por el agua y no me mojo.', a: 'La sombra' },
-    { q: 'Tengo hojas y no soy árbol, tengo lomo y no soy caballo.', a: 'El libro' },
-    { q: 'Tiene cuatro patas y no anda, tiene respaldo y no es cama.', a: 'La silla' },
-    { q: 'Era enorme, tenía dientes afilados y vivió hace millones de años. ¿Quién es?', a: 'El T-rex' },
-  ];
-  function genRiddle() {
-    const used = S.run ? S.run.usedRiddles : [];
-    let pool = RIDDLES.map((_, i) => i).filter(i => !used.includes(i));
-    if (!pool.length) pool = RIDDLES.map((_, i) => i);
-    const i = pick(pool);
-    if (S.run) S.run.usedRiddles.push(i);
-    const r = RIDDLES[i];
-    const others = shuffle(RIDDLES.filter(x => x !== r)).slice(0, 3).map(x => x.a);
-    return { q: r.q, answer: r.a, options: shuffle([r.a, ...others]) };
-  }
-
-  const NAMES = ['Danielito', 'Alvarito', 'el gato', 'el perro', 'papá', 'mamá', 'la abuela', 'el abuelo'];
-  const RANKS = [
-    { rel: 'corre más rápido que', top: '¿Quién corre más rápido?', bottom: '¿Quién corre más despacio?' },
-    { rel: 'tiene más cromos que', top: '¿Quién tiene más cromos?', bottom: '¿Quién tiene menos cromos?' },
-    { rel: 'se ha comido más galletas que', top: '¿Quién se ha comido más galletas?', bottom: '¿Quién se ha comido menos galletas?' },
-  ];
-  const DAYS = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'];
-  const FACTS = [
-    { q: '¿Cuántas patas tiene una araña?', a: '8', c: ['6', '4', '10'] },
-    { q: '¿Cuántos lados tiene un triángulo?', a: '3', c: ['4', '5', '2'] },
-    { q: '¿Cuántos días tiene una semana?', a: '7', c: ['5', '6', '10'] },
-    { q: '¿Cuántos meses tiene un año?', a: '12', c: ['10', '7', '24'] },
-    { q: '¿Qué pesa más: un kilo de plumas o un kilo de piedras?', a: 'Pesan igual', c: ['Las plumas', 'Las piedras'] },
-    { q: 'Alvarito tiene 3 caramelos y se come los 3. ¿Cuántos le quedan?', a: '0', c: ['3', '1', '6'] },
-    { q: 'Danielito tiene 2 manos. ¿Cuántos dedos tiene en las manos?', a: '10', c: ['5', '8', '20'] },
-    { q: 'Un cuadrado tiene lados iguales. ¿Cuántos lados tiene?', a: '4', c: ['3', '5', '6'] },
-  ];
-  const LOGIC = [
-    function rank() {
-      const [A, B, C] = shuffle(NAMES).slice(0, 3);
-      const r = pick(RANKS);
-      const top = Math.random() < 0.5;
-      return {
-        q: `${cap(A)} ${r.rel} ${B}. ${cap(B)} ${r.rel} ${C}. ${top ? r.top : r.bottom}`,
-        answer: cap(top ? A : C), options: shuffle([A, B, C].map(cap)),
-      };
-    },
-    function days() {
-      const i = rnd(0, 6);
-      const mode = pick(isNormal() ? ['mañana', 'ayer', 'pasado'] : ['mañana', 'ayer']);
-      const off = { mañana: 1, ayer: -1, pasado: 2 }[mode];
-      const ans = DAYS[(i + off + 7) % 7];
-      const q = { mañana: '¿Qué día será mañana?', ayer: '¿Qué día fue ayer?', pasado: '¿Qué día será pasado mañana?' }[mode];
-      const others = shuffle(DAYS.filter(d => d !== ans)).slice(0, 3);
-      return { q: `Hoy es ${DAYS[i]}. ${q}`, answer: cap(ans), options: shuffle([ans, ...others]).map(cap) };
-    },
-    function parity() {
-      const want = pick(['par', 'impar']);
-      const max = isNormal() ? 99 : 20;
-      const ok = n => (n % 2 === 0) === (want === 'par');
-      let ans; do { ans = rnd(1, max); } while (!ok(ans));
-      const others = new Set();
-      while (others.size < 3) { const n = rnd(1, max); if (!ok(n)) others.add(n); }
-      return { q: `¿Cuál de estos números es ${want}?`, answer: String(ans), options: shuffle([ans, ...others]).map(String) };
-    },
-    function biggest() {
-      const big = Math.random() < 0.5;
-      let t, u; do { t = rnd(1, 9); u = rnd(1, 9); } while (t === u);
-      const set = new Set([t * 10 + u, u * 10 + t]);
-      while (set.size < 4) set.add(rnd(10, isNormal() ? 99 : 40));
-      const nums = [...set];
-      const ans = big ? Math.max(...nums) : Math.min(...nums);
-      return { q: `¿Qué número es el más ${big ? 'grande' : 'pequeño'}?`, answer: String(ans), options: shuffle(nums).map(String) };
-    },
-    function fact() {
-      const used = S.run ? S.run.usedFacts : [];
-      let pool = FACTS.map((_, i) => i).filter(i => !used.includes(i));
-      if (!pool.length) pool = FACTS.map((_, i) => i);
-      const i = pick(pool);
-      if (S.run) S.run.usedFacts.push(i);
-      const f = FACTS[i];
-      return { q: f.q, answer: f.a, options: shuffle([f.a, ...f.c]) };
-    },
-  ];
-  const genLogic = () => pick(LOGIC)();
-
-  const GEN = { mult: genMult, multStory: genStory, addsub: genAddSub, series: genSeries, oddOne: genOddOne, riddle: genRiddle, logic: genLogic };
-  const EXTRA_TIME = { mult: 0, multStory: 10, addsub: 6, series: 4, oddOne: 0, riddle: 12, logic: 10 };
+  const GEN = {
+    mult: genMult, groups: genGroups, missing: genMissing, skip: genSkip, trueFalse: genTrueFalse,
+    whichMult: genWhichMult, intruder: genIntruder, multStory: genStory,
+  };
+  const EXTRA_TIME = { mult: 0, groups: 6, missing: 4, skip: 4, trueFalse: 0, whichMult: 10, intruder: 8, multStory: 10 };
   function timeFor(kind) {
-    const base = isNormal() ? 28 : 40;
+    const base = S.diff === 'normal' ? 26 : 40;
     return Math.max(15, base + EXTRA_TIME[kind] - S.run.room * 2);
   }
 
@@ -877,6 +845,10 @@
   // ---------- Estado ----------
   const S = {
     screen: 'title', diff: 'facil', run: null, puzzle: null,
+    tables: (() => {
+      const t = store.get('dva-tables', [2, 5, 10]);
+      return Array.isArray(t) ? t.filter(n => ALL_TABLES.includes(n)) : [2, 5, 10];
+    })(),
     T: 40, left: 40, t: 0, alvaX: START, alvaTarget: null, alvaSpeed: 0, alvaFrame: 0,
     jump: 0, bubble: null, halfSaid: false, lastSaid: false,
   };
@@ -885,7 +857,10 @@
   function clearTimers() { timers.forEach(clearTimeout); timers.clear(); }
 
   function newRun(diff) {
-    return { diff, room: 0, step: 0, hearts: MAX_HEARTS, score: 0, pieces: 0, pranks: 0, perfect: true, messes: {}, usedRiddles: [], usedFacts: [] };
+    return {
+      diff, tables: S.tables.slice(), room: 0, step: 0, hearts: MAX_HEARTS, score: 0, pieces: 0, pranks: 0,
+      perfect: true, messes: {}, missed: [], recent: [],
+    };
   }
 
   // ---------- Pintado ----------
@@ -943,10 +918,12 @@
     v.textContent = p.visual || '';
     v.hidden = !p.visual;
     v.classList.toggle('emoji', !!p.emojiVisual);
+    v.classList.toggle('groups', !!p.groupsVisual);
+    v.classList.remove('solved');
+    $('hint').hidden = true;
     const box = $('answers');
     box.innerHTML = '';
-    const allNum = p.options.every(o => /^\d+$/.test(o));
-    const cls = p.emojiOpts ? 'emoji' : allNum ? '' : 'word';
+    const cls = p.options.every(o => /^\d+$/.test(o)) ? '' : p.options.every(o => /^[\d ×]+$/.test(o)) ? 'expr' : 'word';
     p.options.forEach((opt, i) => {
       const b = document.createElement('button');
       b.type = 'button';
@@ -1063,12 +1040,40 @@
     showCard(`
       <canvas class="art" id="titleArt" width="80" height="50"></canvas>
       <h1 class="logo"><span class="d">DANIELITO</span><span class="vs">CONTRA</span><span class="a">ALVARITO</span></h1>
-      <p>Danielito construye un castillo y necesita 6 piezas escondidas por la casa. Resuelve cada reto antes de que llegue Alvarito, ¡o hará una trastada!</p>
-      <p class="small">Si fallas, Alvarito corre más deprisa.${best ? ` Récord: <b>★ ${best}</b>` : ''}</p>
+      <p>Danielito construye un castillo y necesita 6 piezas escondidas por la casa. Resuelve los retos de las tablas antes de que llegue Alvarito, ¡o hará una trastada!</p>
+      <h2>¿QUÉ TABLAS PRACTICAMOS?</h2>
+      <div class="chips" id="chips">
+        ${ALL_TABLES.map(t => `<button type="button" class="chip" data-t="${t}" aria-pressed="false">${t}</button>`).join('')}
+        <button type="button" class="chip all" data-t="all" aria-pressed="false">TODAS</button>
+      </div>
+      <p class="small" id="tablesNote"></p>
     `, [
-      { label: 'FÁCIL<small>Tablas del 2, 5 y 10 · más tiempo</small>', go: () => startRun('facil') },
-      { label: 'NORMAL<small>Todas las tablas · menos tiempo</small>', cls: 'blue', go: () => startRun('normal') },
+      { label: 'CON CALMA<small>Más tiempo para pensar</small>', go: () => startRun('facil') },
+      { label: 'RÁPIDO<small>Alvarito corre más</small>', cls: 'blue', go: () => startRun('normal') },
     ]);
+    const chips = [...document.querySelectorAll('#chips .chip')];
+    const startBtns = [...document.querySelectorAll('#card .btns .btn')];
+    const sync = () => {
+      chips.forEach(c => {
+        const on = c.dataset.t === 'all' ? S.tables.length === ALL_TABLES.length : S.tables.includes(+c.dataset.t);
+        c.setAttribute('aria-pressed', String(on));
+      });
+      startBtns.forEach(b => { b.disabled = !S.tables.length; });
+      $('tablesNote').innerHTML = numify(S.tables.length
+        ? `Si fallas, Alvarito corre más deprisa.${best ? ` Récord: <b>★ ${best}</b>` : ''}`
+        : 'Elige al menos una tabla para empezar.');
+      store.set('dva-tables', S.tables);
+    };
+    chips.forEach(c => c.addEventListener('click', () => {
+      ensureAudio(); sfx.click();
+      if (c.dataset.t === 'all') S.tables = S.tables.length === ALL_TABLES.length ? [] : ALL_TABLES.slice();
+      else {
+        const t = +c.dataset.t;
+        S.tables = S.tables.includes(t) ? S.tables.filter(x => x !== t) : [...S.tables, t].sort((x, y) => x - y);
+      }
+      sync();
+    }));
+    sync();
     const art = $('titleArt');
     const g = art.getContext('2d');
     g.imageSmoothingEnabled = false;
@@ -1076,6 +1081,8 @@
     drawSprite(g, DANI, 8, 0, 3);
     drawSprite(g, ALVA_A, 42, 6, 3);
   }
+
+  const listaTablas = ts => ts.length === 1 ? String(ts[0]) : ts.slice(0, -1).join(', ') + ' y ' + ts[ts.length - 1];
 
   function startRun(diff) {
     S.diff = diff;
@@ -1095,7 +1102,7 @@
       <h2>HABITACIÓN ${r.room + 1} DE ${ROOMS.length}</h2>
       <h1>${room.name.toUpperCase()}</h1>
       <p>${room.intro}</p>
-      <p class="small">Supera 3 retos para conseguir la pieza.</p>
+      <p class="small">Supera 3 retos de ${r.tables.length === ALL_TABLES.length ? 'todas las tablas' : (r.tables.length === 1 ? 'la tabla del ' : 'las tablas del ') + listaTablas(r.tables)} para conseguir la pieza.</p>
     `, [{ label: '¡A POR ELLA!', go: startPuzzle }]);
   }
 
@@ -1119,6 +1126,7 @@
     if (opt === S.puzzle.answer) {
       btn.classList.add('right');
       lockAnswers();
+      if (S.puzzle.solved) { $('visual').textContent = S.puzzle.solved; $('visual').classList.add('solved'); }
       sfx.ok();
       S.run.score += 10 + Math.ceil(S.left);
       updateHud();
@@ -1134,7 +1142,24 @@
       later(sfx.laugh, 150);
       S.left = Math.max(0, S.left - PENALTY);
       say(pick(WRONG), 1.2);
+      remember();
+      if (S.puzzle.hint) {
+        $('hint').innerHTML = numify('<strong>PISTA</strong>' + esc(S.puzzle.hint));
+        $('hint').hidden = false;
+      }
     }
+  }
+
+  // Guarda lo que ha costado para repasarlo al final.
+  function remember() {
+    const p = S.puzzle, r = S.run;
+    const item = p.fact ? factText(p.fact) : p.learn;
+    if (item && !r.missed.includes(item)) r.missed.push(item);
+  }
+  const learnLine = p => p.fact ? factText(p.fact) : p.learn;
+  function repaso(r) {
+    if (!r.missed.length) return '<p class="small">¡No ha fallado ninguna multiplicación!</p>';
+    return `<h2>PARA REPASAR</h2><p class="repaso">${r.missed.slice(-8).map(m => `<span>${m}</span>`).join('')}</p>`;
   }
 
   function nextStep() {
@@ -1156,6 +1181,7 @@
       later(() => { crash.hidden = true; }, 1100);
       (r.messes[room.id] = r.messes[room.id] || []).push(Math.floor(Math.random() * 1e9));
       r.hearts--; r.pranks++; r.perfect = false;
+      remember();
       updateHud();
       revealAnswer();
       later(() => prankCard(room), 1300);
@@ -1169,6 +1195,7 @@
       <h1 class="bad">¡TRASTADA!</h1>
       <p>${pick(room.pranks)}</p>
       <p class="small">La respuesta era <b>${S.puzzle.answer}</b>.</p>
+      ${learnLine(S.puzzle) && learnLine(S.puzzle) !== S.puzzle.answer ? `<p>Recuerda: <b>${learnLine(S.puzzle)}</b></p>` : ''}
       <p class="small">${last ? 'A Danielito ya no le quedan corazones...' : `Le quedan ${r.hearts} ${r.hearts === 1 ? 'corazón' : 'corazones'}.`}</p>
     `, [{
       label: last ? 'VER QUÉ PASA' : 'SEGUIR',
@@ -1218,6 +1245,7 @@
       <p>Danielito ha encontrado las ${ROOMS.length} piezas y ha construido su castillo.</p>
       <p class="small">${r.pranks ? `Alvarito ha hecho ${r.pranks} ${r.pranks === 1 ? 'trastada' : 'trastadas'}, pero no ha podido con él.` : '¡Alvarito no ha conseguido hacer ni una trastada!'}</p>
       <p>Puntos: <b>★ ${r.score}</b>${record ? ' · ¡Nuevo récord!' : ''}</p>
+      ${repaso(r)}
     `, [
       { label: 'JUGAR OTRA VEZ', go: () => startRun(r.diff) },
       { label: 'MENÚ', cls: 'ghost', go: showTitle },
@@ -1236,6 +1264,7 @@
       <p>Alvarito ha hecho tantas trastadas que el castillo de Danielito se ha caído.</p>
       <p class="small">Danielito consiguió ${r.pieces} de ${ROOMS.length} piezas.</p>
       <p>Puntos: <b>★ ${r.score}</b>${record ? ' · ¡Nuevo récord!' : ''}</p>
+      ${repaso(r)}
     `, [
       { label: 'OTRA VEZ', go: () => startRun(r.diff) },
       { label: 'MENÚ', cls: 'ghost', go: showTitle },
@@ -1284,7 +1313,8 @@
   function start(data) {
     if (data && data.run) {
       S.diff = data.diff || data.run.diff || 'facil';
-      S.run = data.run;
+      S.run = Object.assign(newRun(S.diff), data.run);
+      if (!S.run.tables.length) S.run.tables = [2, 5, 10];
       showRoomIntro();
     } else {
       showTitle();
