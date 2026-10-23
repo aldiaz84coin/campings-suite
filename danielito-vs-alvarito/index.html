@@ -443,46 +443,209 @@
 
   // ---------- Personajes (pixel art) ----------
   const PAL = {
-    h: '#3b2414', H: '#5e3b22',            // pelo castaño de Danielito
-    y: '#e2b25a', Y: '#f6d88a',            // rizos rubios de Alvarito
-    s: '#f2c39b', e: '#1b1530', w: '#ffffff', n: '#b34a3c',
-    m: '#8e2b3a', t: '#ecdcd6',            // sudadera granate
-    p: '#3a3a4e', k: '#15121f',
-    b: '#7fb2e8', B: '#2f4f9e', g: '#a3a8b6', // pijama azul y calcetines
+    h: '#2e1c12', // pelo de Danielito
+    H: '#5a3a24',
+    s: '#e9b48f', // piel de Danielito
+    S: '#cf9673',
+    e: '#2a1810', // ojos
+    w: '#ffffff', // blanco
+    n: '#7a2a2a', // boca
+    m: '#8e2b3a', // sudadera granate
+    M: '#6a1d2a',
+    t: '#ecdcd6', // letras de la sudadera
+    p: '#3a3d4a', // pantalón
+    P: '#2a2c36',
+    k: '#15121f', // zapatillas
+    o: '#e8e8e8', // suela
+    y: '#d9a441', // rizos de Alvarito
+    Y: '#f6d27a',
+    z: '#a8762a',
+    a: '#f4cba9', // piel de Alvarito
+    A: '#e6ad8c',
+    c: '#f29c8a', // mofletes
+    b: '#86b6ea', // pijama azul
+    B: '#2f4f9e', // dibujos del pijama
+    q: '#f2c14e',
+    g: '#a3a8b6', // calcetines
   };
+  // Hechos a partir de fotos: Danielito con rizos oscuros y sudadera granate;
+  // Alvarito, más pequeño, con rizos rubios y pijama azul.
   const DANI = [
-    '..h.hh.h..',
-    '.hhhhhhhh.',
-    'hhHhhhHhhh',
-    '.hssssssh.',
-    '.sesssses.',
-    '.ssssssss.',
-    '..swwwws..',
-    '...ssss...',
-    '.mmmmmmmm.',
-    'smmttttmms',
-    'smmmttmmms',
-    '..pppppp..',
-    '..pp..pp..',
-    '..pp..pp..',
-    '.kkk..kkk.',
+    '....hhHhhHhh....',
+    '..hhhhhhhhhhhh..',
+    '.hhHhhhHhhhhHhh.',
+    '.hhhhhhhhhhhhhh.',
+    'hhhHhhhhhHhhhhhh',
+    'hhhhshhhhhhshhhh',
+    '.hhsssssssssshh.',
+    '.hsHHssssssHHsh.',
+    'Sssweessssweesss',
+    'Sssweessssweesss',
+    '.sssssssSssssss.',
+    '.SsssssssssssS..',
+    '..sssnwwwwnsss..',
+    '...sssnnnnsss...',
+    '....ssssssss....',
+    '......SSSS......',
+    '...mmmmmmmmmm...',
+    '..mmmmmmmmmmmm..',
+    '.mmmtmtmmtmtmmm.',
+    '.mmmmmmmmmmmmmm.',
+    '.mMmmtmtmtmmmMm.',
+    '.mMmmmmmmmmmmMm.',
+    '.ssmmmmmmmmmmss.',
+    '...pppppppppp...',
+    '...ppppPPpppp...',
+    '...pppp..pppp...',
+    '...pppp..pppp...',
+    '..kkkkk..kkkkk..',
+    '..ooooo..ooooo..',
   ];
-  const ALVA_HEAD = [
-    '...yYyyYy...',
-    '.yyyyyyyyyy.',
-    'yyYyyYyyYyyy',
-    'yyyssssssyyy',
-    'yysessssesyy',
-    '.yssssssssy.',
-    '..sswwwwss..',
-    '...ssssss...',
-    '..bbbbbbbb..',
-    '.sbBbbbBbbs.',
-    '..bbbBbbbb..',
+  const DANI_YAY = [
+    '....hhHhhHhh....ss',
+    '..hhhhhhhhhhhh..ss',
+    '.hhHhhhHhhhhHhh.mm',
+    '.hhhhhhhhhhhhhh.mm',
+    'hhhHhhhhhHhhhhhhmm',
+    'hhhhshhhhhhshhhhmm',
+    '.hhsssssssssshh.mm',
+    '.hsHHssssssHHsh.mm',
+    'Sssweessssweesssmm',
+    'Sssweessssweesssmm',
+    '.sssssssSssssss.mm',
+    '.SsssssssssssS..mm',
+    '..sssnwwwwnsss..m.',
+    '...sssnnnnsss...m.',
+    '....ssssssss....m.',
+    '......SSSS....mmm.',
+    '...mmmmmmmmmmmm.m.',
+    '..mmmmmmmmmmmm....',
+    '.mmmtmtmmtmtmm....',
+    '.mmmmmmmmmmmmm....',
+    '.mMmmtmtmtmmmm....',
+    '.mMmmmmmmmmmmm....',
+    '.ssmmmmmmmmmmm....',
+    '...pppppppppp.....',
+    '...ppppPPpppp.....',
+    '...pppp..pppp.....',
+    '...pppp..pppp.....',
+    '..kkkkk..kkkkk....',
+    '..ooooo..ooooo....',
   ];
-  const ALVA_A = ALVA_HEAD.concat(['...bb..bb...', '...gg..gg...']);
-  const ALVA_B = ALVA_HEAD.concat(['..bb....bb..', '..gg....gg..']);
+  const DANI_SAD = [
+    '....hhHhhHhh....',
+    '..hhhhhhhhhhhh..',
+    '.hhHhhhHhhhhHhh.',
+    '.hhhhhhhhhhhhhh.',
+    'hhhHhhhhhHhhhhhh',
+    'hhhhshhhhhhshhhh',
+    '.hhsssssssssshh.',
+    '.hsHHssssssHHsh.',
+    'Sssweessssweesss',
+    'Sssweessssweesss',
+    '.sssssssSssssss.',
+    '.SsssssssssssS..',
+    '..ssssssssssss..',
+    '...sssnnnnsss...',
+    '....snssssns....',
+    '......SSSS......',
+    '...mmmmmmmmmm...',
+    '..mmmmmmmmmmmm..',
+    '.mmmtmtmmtmtmmm.',
+    '.mmmmmmmmmmmmmm.',
+    '.mMmmtmtmtmmmMm.',
+    '.mMmmmmmmmmmmMm.',
+    '.ssmmmmmmmmmmss.',
+    '...pppppppppp...',
+    '...ppppPPpppp...',
+    '...pppp..pppp...',
+    '...pppp..pppp...',
+    '..kkkkk..kkkkk..',
+    '..ooooo..ooooo..',
+  ];
+  const ALVA_A = [
+    '....y.yYy.yy....',
+    '..yyYyyyyyyYyy..',
+    '.yYyyzyyYyyzyyy.',
+    'yyyyYyyyyyYyyYyy',
+    'yzyyyyyzyyyyyyzy',
+    'yyyYaayyyyaaYyyy',
+    'yyazaaaaaaaazayz',
+    'zyaazzaaaazzaayy',
+    'yyaaeeaaaaeeaayy',
+    'yyaaeeaaaaeeaayz',
+    'zycaaaaAAaaaacyy',
+    '.yaaawwwwwwaaay.',
+    '..aaanwwwwnaaa..',
+    '...aaaaaaaaaa...',
+    '...bbbbbbbbbb...',
+    '..bbBbbbbqbbbb..',
+    '.abbbbbBbbbbbba.',
+    '.abqbbbbbbBbbba.',
+    '...bbbbbbbbbb...',
+    '...bbBbbbbqbb...',
+    '....bbb..bbb....',
+    '....bbb..bbb....',
+    '....ggg..ggg....',
+    '...gggg..gggg...',
+  ];
+  const ALVA_B = [
+    '....y.yYy.yy....',
+    '..yyYyyyyyyYyy..',
+    '.yYyyzyyYyyzyyy.',
+    'yyyyYyyyyyYyyYyy',
+    'yzyyyyyzyyyyyyzy',
+    'yyyYaayyyyaaYyyy',
+    'yyazaaaaaaaazayz',
+    'zyaazzaaaazzaayy',
+    'yyaaeeaaaaeeaayy',
+    'yyaaeeaaaaeeaayz',
+    'zycaaaaAAaaaacyy',
+    '.yaaawwwwwwaaay.',
+    '..aaanwwwwnaaa..',
+    '...aaaaaaaaaa...',
+    '...bbbbbbbbbb...',
+    '..bbBbbbbqbbbb..',
+    '.abbbbbBbbbbbba.',
+    '.abqbbbbbbBbbba.',
+    '...bbbbbbbbbb...',
+    '...bbBbbbbqbb...',
+    '...bbb....bbb...',
+    '..bbb......bbb..',
+    '..ggg......ggg..',
+    '.gggg......gggg.',
+  ];
+  const ALVA_ROAR = [
+    '......y.yYy.yy......',
+    'aa..yyYyyyyyyYyy..aa',
+    'aa.yYyyzyyYyyzyyy.aa',
+    'aayyyyYyyyyyYyyYyyaa',
+    'bbyzyyyyyzyyyyyyzybb',
+    'bbyyyYaayyyyaaYyyybb',
+    'bbyyazaaaaaaaazayzbb',
+    'bbzyaazzaaaazzaayybb',
+    'bbyyaaeeaaaaeeaayybb',
+    'bbyyaaeeaaaaeeaayzbb',
+    'bbzycaaaaAAaaaacyybb',
+    'bb.yaaanwwwwnaaay.bb',
+    'bb..aaannnnnnaaa..bb',
+    'bb...aaawnnwaaa...bb',
+    'bbbbbbbbbbbbbbbbbbbb',
+    '....bbBbbbbqbbbb....',
+    '....bbbbbBbbbbbb....',
+    '....bqbbbbbbBbbb....',
+    '.....bbbbbbbbbb.....',
+    '.....bbBbbbbqbb.....',
+    '......bbb..bbb......',
+    '......bbb..bbb......',
+    '......ggg..ggg......',
+    '.....gggg..gggg.....',
+  ];
 
+  // Dibuja apoyando los pies en (cx, bottom), así las poses de distinto tamaño no saltan.
+  function drawSpriteAt(g, rows, cx, bottom, s) {
+    drawSprite(g, rows, Math.round(cx - rows[0].length * s / 2), bottom - rows.length * s, s);
+  }
   function drawSprite(g, rows, x, y, s) {
     for (let r = 0; r < rows.length; r++) {
       const row = rows[r];
@@ -497,7 +660,7 @@
 
   // ---------- Escenario ----------
   const W = 160, H = 90, FLOOR = 70;
-  const START = 150, CATCH = 40;
+  const START = 140, CATCH = 40, SPR = 2, FEET = 80;
   const cv = $('scene'), ctx = cv.getContext('2d');
   ctx.imageSmoothingEnabled = false;
   function R(x, y, w, h, c) { ctx.fillStyle = c; ctx.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h)); }
@@ -850,7 +1013,7 @@
       return Array.isArray(t) ? t.filter(n => ALL_TABLES.includes(n)) : [2, 5, 10];
     })(),
     T: 40, left: 40, t: 0, alvaX: START, alvaTarget: null, alvaSpeed: 0, alvaFrame: 0,
-    jump: 0, bubble: null, halfSaid: false, lastSaid: false,
+    jump: 0, sad: false, roar: false, bubble: null, halfSaid: false, lastSaid: false,
   };
   const timers = new Set();
   function later(fn, ms) { const id = setTimeout(() => { timers.delete(id); fn(); }, ms); timers.add(id); }
@@ -871,8 +1034,10 @@
     if (messes) messes.forEach(seed => drawMess(room, seed));
     const bob = S.screen === 'play' && Math.floor(S.t * 2) % 2 ? 1 : 0;
     const jy = S.jump > 0 ? Math.round(Math.sin((1 - S.jump / 0.5) * Math.PI) * 10) : 0;
-    drawSprite(ctx, DANI, 8, 33 - jy + bob, 3);
-    if (S.alvaX < W) drawSprite(ctx, S.alvaFrame ? ALVA_B : ALVA_A, Math.round(S.alvaX), 39, 3);
+    const dani = S.jump > 0 ? DANI_YAY : S.sad ? DANI_SAD : DANI;
+    drawSpriteAt(ctx, dani, 24, FEET - jy + bob, SPR);
+    const alva = S.roar ? ALVA_ROAR : S.alvaFrame ? ALVA_B : ALVA_A;
+    if (S.alvaX < W) drawSpriteAt(ctx, alva, Math.round(S.alvaX) + 16, FEET, SPR);
   }
 
   function say(text, dur = 1.6) { S.bubble = { text, until: S.t + dur }; }
@@ -882,7 +1047,7 @@
     el.hidden = !show;
     if (show) {
       if (el.textContent !== S.bubble.text) el.textContent = S.bubble.text;
-      el.style.left = Math.max(24, Math.min(76, (S.alvaX + 15) / W * 100)) + '%';
+      el.style.left = Math.max(24, Math.min(76, (S.alvaX + 16) / W * 100)) + '%';
     }
   }
 
@@ -1034,11 +1199,11 @@
 
   function showTitle() {
     clearTimers();
-    S.screen = 'title'; S.run = null; S.alvaX = START; S.alvaTarget = null;
+    S.screen = 'title'; S.run = null; S.alvaX = START; S.alvaTarget = null; S.sad = false; S.roar = false;
     updateHud(); updateRoomTag(); demoBoard();
     const best = store.get('dva-best', 0);
     showCard(`
-      <canvas class="art" id="titleArt" width="80" height="50"></canvas>
+      <canvas class="art" id="titleArt" width="80" height="64"></canvas>
       <h1 class="logo"><span class="d">DANIELITO</span><span class="vs">CONTRA</span><span class="a">ALVARITO</span></h1>
       <p>Danielito construye un castillo y necesita 6 piezas escondidas por la casa. Resuelve los retos de las tablas antes de que llegue Alvarito, ¡o hará una trastada!</p>
       <h2>¿QUÉ TABLAS PRACTICAMOS?</h2>
@@ -1077,9 +1242,9 @@
     const art = $('titleArt');
     const g = art.getContext('2d');
     g.imageSmoothingEnabled = false;
-    g.fillStyle = '#30265a'; g.fillRect(0, 44, 80, 6);
-    drawSprite(g, DANI, 8, 0, 3);
-    drawSprite(g, ALVA_A, 42, 6, 3);
+    g.fillStyle = '#30265a'; g.fillRect(0, 59, 80, 5);
+    drawSpriteAt(g, DANI_YAY, 20, 60, 2);
+    drawSpriteAt(g, ALVA_ROAR, 59, 60, 2);
   }
 
   const listaTablas = ts => ts.length === 1 ? String(ts[0]) : ts.slice(0, -1).join(', ') + ' y ' + ts[ts.length - 1];
@@ -1093,7 +1258,7 @@
   function showRoomIntro() {
     clearTimers();
     const r = S.run, room = ROOMS[r.room];
-    S.screen = 'intro'; S.alvaX = START; S.alvaTarget = null;
+    S.screen = 'intro'; S.alvaX = START; S.alvaTarget = null; S.sad = false; S.roar = false;
     S.T = timeFor(room.kinds[0]); S.left = S.T;
     updateHud(); updateRoomTag(); updateTimer();
     S.puzzle = { kind: room.kinds[0], q: 'Prepárate...', visual: '', answer: '', options: [] };
@@ -1112,7 +1277,7 @@
     S.puzzle = Object.assign({ kind }, GEN[kind]());
     S.T = timeFor(kind); S.left = S.T;
     S.halfSaid = false; S.lastSaid = false;
-    S.alvaX = START; S.alvaTarget = null;
+    S.alvaX = START; S.alvaTarget = null; S.sad = false; S.roar = false;
     renderPuzzle(S.puzzle);
     updateRoomTag(); updateHud(); updateTimer();
     hideCard();
@@ -1170,12 +1335,13 @@
   function prank() {
     S.screen = 'prank';
     lockAnswers();
-    S.alvaTarget = CATCH - 4; S.alvaSpeed = 260;
+    S.alvaTarget = CATCH; S.alvaSpeed = 260;
     sfx.laugh();
     say('¡TRASTADA!', 1.2);
     later(() => {
       const r = S.run, room = ROOMS[r.room];
       sfx.crash(); shake(); scrawl();
+      S.roar = true; S.sad = true;
       const crash = $('crash');
       crash.hidden = false;
       later(() => { crash.hidden = true; }, 1100);
@@ -1201,7 +1367,7 @@
       label: last ? 'VER QUÉ PASA' : 'SEGUIR',
       go: () => {
         if (last) { gameOver(); return; }
-        S.alvaTarget = W + 20; S.alvaSpeed = 160;
+        S.alvaTarget = W + 20; S.alvaSpeed = 160; S.roar = false;
         nextStep();
       },
     }]);
@@ -1258,7 +1424,7 @@
     S.screen = 'end';
     sfx.lose();
     const record = saveBest(r.score);
-    S.alvaTarget = null; S.alvaX = CATCH + 30;
+    S.alvaTarget = null; S.alvaX = CATCH + 24; S.roar = true; S.sad = true;
     showCard(`
       <h1 class="bad">¡ALVARITO GANA!</h1>
       <p>Alvarito ha hecho tantas trastadas que el castillo de Danielito se ha caído.</p>
