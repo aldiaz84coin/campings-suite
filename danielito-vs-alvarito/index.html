@@ -1,0 +1,1299 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#17122b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}</style>
+</head>
+<body>
+<!-- juego:inicio -->
+<title>Danielito vs Alvarito</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;600;700&family=Press+Start+2P&display=swap">
+<style>
+  /* Layout: una sola columna de móvil — marcador arriba, escena pixelada de la casa,
+     reloj de Alvarito y tablero del reto abajo. Estética de consola de 8 bits, un solo tema oscuro. */
+  :root {
+    --bg: #17122b;
+    --panel: #241c44;
+    --panel-2: #30265a;
+    --line: #0b0817;
+    --ink: #f3efff;
+    --muted: #a99fd0;
+    --dim: #4b3f7a;
+    --dani: #4aa3ff;
+    --alva: #ffb23f;
+    --gold: #ffd23f;
+    --ok: #5be37d;
+    --bad: #ff4d6d;
+    --scrim: rgba(11, 8, 23, .84);
+    --display: "Press Start 2P", ui-monospace, "Courier New", monospace;
+    --body: "Pixelify Sans", "Trebuchet MS", system-ui, sans-serif;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html, body { height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--body);
+    -webkit-tap-highlight-color: transparent;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  button { font: inherit; color: inherit; }
+  button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+
+  #app {
+    max-width: 520px;
+    min-height: 100%;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-block: 10px 14px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+
+  /* Marcador */
+  .hud {
+    display: grid;
+    grid-template-columns: auto 1fr auto auto;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--display);
+    font-size: 12px;
+  }
+  .hearts { display: flex; gap: 3px; font-size: 18px; line-height: 1; }
+  .hearts span { color: var(--dim); }
+  .hearts span.on { color: var(--bad); }
+  .pieces { display: flex; gap: 4px; justify-content: center; }
+  .pieces i { width: 13px; height: 13px; border: 2px solid var(--dim); }
+  .pieces i.on { background: var(--gold); border-color: var(--gold); box-shadow: 0 2px 0 var(--line); }
+  .score { color: var(--gold); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .icon-btn {
+    width: 38px; height: 38px;
+    background: var(--panel-2);
+    border: 3px solid var(--line);
+    box-shadow: 0 3px 0 var(--line);
+    font-family: var(--display);
+    font-size: 13px;
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+  .icon-btn[aria-pressed="true"] { color: var(--muted); text-decoration: line-through; }
+
+  /* Escena */
+  .stage {
+    position: relative;
+    overflow: hidden;
+    border: 4px solid var(--line);
+    box-shadow: 0 0 0 3px var(--panel-2);
+    background: var(--line);
+  }
+  #scene {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    max-width: 100%;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+  }
+  .room-tag {
+    position: absolute;
+    top: 6px; left: 6px;
+    max-width: 75%;
+    padding: 5px 7px;
+    background: var(--scrim);
+    font-family: var(--display);
+    font-size: 8px;
+    line-height: 1.5;
+    letter-spacing: .04em;
+  }
+  .bubble {
+    position: absolute;
+    top: 9%;
+    transform: translateX(-50%);
+    padding: 6px 8px;
+    background: var(--ink);
+    color: var(--line);
+    border: 3px solid var(--line);
+    font-family: var(--display);
+    font-size: 9px;
+    white-space: nowrap;
+  }
+  .bubble::after {
+    content: "";
+    position: absolute;
+    left: 50%; bottom: -9px;
+    border: 6px solid transparent;
+    border-top-color: var(--line);
+    transform: translateX(-50%);
+  }
+  .crash {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-family: var(--display);
+    font-size: clamp(22px, 8vw, 34px);
+    color: var(--gold);
+    text-shadow: 3px 3px 0 var(--bad), 6px 6px 0 var(--line);
+    animation: pop .45s steps(4) both;
+    pointer-events: none;
+  }
+
+  /* Reloj de Alvarito */
+  .timer { display: grid; gap: 6px; }
+  .timer-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-family: var(--display);
+    font-size: 9px;
+    color: var(--muted);
+  }
+  .timer-label b { color: var(--ink); font-size: 12px; font-weight: 400; font-variant-numeric: tabular-nums; }
+  .bar { height: 16px; border: 3px solid var(--line); background: var(--panel); }
+  .bar i { display: block; height: 100%; width: 100%; background: var(--ok); }
+  .bar i.mid { background: var(--gold); }
+  .bar i.low { background: var(--bad); }
+
+  /* Tablero del reto */
+  .puzzle {
+    position: relative;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 14px;
+    background: var(--panel);
+    border: 4px solid var(--line);
+    box-shadow: inset 0 0 0 3px var(--panel-2);
+  }
+  .kind {
+    margin: 0;
+    font-family: var(--display);
+    font-size: 9px;
+    letter-spacing: .12em;
+    color: var(--gold);
+  }
+  .q {
+    margin: 0;
+    font-size: 23px;
+    line-height: 1.25;
+    font-weight: 600;
+    text-wrap: balance;
+    min-width: 0;
+  }
+  .visual {
+    font-family: var(--display);
+    font-size: clamp(17px, 5.4vw, 24px);
+    line-height: 1.6;
+    text-align: center;
+    word-spacing: .1em;
+    padding: 8px 4px;
+    background: var(--panel-2);
+    border: 3px solid var(--line);
+    overflow-wrap: anywhere;
+  }
+  .visual.emoji { font-family: var(--body); font-size: clamp(24px, 7.5vw, 32px); line-height: 1.35; letter-spacing: .05em; }
+  .answers { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: auto; }
+  .answers .ans:last-child:nth-child(odd) { grid-column: 1 / -1; }
+  .ans {
+    min-height: 66px;
+    padding: 8px 6px;
+    background: var(--panel-2);
+    border: 3px solid var(--line);
+    box-shadow: 0 5px 0 var(--line);
+    font-family: var(--display);
+    font-size: 20px;
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+  .ans.word { font-family: var(--body); font-size: 21px; font-weight: 700; }
+  .ans.emoji { font-family: var(--body); font-size: 36px; line-height: 1; }
+  .ans:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 2px 0 var(--line); }
+  .ans:disabled { cursor: default; }
+  .ans.wrong { background: var(--bad); color: var(--line); animation: wiggle .3s steps(3); opacity: .75; }
+  .ans.right { background: var(--ok); color: var(--line); }
+  .scrawl { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+
+  /* Ventanas */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--scrim);
+    padding-top: calc(16px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+  .card {
+    width: 100%;
+    max-width: 440px;
+    max-height: 100%;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    padding: 22px 18px;
+    text-align: center;
+    background: var(--panel);
+    border: 4px solid var(--line);
+    box-shadow: 0 0 0 4px var(--panel-2), 0 10px 0 4px var(--line);
+    animation: rise .25s steps(3) both;
+  }
+  .card h1, .card h2 { margin: 0; font-family: var(--display); font-weight: 400; line-height: 1.5; text-wrap: balance; }
+  .card h1 { font-size: 18px; color: var(--gold); text-shadow: 3px 3px 0 var(--line); }
+  .card h1.bad { color: var(--alva); }
+  .card h2 { font-size: 12px; color: var(--muted); letter-spacing: .08em; }
+  .card p { margin: 0; font-size: 19px; line-height: 1.35; max-width: 34ch; }
+  .card p.small { font-size: 16px; color: var(--muted); }
+  .card b { color: var(--gold); font-weight: 700; }
+  .n { font-family: var(--display); font-size: .78em; font-weight: 400; letter-spacing: 0; }
+  .logo { display: grid; gap: 8px; }
+  .logo .d { color: var(--dani); font-size: clamp(18px, 6vw, 24px); }
+  .logo .vs { color: var(--ink); font-size: 11px; }
+  .logo .a { color: var(--alva); font-size: clamp(18px, 6vw, 24px); }
+  .art { width: 240px; max-width: 100%; height: auto; image-rendering: pixelated; }
+  .castle { width: 144px; max-width: 100%; height: auto; image-rendering: pixelated; }
+  .btns { display: grid; gap: 12px; width: 100%; }
+  .btn {
+    display: grid;
+    gap: 6px;
+    padding: 15px 12px;
+    background: var(--gold);
+    color: var(--line);
+    border: 3px solid var(--line);
+    box-shadow: 0 5px 0 var(--line);
+    font-family: var(--display);
+    font-size: 13px;
+    line-height: 1.4;
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+  .btn small { font-family: var(--body); font-size: 16px; font-weight: 600; }
+  .btn.blue { background: var(--dani); }
+  .btn.ghost { background: var(--panel-2); color: var(--ink); }
+  .btn:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--line); }
+
+  .shake { animation: shake .5s steps(6); }
+  @keyframes shake {
+    0%, 100% { transform: translate(0, 0); }
+    20% { transform: translate(-6px, 3px); }
+    40% { transform: translate(6px, -3px); }
+    60% { transform: translate(-4px, -2px); }
+    80% { transform: translate(4px, 2px); }
+  }
+  @keyframes pop { from { transform: scale(.3); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  @keyframes rise { from { transform: translateY(16px); opacity: 0; } to { transform: none; opacity: 1; } }
+  @keyframes wiggle { 0%, 100% { transform: translateX(0); } 33% { transform: translateX(-5px); } 66% { transform: translateX(5px); } }
+  @media (prefers-reduced-motion: reduce) {
+    .shake, .crash, .card, .ans.wrong { animation: none; }
+  }
+  @media (max-height: 640px) {
+    .q { font-size: 20px; }
+    .ans { min-height: 56px; }
+    .puzzle { padding: 10px; gap: 9px; }
+  }
+</style>
+
+<div id="app">
+  <header class="hud">
+    <div class="hearts" id="hearts" aria-label="Vidas"></div>
+    <div class="pieces" id="pieces" aria-label="Piezas del castillo"></div>
+    <div class="score" id="score">★ 0</div>
+    <button type="button" class="icon-btn" id="mute" aria-pressed="false" aria-label="Quitar el sonido">♪</button>
+  </header>
+
+  <div class="stage" id="stage">
+    <canvas id="scene" width="160" height="90" aria-label="La casa de Danielito"></canvas>
+    <div class="room-tag" id="roomTag">EL SALÓN · RETO 1/3</div>
+    <div class="bubble" id="bubble" hidden></div>
+    <div class="crash" id="crash" hidden>¡CRASH!</div>
+  </div>
+
+  <div class="timer">
+    <div class="timer-label"><span>ALVARITO LLEGA EN</span><b id="secs">40 s</b></div>
+    <div class="bar"><i id="bar"></i></div>
+  </div>
+
+  <section class="puzzle" id="puzzle">
+    <p class="kind" id="kind">MULTIPLICACIÓN</p>
+    <h2 class="q" id="question" aria-live="polite">¿Cuánto es?</h2>
+    <div class="visual" id="visual">5 × 3 = ?</div>
+    <div class="answers" id="answers"></div>
+    <canvas class="scrawl" id="scrawl"></canvas>
+  </section>
+</div>
+
+<div class="overlay" id="overlay" hidden>
+  <div class="card" id="card" role="dialog" aria-modal="true"></div>
+</div>
+
+<script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+
+  // ---------- Guardado local (solo comodidad: récord y sonido) ----------
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* sin almacenamiento */ } },
+  };
+
+  // ---------- Utilidades ----------
+  const rnd = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
+  const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+  const shuffle = arr => {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+    return a;
+  };
+  const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+  // Los números van en la fuente de consola: en la fuente del texto el 5 parece un 8.
+  const numify = html => html.replace(/(^|>)([^<]*)/g, (m, a, txt) => a + txt.replace(/\d+/g, '<span class="n">$&</span>'));
+  const esc = str => str.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function mulberry32(a) {
+    return function () {
+      a |= 0; a = a + 0x6D2B79F5 | 0;
+      let t = Math.imul(a ^ a >>> 15, 1 | a);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+
+  // ---------- Sonido chiptune ----------
+  let actx = null;
+  let muted = store.get('dva-muted', false);
+  function ensureAudio() {
+    if (!actx) {
+      try { const C = window.AudioContext || window.webkitAudioContext; if (C) actx = new C(); } catch (e) { actx = null; }
+    }
+    if (actx && actx.state === 'suspended') actx.resume().catch(() => {});
+  }
+  function tone(f, dur, type = 'square', vol = 0.06, at = 0, to = null) {
+    if (muted || !actx) return;
+    const t = actx.currentTime + at, o = actx.createOscillator(), g = actx.createGain();
+    o.type = type;
+    o.frequency.setValueAtTime(f, t);
+    if (to) o.frequency.exponentialRampToValueAtTime(to, t + dur);
+    g.gain.setValueAtTime(vol, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g).connect(actx.destination);
+    o.start(t); o.stop(t + dur + 0.02);
+  }
+  function noise(dur, vol = 0.2) {
+    if (muted || !actx) return;
+    const n = Math.floor(actx.sampleRate * dur), buf = actx.createBuffer(1, n, actx.sampleRate), d = buf.getChannelData(0);
+    for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / n);
+    const s = actx.createBufferSource(), g = actx.createGain();
+    s.buffer = buf; g.gain.value = vol;
+    s.connect(g).connect(actx.destination);
+    s.start();
+  }
+  const sfx = {
+    click: () => tone(660, 0.05, 'square', 0.04),
+    ok: () => [523, 659, 784, 1047].forEach((f, i) => tone(f, 0.1, 'square', 0.06, i * 0.07)),
+    bad: () => tone(220, 0.25, 'sawtooth', 0.06, 0, 110),
+    tick: () => tone(1200, 0.03, 'square', 0.03),
+    laugh: () => [700, 560, 700, 560, 700].forEach((f, i) => tone(f, 0.07, 'triangle', 0.07, i * 0.08)),
+    crash: () => { noise(0.6, 0.3); tone(140, 0.5, 'square', 0.07, 0, 40); },
+    piece: () => [392, 523, 659, 784, 659, 784, 1047].forEach((f, i) => tone(f, 0.12, 'square', 0.06, i * 0.1)),
+    lose: () => [392, 330, 262, 196].forEach((f, i) => tone(f, 0.22, 'triangle', 0.08, i * 0.2)),
+  };
+
+  // ---------- Personajes (pixel art) ----------
+  const PAL = {
+    h: '#3b2414', H: '#5e3b22',            // pelo castaño de Danielito
+    y: '#e2b25a', Y: '#f6d88a',            // rizos rubios de Alvarito
+    s: '#f2c39b', e: '#1b1530', w: '#ffffff', n: '#b34a3c',
+    m: '#8e2b3a', t: '#ecdcd6',            // sudadera granate
+    p: '#3a3a4e', k: '#15121f',
+    b: '#7fb2e8', B: '#2f4f9e', g: '#a3a8b6', // pijama azul y calcetines
+  };
+  const DANI = [
+    '..h.hh.h..',
+    '.hhhhhhhh.',
+    'hhHhhhHhhh',
+    '.hssssssh.',
+    '.sesssses.',
+    '.ssssssss.',
+    '..swwwws..',
+    '...ssss...',
+    '.mmmmmmmm.',
+    'smmttttmms',
+    'smmmttmmms',
+    '..pppppp..',
+    '..pp..pp..',
+    '..pp..pp..',
+    '.kkk..kkk.',
+  ];
+  const ALVA_HEAD = [
+    '...yYyyYy...',
+    '.yyyyyyyyyy.',
+    'yyYyyYyyYyyy',
+    'yyyssssssyyy',
+    'yysessssesyy',
+    '.yssssssssy.',
+    '..sswwwwss..',
+    '...ssssss...',
+    '..bbbbbbbb..',
+    '.sbBbbbBbbs.',
+    '..bbbBbbbb..',
+  ];
+  const ALVA_A = ALVA_HEAD.concat(['...bb..bb...', '...gg..gg...']);
+  const ALVA_B = ALVA_HEAD.concat(['..bb....bb..', '..gg....gg..']);
+
+  function drawSprite(g, rows, x, y, s) {
+    for (let r = 0; r < rows.length; r++) {
+      const row = rows[r];
+      for (let c = 0; c < row.length; c++) {
+        const ch = row[c];
+        if (ch === '.') continue;
+        g.fillStyle = PAL[ch];
+        g.fillRect(x + c * s, y + r * s, s, s);
+      }
+    }
+  }
+
+  // ---------- Escenario ----------
+  const W = 160, H = 90, FLOOR = 70;
+  const START = 150, CATCH = 40;
+  const cv = $('scene'), ctx = cv.getContext('2d');
+  ctx.imageSmoothingEnabled = false;
+  function R(x, y, w, h, c) { ctx.fillStyle = c; ctx.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h)); }
+  function line(x0, y0, x1, y1, c) {
+    const n = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0)) || 1;
+    for (let i = 0; i <= n; i++) R(x0 + (x1 - x0) * i / n, y0 + (y1 - y0) * i / n, 1, 1, c);
+  }
+  function walls(c1, c2, kind) {
+    R(0, 0, W, FLOOR, c1);
+    if (kind === 'stripes') for (let x = 0; x < W; x += 8) R(x, 0, 3, FLOOR, c2);
+    if (kind === 'tiles') {
+      for (let y = 0; y < FLOOR; y += 8) R(0, y, W, 1, c2);
+      for (let y = 0; y < FLOOR; y += 8) for (let x = (y / 8 % 2) * 4; x < W; x += 8) R(x, y, 1, 8, c2);
+    }
+    if (kind === 'planks') for (let x = 0; x < W; x += 12) R(x, 0, 1, FLOOR, c2);
+  }
+  function floor(c1, c2, kind) {
+    R(0, FLOOR, W, H - FLOOR, c1);
+    if (kind === 'wood') for (let y = FLOOR + 4; y < H; y += 5) R(0, y, W, 1, c2);
+    if (kind === 'check') for (let y = FLOOR; y < H; y += 5) for (let x = ((y - FLOOR) / 5 % 2) * 5; x < W; x += 10) R(x, y, 5, 5, c2);
+    if (kind === 'grass') for (let x = 0; x < W; x += 3) R(x, FLOOR - 1 - (x * 7) % 3, 1, 2 + (x * 5) % 3, c2);
+  }
+  function door() {
+    R(134, 30, 20, 40, '#2b1a10'); R(136, 32, 16, 38, '#7a4a2a');
+    R(138, 35, 12, 14, '#8d5a34'); R(138, 52, 12, 14, '#8d5a34'); R(148, 50, 2, 2, '#ffd23f');
+  }
+  function dino(x, y, c) { // T-rex de juguete
+    R(x + 6, y, 6, 4, c); R(x + 11, y + 1, 2, 1, '#15121f');
+    R(x + 3, y + 3, 6, 5, c); R(x, y + 5, 4, 2, c); R(x + 4, y + 8, 2, 3, c); R(x + 7, y + 8, 2, 3, c);
+  }
+
+  const ROOMS = [
+    {
+      id: 'salon', name: 'El salón', kinds: ['mult', 'oddOne', 'riddle'],
+      intro: 'La primera pieza del castillo está entre los cojines del sofá. Alvarito está viendo dibujos... de momento.',
+      debris: ['#e0684f', '#f3efff', '#ffd23f'],
+      pranks: [
+        'Alvarito ha saltado en el sofá y ha tirado todos los cojines al suelo.',
+        'Alvarito ha pintado la pared del salón con ceras de colores.',
+        'Alvarito ha escondido el mando de la tele dentro de una zapatilla.',
+      ],
+      draw() {
+        walls('#3f5f86', '#46699a', 'stripes'); floor('#7c7f8c', '#686b78', 'wood'); R(0, FLOOR - 2, W, 2, '#2b3f5a');
+        R(50, 12, 30, 22, '#e8e0c8');
+        R(52, 14, 12, 8, '#8fd3ff'); R(66, 14, 12, 8, '#8fd3ff'); R(52, 24, 12, 8, '#8fd3ff'); R(66, 24, 12, 8, '#8fd3ff');
+        R(14, 14, 14, 18, '#e8e0c8'); R(16, 16, 10, 14, '#d8d2c0'); R(20, 19, 3, 3, '#ffd23f'); R(21, 22, 1, 7, '#7f9bb0');
+        R(64, 46, 46, 8, '#9aa0b8'); R(60, 52, 54, 14, '#b3b8cc'); R(60, 66, 4, 4, '#e8e0c8'); R(110, 66, 4, 4, '#e8e0c8');
+        R(66, 54, 20, 8, '#c4c9db'); R(88, 54, 20, 8, '#c4c9db'); R(92, 46, 10, 7, '#8e5bd6');
+        R(118, 30, 10, 6, '#ffd23f'); R(122, 36, 2, 30, '#2d2d2d'); R(118, 66, 10, 3, '#2d2d2d');
+        door();
+      },
+    },
+    {
+      id: 'cocina', name: 'La cocina', kinds: ['multStory', 'series', 'addsub'],
+      intro: 'Huele a galletas recién hechas. Alvarito también lo ha notado.',
+      debris: ['#e0b25a', '#c98a3a', '#f3efff'],
+      pranks: [
+        'Alvarito ha tirado los cereales por todo el suelo de la cocina.',
+        'Alvarito ha echado sal en el zumo de Danielito.',
+        'Alvarito ha hecho una torre con las cacerolas... ¡y se ha caído con mucho ruido!',
+      ],
+      draw() {
+        walls('#efe3c2', '#d8c79c', 'tiles'); floor('#f1f1f1', '#34364a', 'check'); R(0, FLOOR - 2, W, 2, '#b9a77a');
+        R(44, 46, 56, 24, '#c98b52'); R(44, 44, 56, 3, '#e9e4da');
+        R(48, 50, 14, 16, '#b57843'); R(66, 50, 14, 16, '#b57843'); R(84, 50, 14, 16, '#b57843');
+        R(52, 36, 12, 8, '#9aa3b5'); R(50, 36, 16, 2, '#7d8597');
+        R(84, 34, 10, 10, '#8fd3ff'); R(86, 38, 2, 2, '#a0612d'); R(90, 40, 2, 2, '#a0612d'); R(84, 32, 10, 2, '#c0392b');
+        R(108, 18, 22, 52, '#e8edf5'); R(108, 40, 22, 1, '#aab3c5'); R(126, 24, 2, 10, '#aab3c5'); R(126, 44, 2, 12, '#aab3c5');
+        R(8, 20, 30, 2, '#8a5a3b'); R(10, 14, 6, 6, '#ff6a3d'); R(18, 12, 6, 8, '#5be37d'); R(28, 15, 6, 5, '#ffd23f');
+        door();
+      },
+    },
+    {
+      id: 'cuarto', name: 'El cuarto de Danielito', kinds: ['mult', 'logic', 'riddle'],
+      intro: 'La tercera pieza está debajo de la cama, junto a los dinosaurios. ¡Cuidado con los juguetes!',
+      debris: ['#ff4d6d', '#ffd23f', '#5be37d', '#4aa3ff'],
+      pranks: [
+        'Alvarito ha desmontado la torre de piezas de Danielito.',
+        'Alvarito ha escondido un calcetín sucio debajo de la almohada.',
+        'Alvarito ha pintado bigotes a todos los dinosaurios de juguete.',
+      ],
+      draw() {
+        walls('#6fb79a', '#7cc4a7', 'stripes'); floor('#5b4a8a', '#4f3f7b', 'wood'); R(0, FLOOR - 2, W, 2, '#3f7c66');
+        R(12, 12, 20, 22, '#f3efff'); dino(15, 18, '#54a35e');
+        R(66, 12, 26, 18, '#1d2a5a'); R(66, 12, 26, 2, '#e8e0c8'); R(72, 18, 1, 1, '#ffd23f'); R(84, 16, 1, 1, '#ffd23f'); R(79, 24, 1, 1, '#ffd23f');
+        R(56, 46, 5, 24, '#8a5a3b'); R(56, 54, 58, 10, '#4aa3ff'); R(62, 50, 14, 6, '#f3efff'); R(76, 52, 38, 4, '#3a86d8'); R(110, 56, 4, 14, '#8a5a3b');
+        R(118, 62, 8, 8, '#c0392b'); R(119, 55, 6, 7, '#ffd23f'); R(118, 49, 8, 6, '#5be37d');
+        dino(96, 70, '#7bcf6b');
+        door();
+      },
+    },
+    {
+      id: 'bano', name: 'El baño', kinds: ['addsub', 'series', 'mult'],
+      intro: 'Alvarito quiere llenar la bañera de espuma hasta el techo. ¡Rápido!',
+      debris: ['#f3efff', '#c8f0ff', '#ffd23f'],
+      pranks: [
+        'Alvarito ha gastado un rollo entero de papel higiénico.',
+        'Alvarito ha llenado el lavabo de espuma.',
+        'Alvarito ha tirado el cepillo de dientes de Danielito a la bañera.',
+      ],
+      draw() {
+        walls('#bfe6ef', '#a3d3df', 'tiles'); floor('#7fa9b5', '#6d97a3', 'check'); R(0, FLOOR - 2, W, 2, '#89b7c3');
+        R(20, 12, 18, 20, '#dff6ff'); R(20, 12, 18, 2, '#9aa3b5'); R(22, 34, 14, 5, '#f3efff'); R(27, 39, 4, 31, '#e3e8f0');
+        R(58, 48, 50, 18, '#f3efff'); R(58, 48, 50, 3, '#dfe5ee'); R(60, 66, 4, 4, '#9aa3b5'); R(102, 66, 4, 4, '#9aa3b5');
+        R(64, 44, 5, 4, '#ffffff'); R(70, 42, 6, 6, '#ffffff'); R(78, 45, 4, 3, '#ffffff');
+        R(92, 42, 6, 5, '#ffd23f'); R(97, 43, 2, 1, '#ff6a3d');
+        R(118, 40, 6, 6, '#f3efff'); R(116, 42, 2, 2, '#9aa3b5');
+        door();
+      },
+    },
+    {
+      id: 'jardin', name: 'El jardín', kinds: ['multStory', 'oddOne', 'logic'],
+      intro: 'La quinta pieza está en lo alto del árbol. Alvarito ha encontrado la manguera...',
+      debris: ['#5b3a1e', '#7a4a2a', '#3a2412'],
+      pranks: [
+        'Alvarito ha saltado en el charco y lo ha puesto todo perdido de barro.',
+        'Alvarito ha mojado a Danielito con la manguera.',
+        'Alvarito ha lanzado la pelota de Danielito al tejado.',
+      ],
+      draw() {
+        R(0, 0, W, FLOOR, '#7fc8ff');
+        R(20, 10, 18, 5, '#f3efff'); R(24, 7, 10, 4, '#f3efff'); R(86, 14, 22, 5, '#f3efff'); R(90, 11, 12, 4, '#f3efff');
+        R(116, 6, 12, 12, '#ffd23f');
+        for (let x = 0; x < W; x += 10) R(x, 50, 6, 20, '#e8e0c8');
+        R(0, 56, W, 2, '#d6cdb2'); R(0, 64, W, 2, '#d6cdb2');
+        floor('#3fa34d', '#2f8a3c', 'grass');
+        R(72, 30, 8, 40, '#7a4a2a'); R(58, 10, 36, 22, '#2f8a3c'); R(54, 16, 44, 12, '#3fa34d'); R(62, 6, 28, 6, '#3fa34d');
+        R(84, 14, 5, 5, '#ff6a3d');
+        R(46, 78, 26, 4, '#5b6fa8');
+        R(130, 22, 30, 48, '#c9a77a'); door();
+      },
+    },
+    {
+      id: 'desvan', name: 'El desván', kinds: ['mult', 'riddle', 'series'],
+      intro: 'La última pieza está en el cofre del desván. Alvarito no anda lejos...',
+      debris: ['#9a8f80', '#b8ad9c', '#6d6458'],
+      pranks: [
+        'Alvarito ha soltado las arañas de goma por todo el desván.',
+        'Alvarito ha tirado una caja llena de polvo. ¡Achís!',
+        'Alvarito se ha disfrazado de fantasma con una sábana para asustar a Danielito.',
+      ],
+      draw() {
+        walls('#5a4632', '#4d3b2a', 'planks'); floor('#3d2f22', '#33271c', 'wood'); R(0, FLOOR - 2, W, 2, '#2d2218');
+        for (let i = 0; i < 20; i++) { R(0, i, 40 - i * 2, 1, '#2d2218'); R(W - 40 + i * 2, i, 40 - i * 2, 1, '#2d2218'); }
+        R(70, 8, 20, 16, '#1d2a5a'); R(72, 6, 16, 20, '#1d2a5a'); R(80, 10, 5, 5, '#f3efff');
+        R(44, 50, 20, 20, '#b0864f'); R(44, 58, 20, 2, '#8e6a3c'); R(48, 38, 14, 12, '#c69a5e');
+        R(92, 54, 26, 16, '#8a4b1f'); R(92, 50, 26, 6, '#a65a24'); R(92, 58, 26, 2, '#ffd23f'); R(103, 57, 4, 5, '#ffd23f');
+        line(40, 22, 54, 30, '#b8ad9c'); line(46, 26, 50, 34, '#b8ad9c');
+        door();
+      },
+    },
+  ];
+
+  const CRAYONS = ['#ff4d6d', '#ffd23f', '#5be37d', '#4aa3ff', '#c86bff', '#ff6a3d'];
+  function drawMess(room, seed) {
+    const r = mulberry32(seed);
+    const c = CRAYONS[Math.floor(r() * CRAYONS.length)];
+    let x = 10 + r() * 110, y = 8 + r() * 40;
+    for (let i = 0; i < 10; i++) {
+      const nx = Math.max(2, Math.min(W - 3, x + (r() * 26 - 13)));
+      const ny = Math.max(4, Math.min(FLOOR - 4, y + (r() * 16 - 8)));
+      line(x, y, nx, ny, c); x = nx; y = ny;
+    }
+    for (let i = 0; i < 14; i++) R(4 + r() * 150, FLOOR + 3 + r() * 15, 2, 2, room.debris[Math.floor(r() * room.debris.length)]);
+  }
+
+  // ---------- Retos ----------
+  const KIND_LABEL = {
+    mult: 'MULTIPLICACIÓN', multStory: 'PROBLEMA', addsub: 'CUENTAS', series: 'SERIES',
+    oddOne: 'EL INTRUSO', riddle: 'ADIVINANZA', logic: 'LÓGICA',
+  };
+  const isNormal = () => S.diff === 'normal';
+
+  function numOptions(ans, cands, n = 4) {
+    const set = new Set([ans]);
+    for (const c of shuffle(cands)) {
+      if (set.size >= n) break;
+      if (Number.isInteger(c) && c >= 0) set.add(c);
+    }
+    let k = 1;
+    while (set.size < n) {
+      set.add(ans + k);
+      if (set.size < n && ans - k >= 0) set.add(ans - k);
+      k++;
+    }
+    return shuffle([...set]).map(String);
+  }
+
+  function genMult() {
+    const a = pick(isNormal() ? [2, 3, 4, 5, 6, 7, 8, 9] : [2, 5, 10]);
+    const b = rnd(1, 10);
+    const [x, y] = Math.random() < 0.5 ? [a, b] : [b, a];
+    const ans = a * b;
+    return {
+      q: '¿Cuánto es?', visual: `${x} × ${y} = ?`, answer: String(ans),
+      options: numOptions(ans, [ans + a, ans - a, ans + b, ans - b, ans + 1, ans - 1, a + b, ans + 10]),
+    };
+  }
+
+  const STORIES = [
+    { t: a => `En el jardín hay ${a} perros. ¿Cuántas patas tienen entre todos?`, b: 4, art: '🐶' },
+    { t: a => `Hay ${a} bicicletas en el garaje. ¿Cuántas ruedas hay?`, b: 2, art: '🚲' },
+    { t: a => `Alvarito ha pintado ${a} manos con ceras. ¿Cuántos dedos pintados hay?`, b: 5, art: '✋' },
+    { t: a => `Danielito tiene ${a} coches de juguete. ¿Cuántas ruedas tienen en total?`, b: 4, art: '🚗' },
+    { t: a => `En el museo hay ${a} T-rex. Cada uno camina con 2 patas. ¿Cuántas patas hay?`, b: 2, art: '🦖' },
+    { t: (a, b) => `En la mesa hay ${a} platos con ${b} galletas en cada uno. ¿Cuántas galletas hay?`, art: '🍪' },
+    { t: (a, b) => `Danielito tiene ${a} cajas con ${b} cromos en cada una. ¿Cuántos cromos tiene?`, art: '📦' },
+    { t: a => `Hay ${a} tréboles de 3 hojas. ¿Cuántas hojas hay en total?`, b: 3, art: '☘️' },
+    { t: a => `En el desván viven ${a} arañas. Cada una tiene 8 patas. ¿Cuántas patas hay?`, b: 8, art: '🕷️', normal: true },
+  ];
+  function genStory() {
+    const s = pick(STORIES.filter(x => isNormal() || !x.normal));
+    const a = isNormal() ? rnd(2, 9) : rnd(2, 5);
+    const b = s.b || (isNormal() ? rnd(2, 9) : pick([2, 5, 10]));
+    const ans = a * b;
+    return {
+      q: s.t(a, b), visual: s.art.repeat(a), emojiVisual: true, answer: String(ans),
+      options: numOptions(ans, [ans + b, ans - b, ans + a, a + b, ans + 1, ans - 1]),
+    };
+  }
+
+  const ADDSUB = [
+    { op: '-', t: (a, b) => `Danielito tiene ${a} cromos. Alvarito le esconde ${b}. ¿Cuántos le quedan?` },
+    { op: '+', t: (a, b) => `En la bañera hay ${a} patitos de goma. Alvarito echa ${b} más. ¿Cuántos patitos hay ahora?` },
+    { op: '-', t: (a, b) => `La torre de Danielito tiene ${a} piezas. Alvarito tira ${b}. ¿Cuántas quedan en pie?` },
+    { op: '+', t: (a, b) => `Danielito ha guardado ${a} canicas y luego encuentra ${b} más. ¿Cuántas tiene ahora?` },
+    { op: '+' }, { op: '-' },
+  ];
+  function genAddSub() {
+    const max = isNormal() ? 60 : 20;
+    const s = pick(ADDSUB);
+    let a, b, ans;
+    if (s.op === '+') { a = rnd(2, max - 3); b = rnd(1, max - a); ans = a + b; }
+    else { a = rnd(5, max); b = rnd(1, a - 1); ans = a - b; }
+    return {
+      q: s.t ? s.t(a, b) : '¿Cuánto es?',
+      visual: s.t ? '' : `${a} ${s.op === '+' ? '+' : '−'} ${b} = ?`,
+      answer: String(ans),
+      options: numOptions(ans, [ans + 1, ans - 1, ans + 2, ans - 2, ans + 10, ans - 10, s.op === '+' ? a - b : a + b]),
+    };
+  }
+
+  const PATTERN_POOLS = [
+    ['🍎', '🍌', '🍇', '🍓'], ['🔴', '🔵', '🟢', '🟡'], ['⭐', '🌙', '☀️', '☁️'], ['🦖', '🦕', '🥚', '🌋'], ['🐱', '🐶', '🐭', '🐸'],
+  ];
+  function genPattern() {
+    const pool = shuffle(pick(PATTERN_POOLS));
+    const shape = pick(isNormal() ? ['AB', 'ABB', 'AAB', 'ABC'] : ['AB', 'ABB', 'AAB']);
+    const map = { A: pool[0], B: pool[1], C: pool[2] };
+    const len = Math.min(8, shape.length * 2 + rnd(0, shape.length - 1));
+    const seq = Array.from({ length: len }, (_, i) => map[shape[i % shape.length]]);
+    return {
+      q: '¿Qué va después?', visual: seq.join(' ') + ' ❓', emojiVisual: true,
+      answer: map[shape[len % shape.length]], options: shuffle(pool), emojiOpts: true,
+    };
+  }
+  function genSeries() {
+    if (Math.random() < 0.5) return genPattern();
+    const d = pick(isNormal() ? [2, 3, 4, 5, 10] : [1, 2, 5, 10]);
+    const down = isNormal() && Math.random() < 0.35;
+    const start = down ? d * rnd(5, 9) : d * rnd(0, 4) + (d === 1 ? rnd(1, 10) : 0);
+    const seq = Array.from({ length: 5 }, (_, i) => down ? start - i * d : start + i * d);
+    const miss = isNormal() ? rnd(1, 4) : 4;
+    const ans = seq[miss];
+    return {
+      q: miss === 4 ? '¿Qué número sigue?' : '¿Qué número falta?',
+      visual: seq.map((n, i) => i === miss ? '?' : n).join(' · '),
+      answer: String(ans),
+      options: numOptions(ans, [ans + d, ans - d, ans + 1, ans - 1, ans + 2 * d]),
+    };
+  }
+
+  const GROUPS = [
+    ['🍎', '🍌', '🍇', '🍓', '🍐', '🍉'],
+    ['🐶', '🐱', '🐰', '🐮', '🐷', '🐸'],
+    ['🚗', '🚌', '🚲', '🚂', '🚀', '🚜'],
+    ['👕', '👖', '🧦', '🧢', '👟', '🧤'],
+    ['🦖', '🦕', '🐊', '🐢', '🦎'],
+  ];
+  function genOddOne() {
+    if (isNormal() && Math.random() < 0.4) {
+      const t = pick([2, 3, 4, 5, 10]);
+      const ins = shuffle([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]).slice(0, 3).map(k => k * t);
+      let out;
+      do { out = rnd(t + 1, t * 10 - 1); } while (out % t === 0);
+      return { q: `¿Qué número NO está en la tabla del ${t}?`, answer: String(out), options: shuffle([...ins, out].map(String)) };
+    }
+    const gi = rnd(0, GROUPS.length - 1);
+    let oi;
+    do { oi = rnd(0, GROUPS.length - 1); } while (oi === gi);
+    const items = shuffle(GROUPS[gi]).slice(0, 3);
+    const odd = pick(GROUPS[oi]);
+    return { q: '¿Cuál no es de la misma familia?', answer: odd, options: shuffle([...items, odd]), emojiOpts: true };
+  }
+
+  const RIDDLES = [
+    { q: 'Tengo agujas y no sé coser. Tengo números y no sé leer. ¿Qué soy?', a: 'El reloj' },
+    { q: 'Oro parece, plata no es. ¿Qué es?', a: 'El plátano' },
+    { q: 'Blanco por dentro, verde por fuera. Si quieres que te lo diga, espera.', a: 'La pera' },
+    { q: 'Cuanto más la mojas, más seca. ¿Qué es?', a: 'La toalla' },
+    { q: 'Tiene dientes y no come, tiene cabeza y no es hombre.', a: 'El ajo' },
+    { q: 'Mi madre es tartamuda, mi padre es buen cantor. Tengo blanco mi vestido y amarillo el corazón.', a: 'El huevo' },
+    { q: 'Vuela sin alas, silba sin boca, y no se ve ni se toca.', a: 'El viento' },
+    { q: 'Lleva su casa a cuestas y camina muy despacito. ¿Quién es?', a: 'El caracol' },
+    { q: 'Paso por el fuego y no me quemo, paso por el agua y no me mojo.', a: 'La sombra' },
+    { q: 'Tengo hojas y no soy árbol, tengo lomo y no soy caballo.', a: 'El libro' },
+    { q: 'Tiene cuatro patas y no anda, tiene respaldo y no es cama.', a: 'La silla' },
+    { q: 'Era enorme, tenía dientes afilados y vivió hace millones de años. ¿Quién es?', a: 'El T-rex' },
+  ];
+  function genRiddle() {
+    const used = S.run ? S.run.usedRiddles : [];
+    let pool = RIDDLES.map((_, i) => i).filter(i => !used.includes(i));
+    if (!pool.length) pool = RIDDLES.map((_, i) => i);
+    const i = pick(pool);
+    if (S.run) S.run.usedRiddles.push(i);
+    const r = RIDDLES[i];
+    const others = shuffle(RIDDLES.filter(x => x !== r)).slice(0, 3).map(x => x.a);
+    return { q: r.q, answer: r.a, options: shuffle([r.a, ...others]) };
+  }
+
+  const NAMES = ['Danielito', 'Alvarito', 'el gato', 'el perro', 'papá', 'mamá', 'la abuela', 'el abuelo'];
+  const RANKS = [
+    { rel: 'corre más rápido que', top: '¿Quién corre más rápido?', bottom: '¿Quién corre más despacio?' },
+    { rel: 'tiene más cromos que', top: '¿Quién tiene más cromos?', bottom: '¿Quién tiene menos cromos?' },
+    { rel: 'se ha comido más galletas que', top: '¿Quién se ha comido más galletas?', bottom: '¿Quién se ha comido menos galletas?' },
+  ];
+  const DAYS = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'];
+  const FACTS = [
+    { q: '¿Cuántas patas tiene una araña?', a: '8', c: ['6', '4', '10'] },
+    { q: '¿Cuántos lados tiene un triángulo?', a: '3', c: ['4', '5', '2'] },
+    { q: '¿Cuántos días tiene una semana?', a: '7', c: ['5', '6', '10'] },
+    { q: '¿Cuántos meses tiene un año?', a: '12', c: ['10', '7', '24'] },
+    { q: '¿Qué pesa más: un kilo de plumas o un kilo de piedras?', a: 'Pesan igual', c: ['Las plumas', 'Las piedras'] },
+    { q: 'Alvarito tiene 3 caramelos y se come los 3. ¿Cuántos le quedan?', a: '0', c: ['3', '1', '6'] },
+    { q: 'Danielito tiene 2 manos. ¿Cuántos dedos tiene en las manos?', a: '10', c: ['5', '8', '20'] },
+    { q: 'Un cuadrado tiene lados iguales. ¿Cuántos lados tiene?', a: '4', c: ['3', '5', '6'] },
+  ];
+  const LOGIC = [
+    function rank() {
+      const [A, B, C] = shuffle(NAMES).slice(0, 3);
+      const r = pick(RANKS);
+      const top = Math.random() < 0.5;
+      return {
+        q: `${cap(A)} ${r.rel} ${B}. ${cap(B)} ${r.rel} ${C}. ${top ? r.top : r.bottom}`,
+        answer: cap(top ? A : C), options: shuffle([A, B, C].map(cap)),
+      };
+    },
+    function days() {
+      const i = rnd(0, 6);
+      const mode = pick(isNormal() ? ['mañana', 'ayer', 'pasado'] : ['mañana', 'ayer']);
+      const off = { mañana: 1, ayer: -1, pasado: 2 }[mode];
+      const ans = DAYS[(i + off + 7) % 7];
+      const q = { mañana: '¿Qué día será mañana?', ayer: '¿Qué día fue ayer?', pasado: '¿Qué día será pasado mañana?' }[mode];
+      const others = shuffle(DAYS.filter(d => d !== ans)).slice(0, 3);
+      return { q: `Hoy es ${DAYS[i]}. ${q}`, answer: cap(ans), options: shuffle([ans, ...others]).map(cap) };
+    },
+    function parity() {
+      const want = pick(['par', 'impar']);
+      const max = isNormal() ? 99 : 20;
+      const ok = n => (n % 2 === 0) === (want === 'par');
+      let ans; do { ans = rnd(1, max); } while (!ok(ans));
+      const others = new Set();
+      while (others.size < 3) { const n = rnd(1, max); if (!ok(n)) others.add(n); }
+      return { q: `¿Cuál de estos números es ${want}?`, answer: String(ans), options: shuffle([ans, ...others]).map(String) };
+    },
+    function biggest() {
+      const big = Math.random() < 0.5;
+      let t, u; do { t = rnd(1, 9); u = rnd(1, 9); } while (t === u);
+      const set = new Set([t * 10 + u, u * 10 + t]);
+      while (set.size < 4) set.add(rnd(10, isNormal() ? 99 : 40));
+      const nums = [...set];
+      const ans = big ? Math.max(...nums) : Math.min(...nums);
+      return { q: `¿Qué número es el más ${big ? 'grande' : 'pequeño'}?`, answer: String(ans), options: shuffle(nums).map(String) };
+    },
+    function fact() {
+      const used = S.run ? S.run.usedFacts : [];
+      let pool = FACTS.map((_, i) => i).filter(i => !used.includes(i));
+      if (!pool.length) pool = FACTS.map((_, i) => i);
+      const i = pick(pool);
+      if (S.run) S.run.usedFacts.push(i);
+      const f = FACTS[i];
+      return { q: f.q, answer: f.a, options: shuffle([f.a, ...f.c]) };
+    },
+  ];
+  const genLogic = () => pick(LOGIC)();
+
+  const GEN = { mult: genMult, multStory: genStory, addsub: genAddSub, series: genSeries, oddOne: genOddOne, riddle: genRiddle, logic: genLogic };
+  const EXTRA_TIME = { mult: 0, multStory: 10, addsub: 6, series: 4, oddOne: 0, riddle: 12, logic: 10 };
+  function timeFor(kind) {
+    const base = isNormal() ? 28 : 40;
+    return Math.max(15, base + EXTRA_TIME[kind] - S.run.room * 2);
+  }
+
+  const TAUNTS = ['¡Je, je, je!', '¡Voy a por ti!', '¡Que te pillo!', '¡A destrozar!', '¡Me aburro!', '¡Allá voy!'];
+  const RETREATS = ['¡Jo!', '¡Bah, me voy!', '¡La próxima vez!', '¡Jopé!'];
+  const WRONG = ['¡Je, je!', '¡Fallaste!', '¡Me acerco!'];
+  const MAX_HEARTS = 3;
+  const PENALTY = 5;
+
+  // ---------- Estado ----------
+  const S = {
+    screen: 'title', diff: 'facil', run: null, puzzle: null,
+    T: 40, left: 40, t: 0, alvaX: START, alvaTarget: null, alvaSpeed: 0, alvaFrame: 0,
+    jump: 0, bubble: null, halfSaid: false, lastSaid: false,
+  };
+  const timers = new Set();
+  function later(fn, ms) { const id = setTimeout(() => { timers.delete(id); fn(); }, ms); timers.add(id); }
+  function clearTimers() { timers.forEach(clearTimeout); timers.clear(); }
+
+  function newRun(diff) {
+    return { diff, room: 0, step: 0, hearts: MAX_HEARTS, score: 0, pieces: 0, pranks: 0, perfect: true, messes: {}, usedRiddles: [], usedFacts: [] };
+  }
+
+  // ---------- Pintado ----------
+  function draw() {
+    const room = ROOMS[S.run ? S.run.room : 0];
+    room.draw();
+    const messes = S.run && S.run.messes[room.id];
+    if (messes) messes.forEach(seed => drawMess(room, seed));
+    const bob = S.screen === 'play' && Math.floor(S.t * 2) % 2 ? 1 : 0;
+    const jy = S.jump > 0 ? Math.round(Math.sin((1 - S.jump / 0.5) * Math.PI) * 10) : 0;
+    drawSprite(ctx, DANI, 8, 33 - jy + bob, 3);
+    if (S.alvaX < W) drawSprite(ctx, S.alvaFrame ? ALVA_B : ALVA_A, Math.round(S.alvaX), 39, 3);
+  }
+
+  function say(text, dur = 1.6) { S.bubble = { text, until: S.t + dur }; }
+  function updateBubble() {
+    const el = $('bubble');
+    const show = S.bubble && S.t < S.bubble.until && S.alvaX < W - 6;
+    el.hidden = !show;
+    if (show) {
+      if (el.textContent !== S.bubble.text) el.textContent = S.bubble.text;
+      el.style.left = Math.max(24, Math.min(76, (S.alvaX + 15) / W * 100)) + '%';
+    }
+  }
+
+  function updateTimer() {
+    const ratio = S.T ? Math.max(0, S.left / S.T) : 1;
+    const bar = $('bar');
+    bar.style.width = (ratio * 100).toFixed(1) + '%';
+    bar.className = ratio > 0.5 ? '' : ratio > 0.25 ? 'mid' : 'low';
+    $('secs').textContent = Math.ceil(Math.max(0, S.left)) + ' s';
+  }
+
+  function updateHud() {
+    const r = S.run;
+    const hearts = r ? r.hearts : MAX_HEARTS;
+    const pieces = r ? r.pieces : 0;
+    $('hearts').innerHTML = Array.from({ length: MAX_HEARTS }, (_, i) => `<span class="${i < hearts ? 'on' : ''}">♥</span>`).join('');
+    $('hearts').setAttribute('aria-label', `${hearts} vidas`);
+    $('pieces').innerHTML = ROOMS.map((_, i) => `<i class="${i < pieces ? 'on' : ''}"></i>`).join('');
+    $('pieces').setAttribute('aria-label', `${pieces} de ${ROOMS.length} piezas del castillo`);
+    $('score').textContent = '★ ' + (r ? r.score : 0);
+  }
+
+  function updateRoomTag() {
+    const r = S.run;
+    const room = ROOMS[r ? r.room : 0];
+    $('roomTag').textContent = `${room.name.toUpperCase()} · RETO ${(r ? Math.min(r.step, 2) : 0) + 1}/3`;
+  }
+
+  function renderPuzzle(p, interactive = true) {
+    $('kind').textContent = KIND_LABEL[p.kind];
+    $('question').innerHTML = numify(esc(p.q));
+    const v = $('visual');
+    v.textContent = p.visual || '';
+    v.hidden = !p.visual;
+    v.classList.toggle('emoji', !!p.emojiVisual);
+    const box = $('answers');
+    box.innerHTML = '';
+    const allNum = p.options.every(o => /^\d+$/.test(o));
+    const cls = p.emojiOpts ? 'emoji' : allNum ? '' : 'word';
+    p.options.forEach((opt, i) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.id = 'ans' + i;
+      b.className = 'ans' + (cls ? ' ' + cls : '');
+      b.textContent = opt;
+      b.disabled = !interactive;
+      b.addEventListener('click', () => answer(b, opt));
+      box.appendChild(b);
+    });
+    clearScrawl();
+  }
+
+  function lockAnswers() { document.querySelectorAll('.ans').forEach(b => { b.disabled = true; }); }
+  function revealAnswer() {
+    document.querySelectorAll('.ans').forEach(b => { if (b.textContent === S.puzzle.answer) b.classList.add('right'); });
+  }
+
+  // ---------- Garabatos de Alvarito sobre el tablero ----------
+  let scrawlTimer = null;
+  function clearScrawl() {
+    if (scrawlTimer) { clearInterval(scrawlTimer); scrawlTimer = null; }
+    const c = $('scrawl');
+    c.getContext('2d').clearRect(0, 0, c.width, c.height);
+  }
+  function scrawl() {
+    clearScrawl();
+    const c = $('scrawl'), p = $('puzzle');
+    const w = p.clientWidth, h = p.clientHeight;
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    c.width = w * dpr; c.height = h * dpr;
+    const g = c.getContext('2d');
+    g.scale(dpr, dpr);
+    g.lineCap = 'round'; g.lineJoin = 'round'; g.lineWidth = 7; g.globalAlpha = 0.85;
+    const segs = [];
+    for (let s = 0; s < 4; s++) {
+      const col = pick(CRAYONS);
+      let x = Math.random() * w, y = Math.random() * h;
+      for (let i = 0; i < 9; i++) {
+        const nx = Math.max(8, Math.min(w - 8, x + (Math.random() * 160 - 80)));
+        const ny = Math.max(8, Math.min(h - 8, y + (Math.random() * 90 - 45)));
+        segs.push([x, y, nx, ny, col]); x = nx; y = ny;
+      }
+    }
+    const paint = ([x0, y0, x1, y1, col]) => { g.strokeStyle = col; g.beginPath(); g.moveTo(x0, y0); g.lineTo(x1, y1); g.stroke(); };
+    if (reducedMotion) { segs.forEach(paint); return; }
+    let i = 0;
+    scrawlTimer = setInterval(() => {
+      paint(segs[i++]);
+      if (i >= segs.length) { clearInterval(scrawlTimer); scrawlTimer = null; }
+    }, 25);
+  }
+
+  function shake() {
+    if (reducedMotion) return;
+    const app = $('app');
+    app.classList.remove('shake');
+    void app.offsetWidth;
+    app.classList.add('shake');
+    later(() => app.classList.remove('shake'), 550);
+  }
+
+  // ---------- Castillo de piezas ----------
+  const CASTLE = [
+    [[4, 26, 20, 12, '#e2412b']],
+    [[24, 26, 20, 12, '#4aa3ff']],
+    [[10, 16, 28, 10, '#ffd23f']],
+    [[8, 6, 8, 10, '#54c26a'], [8, 4, 2, 2, '#54c26a'], [11, 4, 2, 2, '#54c26a'], [14, 4, 2, 2, '#54c26a']],
+    [[32, 6, 8, 10, '#ff6a3d'], [32, 4, 2, 2, '#ff6a3d'], [35, 4, 2, 2, '#ff6a3d'], [38, 4, 2, 2, '#ff6a3d']],
+    [[23, 2, 1, 14, '#f3efff'], [24, 2, 7, 5, '#c86bff']],
+  ];
+  function drawCastle(canvas, n) {
+    const g = canvas.getContext('2d');
+    g.clearRect(0, 0, canvas.width, canvas.height);
+    CASTLE.forEach((parts, i) => parts.forEach(([x, y, w, h, c]) => {
+      if (i < n) { g.fillStyle = c; g.fillRect(x, y, w, h); }
+      else { g.strokeStyle = '#4b3f7a'; g.lineWidth = 1; g.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1); }
+    }));
+    if (n >= 2) { g.fillStyle = '#1b1530'; g.fillRect(20, 30, 8, 8); }
+  }
+
+  // ---------- Ventanas ----------
+  function showCard(html, actions) {
+    const card = $('card');
+    card.innerHTML = numify(html);
+    const row = document.createElement('div');
+    row.className = 'btns';
+    actions.forEach(a => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'btn ' + (a.cls || '');
+      b.innerHTML = numify(a.label);
+      b.addEventListener('click', () => { ensureAudio(); sfx.click(); a.go(); });
+      row.appendChild(b);
+    });
+    card.appendChild(row);
+    $('overlay').hidden = false;
+    const first = row.querySelector('button');
+    if (first) first.focus({ preventScroll: true });
+  }
+  function hideCard() { $('overlay').hidden = true; }
+
+  function demoBoard() {
+    S.puzzle = { kind: 'mult', q: '¿Cuánto es?', visual: '5 × 3 = ?', answer: '15', options: ['15', '12', '18', '10'] };
+    renderPuzzle(S.puzzle, false);
+    S.T = 40; S.left = 40; updateTimer();
+  }
+
+  function showTitle() {
+    clearTimers();
+    S.screen = 'title'; S.run = null; S.alvaX = START; S.alvaTarget = null;
+    updateHud(); updateRoomTag(); demoBoard();
+    const best = store.get('dva-best', 0);
+    showCard(`
+      <canvas class="art" id="titleArt" width="80" height="50"></canvas>
+      <h1 class="logo"><span class="d">DANIELITO</span><span class="vs">CONTRA</span><span class="a">ALVARITO</span></h1>
+      <p>Danielito construye un castillo y necesita 6 piezas escondidas por la casa. Resuelve cada reto antes de que llegue Alvarito, ¡o hará una trastada!</p>
+      <p class="small">Si fallas, Alvarito corre más deprisa.${best ? ` Récord: <b>★ ${best}</b>` : ''}</p>
+    `, [
+      { label: 'FÁCIL<small>Tablas del 2, 5 y 10 · más tiempo</small>', go: () => startRun('facil') },
+      { label: 'NORMAL<small>Todas las tablas · menos tiempo</small>', cls: 'blue', go: () => startRun('normal') },
+    ]);
+    const art = $('titleArt');
+    const g = art.getContext('2d');
+    g.imageSmoothingEnabled = false;
+    g.fillStyle = '#30265a'; g.fillRect(0, 44, 80, 6);
+    drawSprite(g, DANI, 8, 0, 3);
+    drawSprite(g, ALVA_A, 42, 6, 3);
+  }
+
+  function startRun(diff) {
+    S.diff = diff;
+    S.run = newRun(diff);
+    showRoomIntro();
+  }
+
+  function showRoomIntro() {
+    clearTimers();
+    const r = S.run, room = ROOMS[r.room];
+    S.screen = 'intro'; S.alvaX = START; S.alvaTarget = null;
+    S.T = timeFor(room.kinds[0]); S.left = S.T;
+    updateHud(); updateRoomTag(); updateTimer();
+    S.puzzle = { kind: room.kinds[0], q: 'Prepárate...', visual: '', answer: '', options: [] };
+    renderPuzzle(S.puzzle, false);
+    showCard(`
+      <h2>HABITACIÓN ${r.room + 1} DE ${ROOMS.length}</h2>
+      <h1>${room.name.toUpperCase()}</h1>
+      <p>${room.intro}</p>
+      <p class="small">Supera 3 retos para conseguir la pieza.</p>
+    `, [{ label: '¡A POR ELLA!', go: startPuzzle }]);
+  }
+
+  function startPuzzle() {
+    clearTimers();
+    const r = S.run, kind = ROOMS[r.room].kinds[r.step];
+    S.puzzle = Object.assign({ kind }, GEN[kind]());
+    S.T = timeFor(kind); S.left = S.T;
+    S.halfSaid = false; S.lastSaid = false;
+    S.alvaX = START; S.alvaTarget = null;
+    renderPuzzle(S.puzzle);
+    updateRoomTag(); updateHud(); updateTimer();
+    hideCard();
+    S.screen = 'play';
+    say(pick(TAUNTS));
+  }
+
+  function answer(btn, opt) {
+    if (S.screen !== 'play') return;
+    ensureAudio();
+    if (opt === S.puzzle.answer) {
+      btn.classList.add('right');
+      lockAnswers();
+      sfx.ok();
+      S.run.score += 10 + Math.ceil(S.left);
+      updateHud();
+      S.screen = 'between';
+      S.jump = 0.5;
+      say(pick(RETREATS), 1.2);
+      S.alvaTarget = W + 20; S.alvaSpeed = 160;
+      later(nextStep, 1100);
+    } else {
+      btn.classList.add('wrong');
+      btn.disabled = true;
+      sfx.bad();
+      later(sfx.laugh, 150);
+      S.left = Math.max(0, S.left - PENALTY);
+      say(pick(WRONG), 1.2);
+    }
+  }
+
+  function nextStep() {
+    S.run.step++;
+    if (S.run.step >= 3) roomComplete(); else startPuzzle();
+  }
+
+  function prank() {
+    S.screen = 'prank';
+    lockAnswers();
+    S.alvaTarget = CATCH - 4; S.alvaSpeed = 260;
+    sfx.laugh();
+    say('¡TRASTADA!', 1.2);
+    later(() => {
+      const r = S.run, room = ROOMS[r.room];
+      sfx.crash(); shake(); scrawl();
+      const crash = $('crash');
+      crash.hidden = false;
+      later(() => { crash.hidden = true; }, 1100);
+      (r.messes[room.id] = r.messes[room.id] || []).push(Math.floor(Math.random() * 1e9));
+      r.hearts--; r.pranks++; r.perfect = false;
+      updateHud();
+      revealAnswer();
+      later(() => prankCard(room), 1300);
+    }, 450);
+  }
+
+  function prankCard(room) {
+    const r = S.run;
+    const last = r.hearts <= 0;
+    showCard(`
+      <h1 class="bad">¡TRASTADA!</h1>
+      <p>${pick(room.pranks)}</p>
+      <p class="small">La respuesta era <b>${S.puzzle.answer}</b>.</p>
+      <p class="small">${last ? 'A Danielito ya no le quedan corazones...' : `Le quedan ${r.hearts} ${r.hearts === 1 ? 'corazón' : 'corazones'}.`}</p>
+    `, [{
+      label: last ? 'VER QUÉ PASA' : 'SEGUIR',
+      go: () => {
+        if (last) { gameOver(); return; }
+        S.alvaTarget = W + 20; S.alvaSpeed = 160;
+        nextStep();
+      },
+    }]);
+  }
+
+  function roomComplete() {
+    clearTimers();
+    const r = S.run;
+    r.pieces = r.room + 1;
+    let bonus = false;
+    if (r.perfect && r.hearts < MAX_HEARTS) { r.hearts++; bonus = true; }
+    S.screen = 'piece';
+    sfx.piece();
+    updateHud();
+    if (r.room === ROOMS.length - 1) { victory(); return; }
+    showCard(`
+      <h1>¡PIEZA CONSEGUIDA!</h1>
+      <canvas class="castle" id="castleArt" width="48" height="40"></canvas>
+      <p>Danielito ya tiene ${r.pieces} de ${ROOMS.length} piezas del castillo.</p>
+      ${bonus ? '<p class="small">Sin ninguna trastada: <b>¡recuperas un corazón!</b></p>' : ''}
+    `, [{
+      label: 'SIGUIENTE HABITACIÓN',
+      go: () => { r.room++; r.step = 0; r.perfect = true; showRoomIntro(); },
+    }]);
+    drawCastle($('castleArt'), r.pieces);
+  }
+
+  function saveBest(score) {
+    const best = store.get('dva-best', 0);
+    if (score > best) { store.set('dva-best', score); return true; }
+    return false;
+  }
+
+  function victory() {
+    const r = S.run;
+    S.screen = 'end';
+    const record = saveBest(r.score);
+    showCard(`
+      <h1>¡CASTILLO TERMINADO!</h1>
+      <canvas class="castle" id="castleArt" width="48" height="40"></canvas>
+      <p>Danielito ha encontrado las ${ROOMS.length} piezas y ha construido su castillo.</p>
+      <p class="small">${r.pranks ? `Alvarito ha hecho ${r.pranks} ${r.pranks === 1 ? 'trastada' : 'trastadas'}, pero no ha podido con él.` : '¡Alvarito no ha conseguido hacer ni una trastada!'}</p>
+      <p>Puntos: <b>★ ${r.score}</b>${record ? ' · ¡Nuevo récord!' : ''}</p>
+    `, [
+      { label: 'JUGAR OTRA VEZ', go: () => startRun(r.diff) },
+      { label: 'MENÚ', cls: 'ghost', go: showTitle },
+    ]);
+    drawCastle($('castleArt'), ROOMS.length);
+  }
+
+  function gameOver() {
+    const r = S.run;
+    S.screen = 'end';
+    sfx.lose();
+    const record = saveBest(r.score);
+    S.alvaTarget = null; S.alvaX = CATCH + 30;
+    showCard(`
+      <h1 class="bad">¡ALVARITO GANA!</h1>
+      <p>Alvarito ha hecho tantas trastadas que el castillo de Danielito se ha caído.</p>
+      <p class="small">Danielito consiguió ${r.pieces} de ${ROOMS.length} piezas.</p>
+      <p>Puntos: <b>★ ${r.score}</b>${record ? ' · ¡Nuevo récord!' : ''}</p>
+    `, [
+      { label: 'OTRA VEZ', go: () => startRun(r.diff) },
+      { label: 'MENÚ', cls: 'ghost', go: showTitle },
+    ]);
+  }
+
+  // ---------- Bucle ----------
+  let last = performance.now();
+  function loop(now) {
+    const dt = Math.min(0.1, (now - last) / 1000);
+    last = now;
+    S.t += dt;
+    if (S.screen === 'play' && !document.hidden) {
+      const before = S.left;
+      S.left -= dt;
+      if (Math.ceil(before) !== Math.ceil(S.left) && S.left <= 5 && S.left > 0) sfx.tick();
+      if (!S.halfSaid && S.left < S.T * 0.5) { S.halfSaid = true; say(pick(TAUNTS)); }
+      if (!S.lastSaid && S.left < 5) { S.lastSaid = true; say('¡Ya casi llego!'); }
+      S.alvaX = START - (START - CATCH) * Math.min(1, 1 - S.left / S.T);
+      S.alvaFrame = Math.floor(S.t * 5) % 2;
+      updateTimer();
+      if (S.left <= 0) { S.left = 0; updateTimer(); prank(); }
+    } else if (S.alvaTarget !== null) {
+      const step = S.alvaSpeed * dt;
+      if (Math.abs(S.alvaTarget - S.alvaX) <= step) { S.alvaX = S.alvaTarget; S.alvaTarget = null; }
+      else { S.alvaX += Math.sign(S.alvaTarget - S.alvaX) * step; S.alvaFrame = Math.floor(S.t * 10) % 2; }
+    }
+    if (S.jump > 0) S.jump = Math.max(0, S.jump - dt);
+    draw();
+    updateBubble();
+    requestAnimationFrame(loop);
+  }
+
+  // ---------- Sonido on/off ----------
+  const muteBtn = $('mute');
+  function syncMute() {
+    muteBtn.setAttribute('aria-pressed', String(muted));
+    muteBtn.setAttribute('aria-label', muted ? 'Poner el sonido' : 'Quitar el sonido');
+  }
+  muteBtn.addEventListener('click', () => { muted = !muted; store.set('dva-muted', muted); syncMute(); ensureAudio(); sfx.click(); });
+  syncMute();
+
+  // ---------- Arranque (conserva la partida si la página se actualiza) ----------
+  const hot = window.claude && window.claude.hot;
+  if (hot && hot.snapshot) hot.snapshot(() => ({ run: S.run, diff: S.diff }));
+  function start(data) {
+    if (data && data.run) {
+      S.diff = data.diff || data.run.diff || 'facil';
+      S.run = data.run;
+      showRoomIntro();
+    } else {
+      showTitle();
+    }
+    requestAnimationFrame(t => { last = t; loop(t); });
+  }
+  if (hot && hot.ready) hot.ready(start); else start(hot && hot.data ? hot.data : {});
+})();
+</script>
+<!-- juego:fin -->
+</body>
+</html>
