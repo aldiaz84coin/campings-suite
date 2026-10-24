@@ -111,33 +111,26 @@
   }
   .crash.green { color: var(--hulk); text-shadow: 3px 3px 0 #2f7d32, 6px 6px 0 var(--line); }
 
-  /* Reloj del dino */
-  .timer { display: grid; gap: 6px; }
-  .timer-label { display: flex; justify-content: space-between; align-items: baseline; font-family: var(--display); font-size: 9px; color: var(--muted); }
-  .timer-label b { color: var(--ink); font-size: 12px; font-weight: 400; font-variant-numeric: tabular-nums; }
-  .bar { height: 16px; border: 3px solid var(--line); background: var(--panel); }
+  /* Reloj del dino: solo una barra, sin números */
+  .timer { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 8px; }
+  .dino-ico { font-size: 24px; line-height: 1; }
+  .bar { height: 18px; border: 3px solid var(--line); background: var(--panel); }
   .bar i { display: block; height: 100%; width: 100%; background: var(--ok); }
   .bar i.mid { background: var(--gold); }
   .bar i.low { background: var(--bad); }
   .bar i.paused { background: var(--muted); }
 
-  /* Ayudas de la familia */
-  .helpers { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  /* Ayudas de la familia: solo sus caras */
+  .helpers { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
   .helper {
-    display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 6px;
-    min-width: 0; min-height: 58px; padding: 5px 6px;
+    display: grid; place-items: center;
+    min-width: 0; min-height: 70px; padding: 6px;
     background: var(--panel-2);
     border: 3px solid var(--line); box-shadow: 0 4px 0 var(--line);
-    text-align: left;
   }
-  .helper canvas { width: 36px; height: 36px; image-rendering: pixelated; background: var(--panel); }
-  .helper b { display: block; font-family: var(--display); font-size: 7px; font-weight: 400; line-height: 1.4; }
-  .helper small { display: block; font-size: 13px; line-height: 1.15; color: var(--muted); }
+  .helper canvas { width: 56px; height: 56px; image-rendering: pixelated; background: var(--panel); }
   .helper:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 2px 0 var(--line); }
-  .helper:disabled { opacity: .45; }
-  @media (max-width: 430px) {
-    .helper { grid-template-columns: 1fr; justify-items: center; text-align: center; gap: 3px; }
-  }
+  .helper:disabled { opacity: .35; filter: grayscale(1); }
 
   /* Tablero */
   .board {
@@ -148,19 +141,19 @@
     border: 4px solid var(--line);
     box-shadow: inset 0 0 0 3px var(--panel-2);
   }
-  .prompt-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-  .prompt { margin: 0; font-size: 24px; font-weight: 700; line-height: 1.2; text-wrap: balance; min-width: 0; }
-  .say-btn {
-    flex: none; width: 46px; height: 46px;
-    background: var(--gold); color: var(--line);
-    border: 3px solid var(--line); box-shadow: 0 4px 0 var(--line);
-    font-size: 22px; line-height: 1;
-  }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   .target {
-    display: flex; align-items: center; justify-content: center; gap: 14px;
-    min-height: 98px; padding: 6px 10px;
+    position: relative;
+    display: flex; align-items: center; justify-content: center; gap: 18px;
+    min-height: 110px; padding: 6px 44px;
     background: var(--panel-2); border: 3px solid var(--line);
   }
+  .target::after {
+    content: "🔊"; position: absolute; top: 6px; right: 6px;
+    width: 34px; height: 34px; display: grid; place-items: center;
+    background: var(--gold); border: 3px solid var(--line); font-size: 16px;
+  }
+  .target .ear { font-size: 70px; line-height: 1; }
   .target .big { font-size: 84px; font-weight: 700; line-height: 1; color: var(--gold); }
   .target .name { font-size: 34px; font-weight: 700; color: var(--gold); }
   .target .emoji { font-size: 60px; line-height: 1; }
@@ -169,8 +162,7 @@
     display: inline-block; min-width: 1.05em; padding: 0 .08em;
     border-bottom: 5px solid var(--gold); color: var(--gold); text-align: center;
   }
-  .hint { margin: 0; font-size: 20px; font-weight: 700; color: var(--gold); text-align: center; }
-  .feedback { margin: 0; font-size: 21px; font-weight: 700; color: var(--ok); text-align: center; text-wrap: balance; }
+  .hint { margin: 0; font-size: 54px; line-height: 1; text-align: center; }
   .answers { display: grid; gap: 10px; margin-top: auto; }
   .ans {
     min-height: 86px;
@@ -215,12 +207,16 @@
   .logo .d { color: var(--hulk); font-size: clamp(18px, 6vw, 24px); }
   .art { width: 260px; max-width: 100%; height: auto; image-rendering: pixelated; }
   .letters { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
-  .letters span {
-    min-width: 40px; padding: 2px 6px;
+  .letters button {
+    min-width: 44px; padding: 2px 6px;
     background: var(--ink); color: var(--line); border: 3px solid var(--line);
     font-size: 26px; font-weight: 700; line-height: 1.2;
   }
-  .letters.miss span { background: var(--gold); }
+  .letters.miss button { background: var(--gold); }
+  .need { display: flex; gap: 6px; justify-content: center; }
+  .need i { width: 18px; height: 18px; border: 3px solid var(--hulk); }
+  .btns.row { grid-template-columns: 1fr 1fr; }
+  .btn .ico { font-family: var(--letter); font-size: 40px; line-height: 1; }
   .modes { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; }
   .mode {
     display: grid; gap: 4px; padding: 10px 6px;
@@ -254,10 +250,11 @@
   @keyframes wiggle { 0%, 100% { transform: translateX(0); } 33% { transform: translateX(-5px); } 66% { transform: translateX(5px); } }
   @media (prefers-reduced-motion: reduce) { .shake, .crash, .card, .ans.wrong { animation: none; } }
   @media (max-height: 700px) {
-    .target { min-height: 78px; }
+    .target { min-height: 84px; }
+    .helper { min-height: 60px; }
+    .helper canvas { width: 46px; height: 46px; }
     .target .big { font-size: 64px; }
     .ans { min-height: 70px; font-size: 44px; }
-    .helper { min-height: 50px; }
   }
 </style>
 
@@ -275,25 +272,21 @@
     <div class="crash" id="crash" hidden></div>
   </div>
 
-  <div class="timer">
-    <div class="timer-label"><span id="timerText">EL DINO LLEGA EN</span><b id="secs">30 s</b></div>
+  <div class="timer" aria-label="Tiempo hasta que llega el dino">
+    <span class="dino-ico" aria-hidden="true">🦖</span>
     <div class="bar"><i id="bar"></i></div>
   </div>
 
   <div class="helpers">
-    <button type="button" class="helper" id="helpDani"><canvas width="16" height="16"></canvas><span><b>DANIELITO</b><small id="daniSub">Pista</small></span></button>
-    <button type="button" class="helper" id="helpAbuela"><canvas width="16" height="16"></canvas><span><b>ABUELA</b><small>Pescaíto</small></span></button>
-    <button type="button" class="helper" id="helpAbuelo"><canvas width="16" height="16"></canvas><span><b>ABUELO</b><small>Sombrilla</small></span></button>
+    <button type="button" class="helper" id="helpDani" aria-label="Llamar a Danielito"><canvas width="16" height="16"></canvas></button>
+    <button type="button" class="helper" id="helpAbuela" aria-label="Llamar a la abuela"><canvas width="16" height="16"></canvas></button>
+    <button type="button" class="helper" id="helpAbuelo" aria-label="Llamar al abuelo"><canvas width="16" height="16"></canvas></button>
   </div>
 
   <section class="board" id="board">
-    <div class="prompt-row">
-      <h2 class="prompt" id="prompt" aria-live="polite">¿Dónde está la A?</h2>
-      <button type="button" class="say-btn" id="sayBtn" aria-label="Escuchar otra vez">🔊</button>
-    </div>
-    <div class="target" id="target"><span class="big">A</span></div>
+    <h2 class="sr-only" id="prompt" aria-live="polite"></h2>
+    <button type="button" class="target" id="target" aria-label="Escuchar otra vez"><span class="big">A</span></button>
     <p class="hint" id="hint" hidden></p>
-    <p class="feedback" id="feedback" hidden></p>
     <div class="answers" id="answers"></div>
   </section>
 </div>
@@ -378,20 +371,33 @@
     } catch (e) { voice = null; }
   }
   if (synth) { pickVoice(); try { synth.onvoiceschanged = pickVoice; } catch (e) { /* sin voces */ } }
-  function speak(text) {
+  // Cada personaje habla con su tono: Alvarito agudo, el abuelo grave, el dino con vozarrón.
+  const VOICE = {
+    narr: { pitch: 1.1, rate: 0.9 },
+    alva: { pitch: 1.7, rate: 1.0 },
+    dani: { pitch: 1.4, rate: 1.0 },
+    abuela: { pitch: 1.05, rate: 0.9 },
+    abuelo: { pitch: 0.7, rate: 0.85 },
+    dino: { pitch: 0.1, rate: 0.75 },
+  };
+  function speak(text, who = 'narr', interrupt = false) {
     if (muted || !synth) return;
     try {
-      synth.cancel();
+      if (interrupt) synth.cancel();
       const u = new SpeechSynthesisUtterance(text);
       u.lang = 'es-ES';
       if (voice) u.voice = voice;
-      u.rate = 0.9; u.pitch = 1.1;
+      const v = VOICE[who] || VOICE.narr;
+      u.pitch = v.pitch; u.rate = v.rate;
       synth.speak(u);
     } catch (e) { /* el navegador no deja hablar */ }
   }
 
   // ---------- Letras ----------
   const ALPHABET = 'ABCDEFGHIJKLMNÑOPQRSTUVWXYZ'.split('');
+  const cap = str => str.charAt(0).toUpperCase() + str.slice(1);
+  // Las vocales se alargan para que se oiga su sonido; el resto se apoya en una palabra.
+  const SOUND = { A: 'aaa', E: 'eee', I: 'iii', O: 'ooo', U: 'uuu' };
   const NAME = {
     A: 'a', B: 'be', C: 'ce', D: 'de', E: 'e', F: 'efe', G: 'ge', H: 'hache', I: 'i', J: 'jota', K: 'ka', L: 'ele', M: 'eme',
     N: 'ene', Ñ: 'eñe', O: 'o', P: 'pe', Q: 'cu', R: 'erre', S: 'ese', T: 'te', U: 'u', V: 'uve', W: 'uve doble', X: 'equis', Y: 'ye', Z: 'zeta',
@@ -1291,23 +1297,23 @@
 
   const PHASES = [
     { bg: 'selva', name: 'La selva', dino: 'RAPTOR', who: 'el velociraptor', need: 4,
-      intro: 'Un velociraptor muy hambriento quiere darle un bocao a Alvarito. ¡Encuentra las letras para convertirte en Hulk!' },
+      intro: '¡Cuidado, Alvarito! Viene un velociraptor con mucha hambre. Busca las letras y conviértete en Hulk.' },
     { bg: 'playa', name: 'La playa', dino: 'TRICE', who: 'el triceratops', need: 4,
-      intro: 'Junto a la sombrilla de los abuelos aparece un triceratops con sus tres cuernos.' },
+      intro: 'En la playa de los abuelos aparece un triceratops. ¡Tiene tres cuernos!' },
     { bg: 'pradera', name: 'La pradera', dino: 'STEGO', who: 'el estegosaurio', need: 4,
-      intro: 'Un estegosaurio enorme mueve la cola llena de pinchos. ¡Cuidado!' },
+      intro: 'Un estegosaurio enorme mueve su cola de pinchos. ¡Cuidado!' },
     { bg: 'montanas', name: 'Las montañas', dino: 'PTERO', who: 'el pterodáctilo', need: 4, fly: true,
-      intro: '¡Un pterodáctilo baja volando desde las montañas!' },
+      intro: '¡Mira arriba! Un pterodáctilo baja volando desde las montañas.' },
     { bg: 'volcan', name: 'El volcán', dino: 'TREX', who: 'el T-Rex', need: 5, boss: true,
-      intro: 'El rey de los dinosaurios: ¡el T-Rex! Encuentra 5 letras y prepara el tirachinas.' },
+      intro: '¡Es el T-Rex, el rey de los dinosaurios! Busca las letras y prepara el tirachinas.' },
   ];
 
   const TRAPS = [
-    { item: 'banana', text: '¡Una piel de plátano y el dino resbala!' },
-    { item: 'lego', text: '¡El dino pisa una pieza de Lego! ¡Ay, ay, ay!' },
-    { item: 'bucket', text: '¡Cubo de agua fría para el dino!' },
-    { item: 'feather', text: '¡Cosquillas con una pluma! El dino no para de reír.' },
-    { item: 'smash', text: '¡Hulk aplasta! El dino sale volando.' },
+    { item: 'banana', text: '¡Piel de plátano!' },
+    { item: 'lego', text: '¡Pieza de Lego!' },
+    { item: 'bucket', text: '¡Agua fría!' },
+    { item: 'feather', text: '¡Cosquillas!' },
+    { item: 'smash', text: '¡Hulk aplasta!' },
   ];
   const IDEAS = [
     { item: 'ball', text: '¡Mira, dino, un balón!' },
@@ -1385,15 +1391,21 @@
     for (const l of shuffle(pool)) { if (opts.length >= n) break; if (!opts.includes(l)) opts.push(l); }
     const q = { type, letter: target, options: shuffle(opts) };
     if (type === 'word') { const [emoji, word] = pick(WORDS[target]); q.emoji = emoji; q.word = word; }
+    else if (WORDS[target]) q.pic = pick(WORDS[target]);
     return q;
   }
-  const question = q => q.type === 'word' ? `¿Con qué letra empieza ${q.word.toLowerCase()}?` : `¿Dónde está la ${NAME[q.letter]}?`;
+  function promptSpeech(q) {
+    if (q.type === 'word') return `¿Con qué letra empieza ${q.word.toLowerCase()}?`;
+    const n = NAME[q.letter];
+    const snd = SOUND[q.letter] ? `${SOUND[q.letter]}... ` : '';
+    const pic = q.pic ? `, como ${q.pic[1].toLowerCase()}` : '';
+    return `¿Dónde está la ${n}? ${snd}La ${n}${pic}.`;
+  }
   function hintFor(q) {
-    if (q.type === 'word') return { text: `${q.word.charAt(0)} de ${q.word} ${q.emoji}`, say: `${q.word.toLowerCase()} empieza por la ${NAME[q.letter]}` };
-    const w = WORDS[q.letter];
-    if (!w) return { text: `Busca la ${q.letter}`, say: `Busca la ${NAME[q.letter]}` };
-    const [emoji, word] = w[0];
-    return { text: `${q.letter} de ${word} ${emoji}`, say: `La ${NAME[q.letter]}, de ${word.toLowerCase()}` };
+    if (q.type === 'word') return { pic: '', say: `${q.word.toLowerCase()}... empieza por la ${NAME[q.letter]}.` };
+    const w = q.pic || (WORDS[q.letter] || [])[0];
+    if (!w) return { pic: '', say: `¡Busca la ${NAME[q.letter]}!` };
+    return { pic: w[0], say: `¡La ${NAME[q.letter]}, de ${w[1].toLowerCase()}!` };
   }
   function timeFor() {
     const base = S.run.speed === 'rapido' ? 20 : 30;
@@ -1444,7 +1456,10 @@
   }
   const dinoHead = () => ({ x: S.dinoX + 12, y: (phase().fly ? 56 : FEET) - dinoRows('A').length * SPR + 4 });
 
-  function say(text, x, dur = 1.8) { S.bubble = { text, x, until: S.t + dur }; }
+  function say(text, x, dur = 1.8, who = null, interrupt = false) {
+    S.bubble = { text, x, until: S.t + dur };
+    if (who) speak(text, who, interrupt);
+  }
   function updateBubble() {
     const el = $('bubble');
     const b = S.bubble;
@@ -1480,38 +1495,33 @@
       Array.from({ length: ph.need }, (_, i) => `<i class="${i < got ? 'on' : ''}"></i>`).join('');
     $('progress').setAttribute('aria-label', `Fase ${(r ? r.phase : 0) + 1} de ${PHASES.length}, ${got} de ${ph.need} letras`);
     $('phaseTag').textContent = ph.name.toUpperCase();
-    $('timerText').textContent = (ph.who.replace(/^el /, 'EL ') + ' llega en').toUpperCase();
   }
   function updateTimer() {
     const ratio = S.T ? Math.max(0, S.left / S.T) : 1;
     const bar = $('bar');
     bar.style.width = (ratio * 100).toFixed(1) + '%';
     bar.className = S.t < S.pauseUntil ? 'paused' : ratio > 0.5 ? '' : ratio > 0.25 ? 'mid' : 'low';
-    $('secs').textContent = S.t < S.pauseUntil ? 'PARADO' : Math.ceil(Math.max(0, S.left)) + ' s';
   }
   function updateHelpers() {
     const r = S.run, play = S.screen === 'play';
     const daniWait = Math.ceil(S.daniReadyAt - S.t);
     const dani = $('helpDani');
     dani.disabled = !play || daniWait > 0;
-    const sub = daniWait > 0 && r ? `Espera ${daniWait}` : 'Pista';
-    if ($('daniSub').textContent !== sub) $('daniSub').textContent = sub;
     $('helpAbuela').disabled = !play || !r || r.usedAbuela;
     $('helpAbuelo').disabled = !play || !r || r.usedAbuelo;
   }
 
   function renderQuestion(q, interactive = true) {
-    $('prompt').textContent = q.type === 'word' ? '¿Con qué letra empieza?' : q.type === 'hear' ? '¿Dónde está la…?' : `¿Dónde está la ${q.letter}?`;
+    $('prompt').textContent = promptSpeech(q);
     const t = $('target');
     if (q.type === 'word') {
       t.innerHTML = `<span class="emoji">${q.emoji}</span><span class="word"><span class="slot">?</span>${q.word.slice(1)}</span>`;
     } else if (q.type === 'hear') {
-      t.innerHTML = `<span class="name">«${NAME[q.letter]}»</span>`;
+      t.innerHTML = '<span class="ear">👂</span>';
     } else {
-      t.innerHTML = `<span class="big">${q.letter}</span>`;
+      t.innerHTML = `<span class="big">${q.letter}</span>${q.pic ? `<span class="emoji">${q.pic[0]}</span>` : ''}`;
     }
     $('hint').hidden = true;
-    $('feedback').hidden = true;
     const box = $('answers');
     box.innerHTML = '';
     box.style.gridTemplateColumns = `repeat(${q.options.length}, 1fr)`;
@@ -1533,20 +1543,21 @@
     document.querySelectorAll('.ans').forEach(b => { b.disabled = true; if (b.dataset.l === q.letter) b.classList.add('right'); });
     const slot = document.querySelector('.target .slot');
     if (slot) slot.textContent = q.letter;
-    if (q.type === 'hear') $('target').innerHTML = `<span class="big">${q.letter}</span>`;
+    if (q.type === 'hear') $('target').innerHTML = `<span class="big">${q.letter}</span>${q.pic ? `<span class="emoji">${q.pic[0]}</span>` : ''}`;
   }
 
   // ---------- Ventanas ----------
-  function showCard(html, actions) {
+  function showCard(html, actions, opts = {}) {
     const card = $('card');
     card.innerHTML = html;
     const row = document.createElement('div');
-    row.className = 'btns';
+    row.className = 'btns' + (opts.row ? ' row' : '');
     actions.forEach(a => {
       const b = document.createElement('button');
       b.type = 'button';
       b.className = 'btn ' + (a.cls || '');
       b.innerHTML = a.label;
+      if (a.aria) b.setAttribute('aria-label', a.aria);
       b.addEventListener('click', () => { ensureAudio(); sfx.click(); a.go(); });
       row.appendChild(b);
     });
@@ -1554,6 +1565,7 @@
     $('overlay').hidden = false;
     const first = row.querySelector('button');
     if (first) first.focus({ preventScroll: true });
+    if (opts.say) speak(opts.say, 'narr', true);
   }
   function hideCard() { $('overlay').hidden = true; }
   function paintArt(id, w, h, fn) {
@@ -1572,23 +1584,21 @@
   function showTitle() {
     clearTimers();
     S.screen = 'title'; S.run = null; resetScene();
-    S.q = { type: 'see', letter: 'A', options: ['A', 'E', 'O'] };
+    S.q = { type: 'see', letter: 'A', options: ['A', 'E', 'O'], pic: WORDS.A[0] };
     renderQuestion(S.q, false);
     S.T = 30; S.left = 30;
     updateHud(); updateTimer(); updateHelpers();
     showCard(`
       <canvas class="art" id="titleArt"></canvas>
       <h1 class="logo"><span class="a">ALVARITO</span><span class="y">Y LOS</span><span class="d">DINOS</span></h1>
-      <p>Los dinosaurios quieren darle un bocao a Alvarito. Cada vez que encuentra la letra, se pone su disfraz de Hulk y les hace una trampa.</p>
-      <h2>¿QUÉ LETRAS JUGAMOS?</h2>
+      <p class="small">Para los mayores: elegid las letras y la velocidad. Luego Alvarito solo tiene que escuchar y tocar; todo se dice en voz alta.</p>
       <div class="modes" id="modes">
         ${Object.entries(MODES).map(([k, m]) => `<button type="button" class="mode" data-m="${k}" aria-pressed="${k === S.mode}">${m.label}<small>${m.sample}</small></button>`).join('')}
       </div>
-      <p class="small">Danielito, la abuela y el abuelo ayudan si hace falta.</p>
     `, [
-      { label: 'CON CALMA<small>Los dinos van despacio</small>', go: () => startRun('calma') },
-      { label: 'RÁPIDO<small>Los dinos corren más</small>', cls: 'green', go: () => startRun('rapido') },
-    ]);
+      { label: '<span class="ico">🐢</span><small>Despacio</small>', aria: 'Jugar despacio', go: () => startRun('calma') },
+      { label: '<span class="ico">🐇</span><small>Rápido</small>', aria: 'Jugar rápido', cls: 'green', go: () => startRun('rapido') },
+    ], { row: true });
     document.querySelectorAll('#modes .mode').forEach(b => b.addEventListener('click', () => {
       ensureAudio(); sfx.click();
       S.mode = b.dataset.m; store.set('ad-mode', S.mode);
@@ -1616,12 +1626,11 @@
     renderQuestion(S.q, false);
     updateHud(); updateTimer(); updateHelpers();
     showCard(`
-      <h2>FASE ${r.phase + 1} DE ${PHASES.length}</h2>
-      <h1 class="${ph.boss ? 'bad' : ''}">${ph.name.toUpperCase()}</h1>
+      <h2>${r.phase + 1} / ${PHASES.length}</h2>
       <canvas class="art" id="dinoArt"></canvas>
-      <p>${ph.intro}</p>
-      <p class="small">Encuentra ${ph.need} letras para que ${ph.who} se vaya.</p>
-    `, [{ label: '¡VAMOS!', cls: 'green', go: startQuestion }]);
+      <div class="need" aria-label="${ph.need} letras">${'<i></i>'.repeat(ph.need)}</div>
+      <p class="small">${ph.intro}</p>
+    `, [{ label: '<span class="ico">▶</span>', aria: '¡Vamos!', cls: 'green', go: startQuestion }], { say: ph.intro });
     const rows = dinoRows('A');
     paintArt('dinoArt', rows[0].length + 8, rows.length + 4, g => drawSprite(g, rows, 4, 2, 1));
     $('dinoArt').style.width = Math.min(260, (rows[0].length + 8) * 4) + 'px';
@@ -1631,15 +1640,20 @@
     clearTimers();
     hideCard();
     const first = S.screen === 'intro';
-    S.q = S.q && S.screen === 'intro' ? S.q : makeQuestion();
+    if (!first || !S.q) S.q = makeQuestion();
     S.T = timeFor(); S.left = S.T; S.lastSaid = false;
     S.hulkUntil = 0; S.roarUntil = 0; S.props = []; S.sling = false;
     renderQuestion(S.q);
     updateHud(); updateTimer();
     S.screen = 'play';
     updateHelpers();
-    if (first) { sfx.roar(); say('¡GRRRR!', () => S.dinoX + 16); }
-    later(() => speak(question(S.q)), first ? 600 : 150);
+    if (first) {
+      sfx.roar();
+      say('¡GRRR! ¡Te voy a dar un bocao!', () => S.dinoX + 16, 2.4, 'dino', true);
+      later(() => speak(promptSpeech(S.q)), 300);
+    } else {
+      speak(promptSpeech(S.q), 'narr', true);
+    }
   }
 
   function answer(btn, l) {
@@ -1654,7 +1668,8 @@
       sfx.bad();
       S.left = Math.max(0, S.left - 4);
       if (!r.missed.includes(q.letter)) r.missed.push(q.letter);
-      speak(`Esa es la ${NAME[l]}. ${q.type === 'word' ? '¿Con qué letra empieza ' + q.word.toLowerCase() + '?' : 'Busca la ' + NAME[q.letter] + '.'}`);
+      speak(`Esa es la ${NAME[l]}.`, 'narr', true);
+      speak(q.type === 'word' ? `¿Con qué letra empieza ${q.word.toLowerCase()}?` : `Busca la ${NAME[q.letter]}.`);
       say('¡ÑAM, ÑAM!', () => S.dinoX + 16, 1.2);
     }
   }
@@ -1669,16 +1684,14 @@
     updateHud(); updateHelpers();
     sfx.ok();
     later(sfx.hulk, 250);
-    S.hulkUntil = S.t + 2.4; S.jump = 0.5;
+    S.hulkUntil = S.t + 2.8; S.jump = 0.5;
     flash('¡HULK!', 'green', 700);
-    speak(q.type === 'word' ? `¡Sí! ${q.word.toLowerCase()} empieza por la ${NAME[q.letter]}` : `¡Muy bien! ¡La ${NAME[q.letter]}!`);
+    speak(q.type === 'word' ? `¡Sí! ${q.word.toLowerCase()}, con la ${NAME[q.letter]}.` : `¡Sí! ¡La ${NAME[q.letter]}!`, 'narr', true);
 
     if (ph.boss && r.got >= ph.need) { finalShot(); return; }
 
     const trap = pick(TRAPS);
-    const fb = $('feedback');
-    fb.textContent = trap.text;
-    fb.hidden = false;
+    later(() => say(trap.text, ALVA_CX, 1.6, 'alva'), 300);
     if (trap.item === 'bucket') S.props.push({ kind: 'bucket', x: () => dinoHead().x, y: () => dinoHead().y - 10 });
     else if (trap.item === 'feather') S.props.push({ kind: 'feather', x: () => dinoHead().x - 6, y: () => dinoHead().y + 4 });
     else if (trap.item !== 'smash') S.props.push({ kind: trap.item, under: true, x: () => S.dinoX + 18, y: () => FEET - 2 });
@@ -1687,19 +1700,17 @@
       if (trap.item === 'smash') { shake(); flash('¡ZAS!', '', 600); }
       S.left = S.T;                               // el dino sale disparado hacia atrás
       S.props.push({ kind: 'stars', x: () => dinoHead().x + 6, y: () => dinoHead().y - 4 });
-      say(pick(['¡AAARGH!', '¡AY, AY!', '¡JO!']), () => S.dinoX + 16, 1.2);
-    }, 600);
+    }, 700);
+    later(() => say(pick(['¡AY, AY!', '¡JO!', '¡AAARGH!']), () => S.dinoX + 16, 1.2), 1900);
     later(() => {
       if (r.got >= ph.need) phaseComplete(); else { S.q = null; startQuestion(); }
-    }, 2400);
+    }, 2900);
   }
 
   function finalShot() {
-    const fb = $('feedback');
-    fb.textContent = '¡Hulk saca el tirachinas!';
-    fb.hidden = false;
     S.sling = true;
     S.hulkUntil = S.t + 10;
+    later(() => say('¡Toma, T-Rex!', ALVA_CX, 1.6, 'alva'), 400);
     later(() => {
       sfx.throw();
       const h = dinoHead();
@@ -1709,36 +1720,30 @@
         S.props.push({ kind: 'stars', x: () => dinoHead().x + 6, y: () => dinoHead().y - 4 });
         S.falling = 0.0001;
       } });
-    }, 700);
-    later(victory, 3300);
+    }, 1300);
+    later(victory, 3900);
   }
 
+  // Si el dino llega no hace falta leer nada: el juego sigue solo.
   function bite() {
-    const r = S.run, ph = phase();
+    const r = S.run;
     S.screen = 'bite';
     document.querySelectorAll('.ans').forEach(b => { b.disabled = true; });
     updateHelpers();
     later(() => {
       sfx.chomp(); shake();
-      flash('¡ÑAM! ¡BOCAO!', '', 1200);
+      flash('¡ÑAM!', '', 1200);
       S.roarUntil = S.t + 2.5;
       r.hearts--;
       if (!r.missed.includes(S.q.letter)) r.missed.push(S.q.letter);
       updateHud();
       revealAnswer();
-      speak(`¡Ñam! Era la ${NAME[S.q.letter]}`);
+      say('¡Ñam, ñam! ¡Qué bocao!', () => S.dinoX + 16, 1.8, 'dino', true);
+      speak(`Era la ${NAME[S.q.letter]}.`);
       later(() => {
-        const last = r.hearts <= 0;
-        showCard(`
-          <h1 class="bad">¡BOCAO!</h1>
-          <p>${ph.who.charAt(0).toUpperCase() + ph.who.slice(1)} le ha dado un bocao a Alvarito en el pijama.</p>
-          <p>Era la letra <b>${S.q.letter}</b>.</p>
-          <p class="small">${last ? 'Alvarito ya no tiene más corazones...' : `Le quedan ${r.hearts} ${r.hearts === 1 ? 'corazón' : 'corazones'}.`}</p>
-        `, [{ label: last ? 'VER QUÉ PASA' : 'SEGUIR', go: () => {
-          if (last) { gameOver(); return; }
-          S.left = S.T; S.q = null; startQuestion();
-        } }]);
-      }, 1500);
+        if (r.hearts <= 0) { gameOver(); return; }
+        S.left = S.T; S.q = null; startQuestion();
+      }, 3400);
     }, 450);
   }
 
@@ -1749,20 +1754,20 @@
     S.daniReadyAt = S.t + 10;
     S.helper = { who: 'dani', until: S.t + 3 };
     const idea = pick(IDEAS);
-    say(idea.text, HELPER_CX + 14, 2);
+    say(idea.text, HELPER_CX + 14, 2, 'dani', true);
     sfx.throw();
-    const fromX = HELPER_CX + 8;
-    S.fx.push({ kind: idea.item, x0: fromX, y0: FEET - 46, x1: Math.min(W - 10, S.dinoX + 40), y1: FEET - 6, arc: 18, t0: S.t, dur: 0.9, hit: () => {
+    S.fx.push({ kind: idea.item, x0: HELPER_CX + 8, y0: FEET - 46, x1: Math.min(W - 10, S.dinoX + 40), y1: FEET - 6, arc: 18, t0: S.t, dur: 0.9, hit: () => {
       S.pauseUntil = S.t + 3; S.pauseKind = 'distract';
       S.left = Math.min(S.T, S.left + S.T * 0.25);
     } });
-    // pista: quita una letra que no es y dice una palabra que empieza por la buena
+    // pista: quita una letra que no es y repite cómo suena la buena
     const wrong = [...document.querySelectorAll('.ans:not(:disabled)')].filter(b => b.dataset.l !== S.q.letter);
     if (wrong.length > 1) { const b = pick(wrong); b.disabled = true; b.classList.add('gone'); }
     const h = hintFor(S.q);
-    $('hint').textContent = h.text;
-    $('hint').hidden = false;
-    later(() => speak(h.say), 300);
+    // el dibujo solo hace falta cuando la letra no se ve (reto de solo oír)
+    $('hint').textContent = h.pic;
+    $('hint').hidden = !(h.pic && S.q.type === 'hear');
+    speak(h.say, 'dani');
     updateHelpers();
   }
   function callAbuela() {
@@ -1771,8 +1776,7 @@
     ensureAudio();
     r.usedAbuela = true;
     S.helper = { who: 'abuela', until: S.t + 3.5 };
-    say('¡Pescaíto frito!', HELPER_CX + 14, 2.2);
-    speak('¡Pescaíto frito para los dinos!');
+    say('¡Pescaíto frito para los dinos!', HELPER_CX + 14, 2.4, 'abuela', true);
     for (let i = 0; i < 3; i++) {
       later(() => {
         sfx.throw();
@@ -1782,6 +1786,7 @@
         } });
       }, i * 250);
     }
+    later(() => speak(promptSpeech(S.q)), 2600);
     updateHelpers();
   }
   function callAbuelo() {
@@ -1790,32 +1795,40 @@
     ensureAudio();
     r.usedAbuelo = true;
     S.helper = { who: 'abuelo', until: S.t + 3 };
-    say('¡Fuera de aquí, dino!', HELPER_CX + 14, 2);
-    speak('¡Fuera de aquí, dino!');
+    say('¡Fuera de aquí, dino!', HELPER_CX + 14, 2, 'abuelo', true);
     sfx.whoosh();
     later(() => { S.left = S.T; S.pauseUntil = S.t + 1.5; S.pauseKind = 'scared'; sfx.boing(); }, 400);
+    later(() => speak(promptSpeech(S.q)), 2200);
     updateHelpers();
   }
   $('helpDani').addEventListener('click', callDani);
   $('helpAbuela').addEventListener('click', callAbuela);
   $('helpAbuelo').addEventListener('click', callAbuelo);
-  $('sayBtn').addEventListener('click', () => { ensureAudio(); if (S.q) speak(question(S.q)); });
+  $('target').addEventListener('click', () => { ensureAudio(); if (S.q && S.screen === 'play') speak(promptSpeech(S.q), 'narr', true); });
 
   // ---------- Final de fase y de partida ----------
-  function lettersHtml(list, cls = '') { return `<div class="letters ${cls}">${list.map(l => `<span>${l}</span>`).join('')}</div>`; }
+  // Las fichas de letras se pueden tocar para oírlas.
+  function lettersHtml(list, cls = '') {
+    return `<div class="letters ${cls}">${list.map(l => `<button type="button" data-say="${l}" aria-label="Letra ${NAME[l]}">${l}</button>`).join('')}</div>`;
+  }
+  $('card').addEventListener('click', e => {
+    const b = e.target.closest('[data-say]');
+    if (b) { ensureAudio(); speak(`La ${NAME[b.dataset.say]}`, 'narr', true); }
+  });
 
   function phaseComplete() {
     clearTimers();
     const r = S.run, ph = phase();
     S.screen = 'phase';
     sfx.phase();
-    speak(`¡Bien! ${ph.who} se ha ido corriendo`);
+    const line = `¡Bien! ${cap(ph.who)} se ha ido corriendo. ¡Alvarito es un súper Hulk!`;
     showCard(`
-      <h1 class="green">¡FASE SUPERADA!</h1>
-      <p>${ph.who.charAt(0).toUpperCase() + ph.who.slice(1)} se ha ido corriendo. ¡Alvarito es un súper Hulk!</p>
-      <h2>LETRAS ENCONTRADAS</h2>
+      <canvas class="art" id="hulkArt"></canvas>
       ${lettersHtml(r.found)}
-    `, [{ label: 'SIGUIENTE FASE', cls: 'green', go: () => { r.phase++; showPhaseIntro(); } }]);
+      <p class="small">${line}</p>
+    `, [{ label: '<span class="ico">▶</span>', aria: 'Siguiente fase', cls: 'green', go: () => { r.phase++; showPhaseIntro(); } }], { say: line });
+    paintArt('hulkArt', 30, 28, g => drawSpriteAt(g, SPRITES.ALVA_HULK, 15, 26, 1));
+    $('hulkArt').style.width = '120px';
   }
 
   function victory() {
@@ -1823,18 +1836,16 @@
     const r = S.run;
     S.screen = 'end';
     sfx.phase();
-    speak('¡Alvarito ha vencido al T-Rex!');
+    const line = '¡Toma! ¡Alvarito ha vencido al T-Rex! Lo ha dejado viendo estrellitas.';
     showCard(`
-      <h1 class="green">¡ALVARITO HA VENCIDO AL T-REX!</h1>
       <canvas class="art" id="winArt"></canvas>
-      <p>Con una piedra de su tirachinas, Hulk Alvarito ha dejado al T-Rex viendo estrellitas.</p>
-      <h2>LETRAS ENCONTRADAS</h2>
       ${lettersHtml(r.found)}
-      ${r.missed.length ? `<h2>PARA REPASAR</h2>${lettersHtml(r.missed, 'miss')}` : '<p class="small">¡Sin fallar ni una letra!</p>'}
+      ${r.missed.length ? `<h2>PARA REPASAR</h2>${lettersHtml(r.missed, 'miss')}` : ''}
+      <p class="small">${line}</p>
     `, [
-      { label: 'JUGAR OTRA VEZ', cls: 'green', go: () => startRun(r.speed) },
-      { label: 'MENÚ', cls: 'ghost', go: showTitle },
-    ]);
+      { label: '<span class="ico">↻</span>', aria: 'Jugar otra vez', cls: 'green', go: () => startRun(r.speed) },
+      { label: '<span class="ico">🏠</span>', aria: 'Volver al inicio', cls: 'ghost', go: showTitle },
+    ], { say: line, row: true });
     paintArt('winArt', 92, 46, g => {
       g.fillStyle = '#21493e'; g.fillRect(0, 42, 92, 4);
       drawSpriteAt(g, SPRITES.ALVA_HULK, 14, 43, 1);
@@ -1848,14 +1859,21 @@
     const r = S.run, ph = phase();
     S.screen = 'end';
     sfx.lose();
+    const line = `Esta vez ha ganado ${ph.who}. ¡Vamos a intentarlo otra vez!`;
     showCard(`
-      <h1 class="bad">¡ESTA VEZ GANA ${ph.who.replace(/^el /, 'EL ').toUpperCase()}!</h1>
-      <p>Alvarito se ha quedado sin corazones, pero ya casi lo tenía.</p>
+      <canvas class="art" id="loseArt"></canvas>
       ${r.missed.length ? `<h2>PARA REPASAR</h2>${lettersHtml(r.missed, 'miss')}` : ''}
+      <p class="small">${line}</p>
     `, [
-      { label: 'INTENTARLO OTRA VEZ', cls: 'green', go: () => { r.hearts = 3; showPhaseIntro(); } },
-      { label: 'MENÚ', cls: 'ghost', go: showTitle },
-    ]);
+      { label: '<span class="ico">↻</span>', aria: 'Intentarlo otra vez', cls: 'green', go: () => { r.hearts = 3; showPhaseIntro(); } },
+      { label: '<span class="ico">🏠</span>', aria: 'Volver al inicio', cls: 'ghost', go: showTitle },
+    ], { say: line, row: true });
+    const rows = dinoRows('BITE');
+    paintArt('loseArt', rows[0].length + 26, rows.length + 4, g => {
+      drawSpriteAt(g, SPRITES.ALVA_ROAR, 11, rows.length + 2, 1);
+      drawSprite(g, rows, 22, 2, 1);
+    });
+    $('loseArt').style.width = Math.min(260, (rows[0].length + 26) * 3) + 'px';
   }
 
   // ---------- Bucle ----------

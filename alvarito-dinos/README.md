@@ -16,6 +16,21 @@ Cinco fases: velociraptor en la selva, triceratops en la playa, estegosaurio en
 la pradera, pterodáctilo en las montañas y, al final, el **T-Rex** en el
 volcán, que acaba con una pedrada de tirachinas.
 
+## Para jugar sin saber leer
+
+Todo se juega mirando y escuchando; los textos que quedan son para los mayores.
+
+- La voz del navegador dice cada letra con su nombre y, en las vocales, con su
+  sonido, junto a una palabra con dibujo: «¿Dónde está la eme? La eme, como
+  moto 🏍️». Tocar el recuadro de la letra (🔊) lo repite.
+- Al tocar una letra se oye cuál es («Esa es la ene. Busca la eme.»).
+- Cada personaje habla con su propio tono: Alvarito agudo, Danielito, la
+  abuela, el abuelo más grave y los dinos con un vozarrón lento.
+- Las ayudas son solo caras; el tiempo es una barra con un dino.
+- Los botones de las ventanas son símbolos (▶ seguir, ↻ otra vez, 🏠 inicio) y
+  cada ventana se narra. Después de un bocao el juego sigue solo.
+- Las fichas de letras del final se pueden tocar para oírlas.
+
 ## La familia ayuda
 
 - **Danielito** (siempre, cada 10 s): da una pista («M de MANZANA 🍎»), quita
@@ -29,8 +44,6 @@ volcán, que acaba con una pedrada de tirachinas.
 
 - Letras grandes en **Andika**, una fuente pensada para niños que empiezan a
   leer (la letra pixelada se queda para los títulos).
-- La voz del navegador lee cada letra y, si se equivoca, dice cuál ha tocado
-  («Esa es la ene. Busca la eme.»). El botón 🔊 la repite.
 - Tres tipos de reto que llegan poco a poco: ver la letra, solo oírla, y
   «¿con qué letra empieza ABEJA?».
 - En fases avanzadas se mezclan letras que se parecen (E/F, M/N, P/R, O/Q…).
@@ -42,5 +55,6 @@ volcán, que acaba con una pedrada de tirachinas.
 
 Es un HTML estático: basta con servir `index.html` desde cualquier hosting de
 archivos estáticos. En el móvil, «Añadir a pantalla de inicio» lo deja como una
-app más. La voz depende del navegador; si no tiene voz en español, el juego se
-puede jugar igual leyendo la letra en pantalla.
+app más. La voz depende del navegador del móvil: hace falta que tenga una voz
+en español (en Android, «Síntesis de voz de Google»; en iPhone viene de serie)
+y que el móvil no esté en silencio.
