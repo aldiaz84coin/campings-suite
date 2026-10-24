@@ -57,4 +57,5 @@ Es un HTML estático: basta con servir `index.html` desde cualquier hosting de
 archivos estáticos. En el móvil, «Añadir a pantalla de inicio» lo deja como una
 app más. La voz depende del navegador del móvil: hace falta que tenga una voz
 en español (en Android, «Síntesis de voz de Google»; en iPhone viene de serie)
-y que el móvil no esté en silencio.
+y que el móvil no esté en silencio. El botón **🔊 Probar sonido** de la portada
+dice si la voz funciona y, si no, qué hacer.

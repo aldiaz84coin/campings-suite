@@ -39,12 +39,17 @@ El juego habla con la voz del navegador, y cada personaje tiene su tono:
 
 - Una narradora lee cada reto («¿Cuánto es 7 por 6?»), las pistas, las
   trastadas y cada habitación. El botón 🔊 repite el reto.
-- **Alvarito** mete prisa: «¡Se lía! ¡Se lía!», «¡Vamos a romper todo!» y, en
-  los últimos 5 segundos, «¡Corre, corre, que se lía!». Cuando llega: «¡Se lió!
+- **Alvarito** mete prisa tres veces por reto con una veintena de frases que no
+  se repiten seguidas: «¡Se lía! ¡Se lía!», «¡Vamos a romper todo!», «¡Tic, tac,
+  tic, tac!», «¡Danielito, que no llegas!», «¡Esto se va a liar parda!»… En los
+  últimos 5 segundos: «¡Corre, corre, que se lía!». Cuando llega: «¡Se lió!
   ¡Trastada!».
 - **Danielito** celebra cada acierto diciendo la multiplicación entera
   («¡Toma ya! 7 por 6 es 42»), para que se le quede.
 - El botón ♪ quita los sonidos y las voces.
+- En la portada, **🔊 Probar sonido** dice si la voz funciona en ese móvil y, si
+  no, qué hacer (subir el volumen, quitar el modo silencio, abrirlo en Chrome o
+  Safari en vez de dentro de otra app, o instalar la voz de Google en Android).
 
 ## Para aprender, no solo para acertar
 

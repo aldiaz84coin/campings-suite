@@ -38,6 +38,14 @@
   }
   * { box-sizing: border-box; }
   [hidden] { display: none !important; }
+  .sound-test {
+    padding: 10px 14px;
+    background: var(--panel-2); color: var(--ink);
+    border: 3px solid var(--line); box-shadow: 0 4px 0 var(--line);
+    font-family: var(--display); font-size: 10px; line-height: 1.4;
+    cursor: pointer; touch-action: manipulation;
+  }
+  .sound-test:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--line); }
   html, body { height: 100%; }
   body {
     background: var(--bg);
@@ -470,17 +478,51 @@
     alva: { pitch: 1.7, rate: 1.1 },
     dani: { pitch: 1.35, rate: 1.0 },
   };
+  // Chrome pierde la frase si se habla justo después de cortar otra: tras cortar se espera
+  // un poco, y las frases que llegan mientras tanto van detrás, en orden.
+  let speechGen = 0, speechReadyAt = 0;
   function speak(text, who = 'narr', interrupt = false) {
     if (muted || !synth || !text) return;
     try {
-      if (interrupt) synth.cancel();
+      if (interrupt) {
+        speechGen++;
+        if (synth.speaking || synth.pending) { synth.cancel(); speechReadyAt = Date.now() + 150; }
+      }
+      const gen = speechGen;
       const u = new SpeechSynthesisUtterance(text);
       u.lang = 'es-ES';
       if (voice) u.voice = voice;
       const v = VOICE[who] || VOICE.narr;
       u.pitch = v.pitch; u.rate = v.rate;
-      synth.speak(u);
+      const go = () => {
+        if (gen !== speechGen) return;
+        try { synth.resume(); synth.speak(u); } catch (e) { /* nada */ }
+      };
+      const wait = speechReadyAt - Date.now();
+      if (wait > 0) setTimeout(go, wait); else go();
     } catch (e) { /* el navegador no deja hablar */ }
+  }
+  // Botón «Probar sonido»: dice en qué falla el sonido en este móvil.
+  function soundCheck(el, muteKey) {
+    muted = false; store.set(muteKey, false); syncMute();
+    ensureAudio(); sfx.ok();
+    if (!synth) {
+      el.textContent = 'Este navegador no tiene voz. Abre el enlace en Chrome (Android) o Safari (iPhone), no dentro de otra app.';
+      return;
+    }
+    let started = false;
+    el.textContent = 'Probando…';
+    const u = new SpeechSynthesisUtterance('¡Hola! Así suena la voz del juego.');
+    u.lang = 'es-ES';
+    if (voice) u.voice = voice;
+    u.onstart = () => {
+      started = true;
+      el.textContent = '✓ La voz funciona.' + (voice ? '' : ' No hay voz en español instalada: puede sonar con acento.');
+    };
+    try { if (synth.speaking || synth.pending) synth.cancel(); synth.resume(); synth.speak(u); } catch (e) { /* nada */ }
+    setTimeout(() => {
+      if (!started) el.textContent = 'No se oye la voz. Sube el volumen, quita el modo silencio y, en Android, instala «Síntesis de voz de Google».';
+    }, 2500);
   }
   const sayFact = text => text.replace(/×/g, 'por').replace(/=/g, 'es');
   // Convierte el reto en una frase: «7 × 6 = ?» se lee «¿Cuánto es 7 por 6?».
@@ -1050,10 +1092,25 @@
     return Math.max(15, base + EXTRA_TIME[kind] - S.run.room * 2);
   }
 
-  const TAUNTS = ['¡Se lía! ¡Se lía!', '¡Vamos a romper todo!', '¡Corre, corre, que se lía!', '¡Je, je, je!', '¡Voy a por tu castillo!', '¡Que se lía!'];
-  const HURRY = '¡Corre, corre, que se lía!';
-  const RETREATS = ['¡Jo!', '¡Bah, me voy!', '¡Jopé! ¡Otra vez será!', '¡La próxima se lía!'];
-  const WRONG = ['¡Se lía! ¡Se lía!', '¡Fallaste! ¡Je, je!', '¡Vamos a romper todo!'];
+  // Frases de Alvarito. Se sacan de una bolsa barajada para que no se repitan seguidas.
+  const TAUNTS = [
+    '¡Se lía! ¡Se lía!', '¡Vamos a romper todo!', '¡Corre, corre, que se lía!', '¡Je, je, je!',
+    '¡Voy a por tu castillo!', '¡Que se lía!', '¡Tic, tac, tic, tac!', '¡Más rápido, Danielito!',
+    '¡Que te pillo, que te pillo!', '¡Venga, venga, venga!', '¡Que voy con las ceras!', '¡Ya llego, ya llego!',
+    '¡Danielito, que no llegas!', '¡Voy a pintar las paredes!', '¡Esto se va a liar parda!', '¡Uy, uy, uy, que se lía!',
+    '¡Piensa más rápido!', '¡Me aburro! ¡Voy a romper algo!', '¡Allá voooy!', '¡Que me como tus galletas!',
+  ];
+  const HURRY = ['¡Corre, corre, que se lía!', '¡Cinco, cuatro, tres...!', '¡Ya casi, ya casi!', '¡Que se lía, que se lía!', '¡Últimos segundos! ¡Je, je!'];
+  const RETREATS = [
+    '¡Jo!', '¡Bah, me voy!', '¡Jopé! ¡Otra vez será!', '¡La próxima se lía!', '¡Vaaale, me voy!',
+    '¡Qué listo eres, Danielito!', '¡Jo, siempre ganas!', '¡Bah, me voy a ver dibujos!',
+  ];
+  const WRONG = ['¡Se lía! ¡Se lía!', '¡Fallaste! ¡Je, je!', '¡Vamos a romper todo!', '¡Ja, ja! ¡Esa no es!', '¡Uy, casi!', '¡Más cerca, más cerca!'];
+  function bag(list) {
+    let left = [];
+    return () => { if (!left.length) left = shuffle(list); return left.pop(); };
+  }
+  const nextTaunt = bag(TAUNTS), nextHurry = bag(HURRY), nextRetreat = bag(RETREATS), nextWrong = bag(WRONG);
   const CHEERS = ['¡Toma ya!', '¡Facilísimo!', '¡Lo sé!', '¡Bien!'];
   const MAX_HEARTS = 3;
   const PENALTY = 5;
@@ -1066,7 +1123,7 @@
       return Array.isArray(t) ? t.filter(n => ALL_TABLES.includes(n)) : [2, 5, 10];
     })(),
     T: 40, left: 40, t: 0, alvaX: START, alvaTarget: null, alvaSpeed: 0, alvaFrame: 0,
-    jump: 0, sad: false, roar: false, bubble: null, halfSaid: false, lastSaid: false,
+    jump: 0, sad: false, roar: false, bubble: null, tauntMarks: [], lastSaid: false,
   };
   const timers = new Set();
   function later(fn, ms) { const id = setTimeout(() => { timers.delete(id); fn(); }, ms); timers.add(id); }
@@ -1269,10 +1326,13 @@
         <button type="button" class="chip all" data-t="all" aria-pressed="false">TODAS</button>
       </div>
       <p class="small" id="tablesNote"></p>
+      <button type="button" class="sound-test" id="soundTest">🔊 PROBAR SONIDO</button>
+      <p class="small" id="soundStatus" role="status"></p>
     `, [
       { label: 'CON CALMA<small>Más tiempo para pensar</small>', go: () => startRun('facil') },
       { label: 'RÁPIDO<small>Alvarito corre más</small>', cls: 'blue', go: () => startRun('normal') },
     ]);
+    $('soundTest').addEventListener('click', () => soundCheck($('soundStatus'), 'dva-muted'));
     const chips = [...document.querySelectorAll('#chips .chip')];
     const startBtns = [...document.querySelectorAll('#card .btns .btn')];
     const sync = () => {
@@ -1333,14 +1393,14 @@
     const r = S.run, kind = ROOMS[r.room].kinds[r.step];
     S.puzzle = Object.assign({ kind }, GEN[kind]());
     S.T = timeFor(kind); S.left = S.T;
-    S.halfSaid = false; S.lastSaid = false;
+    S.tauntMarks = [0.72, 0.42]; S.lastSaid = false;
     S.alvaX = START; S.alvaTarget = null; S.sad = false; S.roar = false;
     renderPuzzle(S.puzzle);
     updateRoomTag(); updateHud(); updateTimer();
     hideCard();
     S.screen = 'play';
     speak(toSpeech(S.puzzle), 'narr', true);
-    say(pick(TAUNTS));
+    say(nextTaunt());
   }
 
   function answer(btn, opt) {
@@ -1357,7 +1417,7 @@
       S.jump = 0.5;
       const p = S.puzzle;
       speak(`${pick(CHEERS)} ${p.fact ? sayFact(factText(p.fact)) : ''}`, 'dani', true);
-      say(pick(RETREATS), 1.6);
+      say(nextRetreat(), 1.6);
       S.alvaTarget = W + 20; S.alvaSpeed = 160;
       later(nextStep, 2300);
     } else {
@@ -1366,7 +1426,7 @@
       sfx.bad();
       later(sfx.laugh, 150);
       S.left = Math.max(0, S.left - PENALTY);
-      say(pick(WRONG), 1.4, true);
+      say(nextWrong(), 1.4, true);
       remember();
       if (S.puzzle.hint) {
         const firstTime = $('hint').hidden;
@@ -1514,8 +1574,8 @@
       const before = S.left;
       S.left -= dt;
       if (Math.ceil(before) !== Math.ceil(S.left) && S.left <= 5 && S.left > 0) sfx.tick();
-      if (!S.halfSaid && S.left < S.T * 0.5) { S.halfSaid = true; say(pick(TAUNTS)); }
-      if (!S.lastSaid && S.left < 5) { S.lastSaid = true; say(HURRY, 2.2); }
+      if (S.tauntMarks.length && S.left < S.T * S.tauntMarks[0]) { S.tauntMarks.shift(); say(nextTaunt(), 2); }
+      if (!S.lastSaid && S.left < 5) { S.lastSaid = true; say(nextHurry(), 2.2); }
       S.alvaX = START - (START - CATCH) * Math.min(1, 1 - S.left / S.T);
       S.alvaFrame = Math.floor(S.t * 5) % 2;
       updateTimer();
