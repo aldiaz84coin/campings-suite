@@ -129,7 +129,10 @@
     border: 3px solid var(--line);
     font-family: var(--display);
     font-size: 9px;
-    white-space: nowrap;
+    line-height: 1.4;
+    width: max-content;
+    max-width: 58%;
+    text-align: center;
   }
   .bubble::after {
     content: "";
@@ -180,6 +183,14 @@
     border: 4px solid var(--line);
     box-shadow: inset 0 0 0 3px var(--panel-2);
   }
+  .kind-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .say-btn {
+    flex: none; width: 38px; height: 38px;
+    background: var(--gold); color: var(--line);
+    border: 3px solid var(--line); box-shadow: 0 3px 0 var(--line);
+    font-size: 17px; line-height: 1; cursor: pointer; touch-action: manipulation;
+  }
+  .say-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--line); }
   .kind {
     margin: 0;
     font-family: var(--display);
@@ -355,7 +366,10 @@
   </div>
 
   <section class="puzzle" id="puzzle">
-    <p class="kind" id="kind">MULTIPLICACIÓN</p>
+    <div class="kind-row">
+      <p class="kind" id="kind">MULTIPLICACIÓN</p>
+      <button type="button" class="say-btn" id="sayBtn" aria-label="Escuchar el reto otra vez">🔊</button>
+    </div>
     <h2 class="q" id="question" aria-live="polite">¿Cuánto es?</h2>
     <div class="visual" id="visual">5 × 3 = ?</div>
     <p class="hint" id="hint" hidden></p>
@@ -440,6 +454,43 @@
     piece: () => [392, 523, 659, 784, 659, 784, 1047].forEach((f, i) => tone(f, 0.12, 'square', 0.06, i * 0.1)),
     lose: () => [392, 330, 262, 196].forEach((f, i) => tone(f, 0.22, 'triangle', 0.08, i * 0.2)),
   };
+
+  // ---------- Voz: lee los retos y cada personaje habla con su tono ----------
+  const synth = window.speechSynthesis || null;
+  let voice = null;
+  function pickVoice() {
+    try {
+      const vs = synth.getVoices();
+      voice = vs.find(v => /^es[-_]ES/i.test(v.lang)) || vs.find(v => /^es/i.test(v.lang)) || null;
+    } catch (e) { voice = null; }
+  }
+  if (synth) { pickVoice(); try { synth.onvoiceschanged = pickVoice; } catch (e) { /* sin voces */ } }
+  const VOICE = {
+    narr: { pitch: 1.1, rate: 0.95 },
+    alva: { pitch: 1.7, rate: 1.1 },
+    dani: { pitch: 1.35, rate: 1.0 },
+  };
+  function speak(text, who = 'narr', interrupt = false) {
+    if (muted || !synth || !text) return;
+    try {
+      if (interrupt) synth.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = 'es-ES';
+      if (voice) u.voice = voice;
+      const v = VOICE[who] || VOICE.narr;
+      u.pitch = v.pitch; u.rate = v.rate;
+      synth.speak(u);
+    } catch (e) { /* el navegador no deja hablar */ }
+  }
+  const sayFact = text => text.replace(/×/g, 'por').replace(/=/g, 'es');
+  // Convierte el reto en una frase: «7 × 6 = ?» se lee «¿Cuánto es 7 por 6?».
+  function toSpeech(p) {
+    if (!p || !p.q) return '';
+    const v = p.visual && !p.emojiVisual && !p.groupsVisual ? p.visual : '';
+    if (/ = \?$/.test(v)) return `¿Cuánto es ${sayFact(v.replace(/ = \?$/, ''))}?`;
+    const spoken = sayFact(v).replace(/\s{2,}/g, ', ').replace(/(^|\s)\?(?=,|\s|$)/g, '$1¿cuál?');
+    return `${p.q} ${spoken}`.trim();
+  }
 
   // ---------- Personajes (pixel art) ----------
   const PAL = {
@@ -999,9 +1050,11 @@
     return Math.max(15, base + EXTRA_TIME[kind] - S.run.room * 2);
   }
 
-  const TAUNTS = ['¡Je, je, je!', '¡Voy a por ti!', '¡Que te pillo!', '¡A destrozar!', '¡Me aburro!', '¡Allá voy!'];
-  const RETREATS = ['¡Jo!', '¡Bah, me voy!', '¡La próxima vez!', '¡Jopé!'];
-  const WRONG = ['¡Je, je!', '¡Fallaste!', '¡Me acerco!'];
+  const TAUNTS = ['¡Se lía! ¡Se lía!', '¡Vamos a romper todo!', '¡Corre, corre, que se lía!', '¡Je, je, je!', '¡Voy a por tu castillo!', '¡Que se lía!'];
+  const HURRY = '¡Corre, corre, que se lía!';
+  const RETREATS = ['¡Jo!', '¡Bah, me voy!', '¡Jopé! ¡Otra vez será!', '¡La próxima se lía!'];
+  const WRONG = ['¡Se lía! ¡Se lía!', '¡Fallaste! ¡Je, je!', '¡Vamos a romper todo!'];
+  const CHEERS = ['¡Toma ya!', '¡Facilísimo!', '¡Lo sé!', '¡Bien!'];
   const MAX_HEARTS = 3;
   const PENALTY = 5;
 
@@ -1040,7 +1093,10 @@
     if (S.alvaX < W) drawSpriteAt(ctx, alva, Math.round(S.alvaX) + 16, FEET, SPR);
   }
 
-  function say(text, dur = 1.6) { S.bubble = { text, until: S.t + dur }; }
+  function say(text, dur = 1.6, interrupt = false) {
+    S.bubble = { text, until: S.t + dur };
+    speak(text, 'alva', interrupt);
+  }
   function updateBubble() {
     const el = $('bubble');
     const show = S.bubble && S.t < S.bubble.until && S.alvaX < W - 6;
@@ -1171,7 +1227,7 @@
   }
 
   // ---------- Ventanas ----------
-  function showCard(html, actions) {
+  function showCard(html, actions, opts = {}) {
     const card = $('card');
     card.innerHTML = numify(html);
     const row = document.createElement('div');
@@ -1188,6 +1244,7 @@
     $('overlay').hidden = false;
     const first = row.querySelector('button');
     if (first) first.focus({ preventScroll: true });
+    if (opts.say) speak(opts.say, 'narr', true);
   }
   function hideCard() { $('overlay').hidden = true; }
 
@@ -1268,7 +1325,7 @@
       <h1>${room.name.toUpperCase()}</h1>
       <p>${room.intro}</p>
       <p class="small">Supera 3 retos de ${r.tables.length === ALL_TABLES.length ? 'todas las tablas' : (r.tables.length === 1 ? 'la tabla del ' : 'las tablas del ') + listaTablas(r.tables)} para conseguir la pieza.</p>
-    `, [{ label: '¡A POR ELLA!', go: startPuzzle }]);
+    `, [{ label: '¡A POR ELLA!', go: startPuzzle }], { say: `${room.name}. ${room.intro}` });
   }
 
   function startPuzzle() {
@@ -1282,6 +1339,7 @@
     updateRoomTag(); updateHud(); updateTimer();
     hideCard();
     S.screen = 'play';
+    speak(toSpeech(S.puzzle), 'narr', true);
     say(pick(TAUNTS));
   }
 
@@ -1297,20 +1355,24 @@
       updateHud();
       S.screen = 'between';
       S.jump = 0.5;
-      say(pick(RETREATS), 1.2);
+      const p = S.puzzle;
+      speak(`${pick(CHEERS)} ${p.fact ? sayFact(factText(p.fact)) : ''}`, 'dani', true);
+      say(pick(RETREATS), 1.6);
       S.alvaTarget = W + 20; S.alvaSpeed = 160;
-      later(nextStep, 1100);
+      later(nextStep, 2300);
     } else {
       btn.classList.add('wrong');
       btn.disabled = true;
       sfx.bad();
       later(sfx.laugh, 150);
       S.left = Math.max(0, S.left - PENALTY);
-      say(pick(WRONG), 1.2);
+      say(pick(WRONG), 1.4, true);
       remember();
       if (S.puzzle.hint) {
+        const firstTime = $('hint').hidden;
         $('hint').innerHTML = numify('<strong>PISTA</strong>' + esc(S.puzzle.hint));
         $('hint').hidden = false;
+        if (firstTime) speak('Pista: ' + sayFact(S.puzzle.hint));
       }
     }
   }
@@ -1337,7 +1399,7 @@
     lockAnswers();
     S.alvaTarget = CATCH; S.alvaSpeed = 260;
     sfx.laugh();
-    say('¡TRASTADA!', 1.2);
+    say('¡Se lió! ¡Trastada!', 1.4, true);
     later(() => {
       const r = S.run, room = ROOMS[r.room];
       sfx.crash(); shake(); scrawl();
@@ -1357,9 +1419,12 @@
   function prankCard(room) {
     const r = S.run;
     const last = r.hearts <= 0;
+    const prankText = pick(room.pranks);
+    const learn = learnLine(S.puzzle);
+    const spoken = `${prankText} La respuesta era ${S.puzzle.answer}.` + (learn && learn !== S.puzzle.answer ? ` Recuerda: ${sayFact(learn)}.` : '');
     showCard(`
       <h1 class="bad">¡TRASTADA!</h1>
-      <p>${pick(room.pranks)}</p>
+      <p>${prankText}</p>
       <p class="small">La respuesta era <b>${S.puzzle.answer}</b>.</p>
       ${learnLine(S.puzzle) && learnLine(S.puzzle) !== S.puzzle.answer ? `<p>Recuerda: <b>${learnLine(S.puzzle)}</b></p>` : ''}
       <p class="small">${last ? 'A Danielito ya no le quedan corazones...' : `Le quedan ${r.hearts} ${r.hearts === 1 ? 'corazón' : 'corazones'}.`}</p>
@@ -1370,7 +1435,7 @@
         S.alvaTarget = W + 20; S.alvaSpeed = 160; S.roar = false;
         nextStep();
       },
-    }]);
+    }], { say: spoken });
   }
 
   function roomComplete() {
@@ -1391,7 +1456,7 @@
     `, [{
       label: 'SIGUIENTE HABITACIÓN',
       go: () => { r.room++; r.step = 0; r.perfect = true; showRoomIntro(); },
-    }]);
+    }], { say: `¡Pieza conseguida! Danielito ya tiene ${r.pieces} de ${ROOMS.length} piezas del castillo.${bonus ? ' Sin ninguna trastada: ¡recuperas un corazón!' : ''}` });
     drawCastle($('castleArt'), r.pieces);
   }
 
@@ -1415,7 +1480,8 @@
     `, [
       { label: 'JUGAR OTRA VEZ', go: () => startRun(r.diff) },
       { label: 'MENÚ', cls: 'ghost', go: showTitle },
-    ]);
+    ], { say: `¡Castillo terminado! Danielito ha construido su castillo y ha hecho ${r.score} puntos.` });
+    later(() => speak('¡Jo! ¡La próxima vez se lía!', 'alva'), 400);
     drawCastle($('castleArt'), ROOMS.length);
   }
 
@@ -1434,7 +1500,8 @@
     `, [
       { label: 'OTRA VEZ', go: () => startRun(r.diff) },
       { label: 'MENÚ', cls: 'ghost', go: showTitle },
-    ]);
+    ], { say: '¡Alvarito gana! Ha hecho tantas trastadas que el castillo se ha caído.' });
+    later(() => speak('¡Se lió! ¡Se lió! ¡Lo hemos roto todo!', 'alva'), 300);
   }
 
   // ---------- Bucle ----------
@@ -1448,7 +1515,7 @@
       S.left -= dt;
       if (Math.ceil(before) !== Math.ceil(S.left) && S.left <= 5 && S.left > 0) sfx.tick();
       if (!S.halfSaid && S.left < S.T * 0.5) { S.halfSaid = true; say(pick(TAUNTS)); }
-      if (!S.lastSaid && S.left < 5) { S.lastSaid = true; say('¡Ya casi llego!'); }
+      if (!S.lastSaid && S.left < 5) { S.lastSaid = true; say(HURRY, 2.2); }
       S.alvaX = START - (START - CATCH) * Math.min(1, 1 - S.left / S.T);
       S.alvaFrame = Math.floor(S.t * 5) % 2;
       updateTimer();
@@ -1470,7 +1537,12 @@
     muteBtn.setAttribute('aria-pressed', String(muted));
     muteBtn.setAttribute('aria-label', muted ? 'Poner el sonido' : 'Quitar el sonido');
   }
-  muteBtn.addEventListener('click', () => { muted = !muted; store.set('dva-muted', muted); syncMute(); ensureAudio(); sfx.click(); });
+  muteBtn.addEventListener('click', () => {
+    muted = !muted; store.set('dva-muted', muted); syncMute();
+    if (muted && synth) { try { synth.cancel(); } catch (e) { /* nada */ } }
+    ensureAudio(); sfx.click();
+  });
+  $('sayBtn').addEventListener('click', () => { ensureAudio(); if (S.screen === 'play') speak(toSpeech(S.puzzle), 'narr', true); });
   syncMute();
 
   // ---------- Arranque (conserva la partida si la página se actualiza) ----------

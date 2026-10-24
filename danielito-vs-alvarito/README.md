@@ -33,6 +33,19 @@ Todos usan solo las tablas elegidas:
 - **El intruso**: qué número no está en la tabla.
 - **Problemas**: patas de perros, ruedas de bicis, galletas en platos…
 
+## Voces
+
+El juego habla con la voz del navegador, y cada personaje tiene su tono:
+
+- Una narradora lee cada reto («¿Cuánto es 7 por 6?»), las pistas, las
+  trastadas y cada habitación. El botón 🔊 repite el reto.
+- **Alvarito** mete prisa: «¡Se lía! ¡Se lía!», «¡Vamos a romper todo!» y, en
+  los últimos 5 segundos, «¡Corre, corre, que se lía!». Cuando llega: «¡Se lió!
+  ¡Trastada!».
+- **Danielito** celebra cada acierto diciendo la multiplicación entera
+  («¡Toma ya! 7 por 6 es 42»), para que se le quede.
+- El botón ♪ quita los sonidos y las voces.
+
 ## Para aprender, no solo para acertar
 
 - Las respuestas falsas son los errores típicos (una vez más o una vez menos,
