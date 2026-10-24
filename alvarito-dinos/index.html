@@ -432,7 +432,7 @@
   const CONFUSE = { E: 'F', F: 'E', O: 'QC', Q: 'O', C: 'GO', G: 'C', M: 'NW', N: 'MÑ', Ñ: 'N', W: 'MV', P: 'RB', R: 'PB', B: 'PR', V: 'UY', U: 'V', I: 'LT', L: 'I', T: 'I', D: 'O' };
   const MODES = {
     vocales: { label: 'VOCALES', sample: 'A E I O U', letters: 'AEIOU' },
-    nombre: { label: 'SU NOMBRE', sample: 'A L V R I T O', letters: 'ALVRITO' },
+    nombre: { label: 'SU NOMBRE', sample: 'ALVARITO', letters: 'ALVARITO' },
     poco: { label: 'POCO A POCO', sample: 'Vocales y más', phases: ['AEIOU', 'AEIOUMPL', 'AEIOUMPLSTND', 'AEIOUMPLSTNDBCRFG', ALPHABET.join('')] },
     todas: { label: 'TODAS', sample: 'De la A a la Z', letters: ALPHABET.join('') },
   };
@@ -1369,7 +1369,7 @@
   }
   function poolFor(r) {
     const m = MODES[r.mode];
-    return (m.phases ? m.phases[Math.min(r.phase, m.phases.length - 1)] : m.letters).split('');
+    return [...new Set((m.phases ? m.phases[Math.min(r.phase, m.phases.length - 1)] : m.letters).split(''))];
   }
 
   // ---------- Preguntas ----------

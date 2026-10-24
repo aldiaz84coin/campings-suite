@@ -47,7 +47,7 @@ Todo se juega mirando y escuchando; los textos que quedan son para los mayores.
 - Tres tipos de reto que llegan poco a poco: ver la letra, solo oírla, y
   «¿con qué letra empieza ABEJA?».
 - En fases avanzadas se mezclan letras que se parecen (E/F, M/N, P/R, O/Q…).
-- Se elige qué letras jugar: **vocales**, **su nombre** (A L V R I T O),
+- Se elige qué letras jugar: **vocales**, **su nombre** (las letras de ALVARITO),
   **poco a poco** (de las vocales a todo el abecedario) o **todas**.
 - Al terminar: las letras encontradas y las que conviene repasar.
 
