@@ -1,0 +1,1925 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#10241f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}</style>
+</head>
+<body>
+<!-- juego:inicio -->
+<title>Alvarito y los Dinos</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&family=Press+Start+2P&display=swap">
+<style>
+  /* Layout: una columna de móvil — marcador, escena pixelada de la aventura, reloj del dino,
+     botones de ayuda de la familia y tablero con letras grandes. Un solo tema: selva de noche. */
+  :root {
+    --bg: #10241f;
+    --panel: #183a31;
+    --panel-2: #21493e;
+    --line: #07130f;
+    --ink: #f1fbe9;
+    --muted: #9cc3b0;
+    --dim: #3c6457;
+    --hulk: #5cb85c;
+    --gold: #f6c453;
+    --lava: #ff6a3d;
+    --ok: #7be36b;
+    --bad: #ff5a6b;
+    --scrim: rgba(7, 19, 15, .86);
+    --display: "Press Start 2P", ui-monospace, "Courier New", monospace;
+    --letter: "Andika", "Trebuchet MS", system-ui, sans-serif;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html, body { height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--letter);
+    -webkit-tap-highlight-color: transparent;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  button { font: inherit; color: inherit; touch-action: manipulation; cursor: pointer; }
+  button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+  button:disabled { cursor: default; }
+
+  #app {
+    max-width: 520px;
+    min-height: 100%;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    padding-block: 10px 14px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+
+  /* Marcador */
+  .hud { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px; }
+  .hearts { display: flex; gap: 3px; font-size: 20px; line-height: 1; }
+  .hearts span { color: var(--dim); }
+  .hearts span.on { color: var(--bad); }
+  .progress { display: flex; align-items: center; justify-content: center; gap: 6px; font-family: var(--display); font-size: 9px; color: var(--muted); }
+  .progress i { width: 13px; height: 13px; border: 2px solid var(--dim); }
+  .progress i.on { background: var(--hulk); border-color: var(--hulk); box-shadow: 0 2px 0 var(--line); }
+  .icon-btn {
+    width: 40px; height: 40px;
+    background: var(--panel-2);
+    border: 3px solid var(--line);
+    box-shadow: 0 3px 0 var(--line);
+    font-family: var(--display);
+    font-size: 13px;
+  }
+  .icon-btn[aria-pressed="true"] { color: var(--muted); text-decoration: line-through; }
+
+  /* Escena */
+  .stage { position: relative; overflow: hidden; border: 4px solid var(--line); box-shadow: 0 0 0 3px var(--panel-2); background: var(--line); }
+  #scene { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; max-width: 100%; image-rendering: pixelated; image-rendering: crisp-edges; }
+  .phase-tag {
+    position: absolute; top: 6px; left: 6px; max-width: 70%;
+    padding: 5px 7px; background: var(--scrim);
+    font-family: var(--display); font-size: 8px; line-height: 1.5;
+  }
+  .bubble {
+    position: absolute; top: 8%;
+    transform: translateX(-50%);
+    padding: 6px 8px;
+    background: var(--ink); color: var(--line);
+    border: 3px solid var(--line);
+    font-family: var(--display); font-size: 8px; line-height: 1.4;
+    white-space: nowrap;
+  }
+  .bubble::after {
+    content: ""; position: absolute; left: 50%; bottom: -9px;
+    border: 6px solid transparent; border-top-color: var(--line);
+    transform: translateX(-50%);
+  }
+  .crash {
+    position: absolute; inset: 0; display: grid; place-items: center;
+    font-family: var(--display); font-size: clamp(18px, 6.5vw, 30px);
+    color: var(--gold); text-shadow: 3px 3px 0 var(--lava), 6px 6px 0 var(--line);
+    animation: pop .45s steps(4) both; pointer-events: none; text-align: center;
+  }
+  .crash.green { color: var(--hulk); text-shadow: 3px 3px 0 #2f7d32, 6px 6px 0 var(--line); }
+
+  /* Reloj del dino */
+  .timer { display: grid; gap: 6px; }
+  .timer-label { display: flex; justify-content: space-between; align-items: baseline; font-family: var(--display); font-size: 9px; color: var(--muted); }
+  .timer-label b { color: var(--ink); font-size: 12px; font-weight: 400; font-variant-numeric: tabular-nums; }
+  .bar { height: 16px; border: 3px solid var(--line); background: var(--panel); }
+  .bar i { display: block; height: 100%; width: 100%; background: var(--ok); }
+  .bar i.mid { background: var(--gold); }
+  .bar i.low { background: var(--bad); }
+  .bar i.paused { background: var(--muted); }
+
+  /* Ayudas de la familia */
+  .helpers { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .helper {
+    display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 6px;
+    min-width: 0; min-height: 58px; padding: 5px 6px;
+    background: var(--panel-2);
+    border: 3px solid var(--line); box-shadow: 0 4px 0 var(--line);
+    text-align: left;
+  }
+  .helper canvas { width: 36px; height: 36px; image-rendering: pixelated; background: var(--panel); }
+  .helper b { display: block; font-family: var(--display); font-size: 7px; font-weight: 400; line-height: 1.4; }
+  .helper small { display: block; font-size: 13px; line-height: 1.15; color: var(--muted); }
+  .helper:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 2px 0 var(--line); }
+  .helper:disabled { opacity: .45; }
+  @media (max-width: 430px) {
+    .helper { grid-template-columns: 1fr; justify-items: center; text-align: center; gap: 3px; }
+  }
+
+  /* Tablero */
+  .board {
+    position: relative; flex: 1;
+    display: flex; flex-direction: column; gap: 10px;
+    padding: 12px;
+    background: var(--panel);
+    border: 4px solid var(--line);
+    box-shadow: inset 0 0 0 3px var(--panel-2);
+  }
+  .prompt-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .prompt { margin: 0; font-size: 24px; font-weight: 700; line-height: 1.2; text-wrap: balance; min-width: 0; }
+  .say-btn {
+    flex: none; width: 46px; height: 46px;
+    background: var(--gold); color: var(--line);
+    border: 3px solid var(--line); box-shadow: 0 4px 0 var(--line);
+    font-size: 22px; line-height: 1;
+  }
+  .target {
+    display: flex; align-items: center; justify-content: center; gap: 14px;
+    min-height: 98px; padding: 6px 10px;
+    background: var(--panel-2); border: 3px solid var(--line);
+  }
+  .target .big { font-size: 84px; font-weight: 700; line-height: 1; color: var(--gold); }
+  .target .name { font-size: 34px; font-weight: 700; color: var(--gold); }
+  .target .emoji { font-size: 60px; line-height: 1; }
+  .target .word { font-size: 34px; font-weight: 700; letter-spacing: .08em; overflow-wrap: anywhere; min-width: 0; }
+  .target .slot {
+    display: inline-block; min-width: 1.05em; padding: 0 .08em;
+    border-bottom: 5px solid var(--gold); color: var(--gold); text-align: center;
+  }
+  .hint { margin: 0; font-size: 20px; font-weight: 700; color: var(--gold); text-align: center; }
+  .feedback { margin: 0; font-size: 21px; font-weight: 700; color: var(--ok); text-align: center; text-wrap: balance; }
+  .answers { display: grid; gap: 10px; margin-top: auto; }
+  .ans {
+    min-height: 86px;
+    background: var(--ink); color: var(--line);
+    border: 3px solid var(--line); box-shadow: 0 6px 0 var(--line);
+    font-family: var(--letter); font-size: 54px; font-weight: 700; line-height: 1;
+  }
+  .ans:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 2px 0 var(--line); }
+  .ans.wrong { background: var(--bad); animation: wiggle .3s steps(3); opacity: .6; }
+  .ans.right { background: var(--ok); }
+  .ans.gone { opacity: .15; }
+
+  /* Ventanas */
+  .overlay {
+    position: fixed; inset: 0; z-index: 20;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--scrim);
+    padding-top: calc(16px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+  .card {
+    width: 100%; max-width: 440px; max-height: 100%; overflow: auto;
+    display: flex; flex-direction: column; align-items: center; gap: 14px;
+    padding: 22px 18px; text-align: center;
+    background: var(--panel); border: 4px solid var(--line);
+    box-shadow: 0 0 0 4px var(--panel-2), 0 10px 0 4px var(--line);
+    animation: rise .25s steps(3) both;
+  }
+  .card h1, .card h2 { margin: 0; font-family: var(--display); font-weight: 400; line-height: 1.5; text-wrap: balance; }
+  .card h1 { font-size: 17px; color: var(--gold); text-shadow: 3px 3px 0 var(--line); }
+  .card h1.bad { color: var(--lava); }
+  .card h1.green { color: var(--hulk); }
+  .card h2 { font-size: 11px; color: var(--muted); letter-spacing: .06em; }
+  .card p { margin: 0; font-size: 19px; line-height: 1.35; max-width: 34ch; }
+  .card p.small { font-size: 16px; color: var(--muted); }
+  .card b { color: var(--gold); }
+  .logo { display: grid; gap: 8px; }
+  .logo .a { color: var(--gold); font-size: clamp(18px, 6vw, 24px); }
+  .logo .y { color: var(--ink); font-size: 10px; }
+  .logo .d { color: var(--hulk); font-size: clamp(18px, 6vw, 24px); }
+  .art { width: 260px; max-width: 100%; height: auto; image-rendering: pixelated; }
+  .letters { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+  .letters span {
+    min-width: 40px; padding: 2px 6px;
+    background: var(--ink); color: var(--line); border: 3px solid var(--line);
+    font-size: 26px; font-weight: 700; line-height: 1.2;
+  }
+  .letters.miss span { background: var(--gold); }
+  .modes { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; }
+  .mode {
+    display: grid; gap: 4px; padding: 10px 6px;
+    background: var(--panel-2); border: 3px solid var(--line); box-shadow: 0 4px 0 var(--line);
+    font-family: var(--display); font-size: 9px; line-height: 1.4;
+  }
+  .mode small { font-family: var(--letter); font-size: 17px; font-weight: 700; letter-spacing: .06em; }
+  .mode[aria-pressed="true"] { background: var(--hulk); color: var(--line); }
+  .btns { display: grid; gap: 12px; width: 100%; }
+  .btn {
+    display: grid; gap: 6px; padding: 15px 12px;
+    background: var(--gold); color: var(--line);
+    border: 3px solid var(--line); box-shadow: 0 5px 0 var(--line);
+    font-family: var(--display); font-size: 13px; line-height: 1.4;
+  }
+  .btn small { font-family: var(--letter); font-size: 16px; font-weight: 700; }
+  .btn.green { background: var(--hulk); }
+  .btn.ghost { background: var(--panel-2); color: var(--ink); }
+  .btn:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--line); }
+
+  .shake { animation: shake .5s steps(6); }
+  @keyframes shake {
+    0%, 100% { transform: translate(0, 0); }
+    20% { transform: translate(-6px, 3px); }
+    40% { transform: translate(6px, -3px); }
+    60% { transform: translate(-4px, -2px); }
+    80% { transform: translate(4px, 2px); }
+  }
+  @keyframes pop { from { transform: scale(.3); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  @keyframes rise { from { transform: translateY(16px); opacity: 0; } to { transform: none; opacity: 1; } }
+  @keyframes wiggle { 0%, 100% { transform: translateX(0); } 33% { transform: translateX(-5px); } 66% { transform: translateX(5px); } }
+  @media (prefers-reduced-motion: reduce) { .shake, .crash, .card, .ans.wrong { animation: none; } }
+  @media (max-height: 700px) {
+    .target { min-height: 78px; }
+    .target .big { font-size: 64px; }
+    .ans { min-height: 70px; font-size: 44px; }
+    .helper { min-height: 50px; }
+  }
+</style>
+
+<div id="app">
+  <header class="hud">
+    <div class="hearts" id="hearts" aria-label="Vidas"></div>
+    <div class="progress" id="progress"></div>
+    <button type="button" class="icon-btn" id="mute" aria-pressed="false" aria-label="Quitar el sonido">♪</button>
+  </header>
+
+  <div class="stage">
+    <canvas id="scene" width="160" height="90" aria-label="La aventura de Alvarito"></canvas>
+    <div class="phase-tag" id="phaseTag">LA SELVA</div>
+    <div class="bubble" id="bubble" hidden></div>
+    <div class="crash" id="crash" hidden></div>
+  </div>
+
+  <div class="timer">
+    <div class="timer-label"><span id="timerText">EL DINO LLEGA EN</span><b id="secs">30 s</b></div>
+    <div class="bar"><i id="bar"></i></div>
+  </div>
+
+  <div class="helpers">
+    <button type="button" class="helper" id="helpDani"><canvas width="16" height="16"></canvas><span><b>DANIELITO</b><small id="daniSub">Pista</small></span></button>
+    <button type="button" class="helper" id="helpAbuela"><canvas width="16" height="16"></canvas><span><b>ABUELA</b><small>Pescaíto</small></span></button>
+    <button type="button" class="helper" id="helpAbuelo"><canvas width="16" height="16"></canvas><span><b>ABUELO</b><small>Sombrilla</small></span></button>
+  </div>
+
+  <section class="board" id="board">
+    <div class="prompt-row">
+      <h2 class="prompt" id="prompt" aria-live="polite">¿Dónde está la A?</h2>
+      <button type="button" class="say-btn" id="sayBtn" aria-label="Escuchar otra vez">🔊</button>
+    </div>
+    <div class="target" id="target"><span class="big">A</span></div>
+    <p class="hint" id="hint" hidden></p>
+    <p class="feedback" id="feedback" hidden></p>
+    <div class="answers" id="answers"></div>
+  </section>
+</div>
+
+<div class="overlay" id="overlay" hidden>
+  <div class="card" id="card" role="dialog" aria-modal="true"></div>
+</div>
+
+<script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+
+  // ---------- Guardado local (solo comodidad: modo de letras y sonido) ----------
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* sin almacenamiento */ } },
+  };
+
+  // ---------- Utilidades ----------
+  const rnd = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
+  const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+  const shuffle = arr => {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+    return a;
+  };
+  const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // ---------- Sonido chiptune ----------
+  let actx = null;
+  let muted = store.get('ad-muted', false);
+  function ensureAudio() {
+    if (!actx) {
+      try { const C = window.AudioContext || window.webkitAudioContext; if (C) actx = new C(); } catch (e) { actx = null; }
+    }
+    if (actx && actx.state === 'suspended') actx.resume().catch(() => {});
+  }
+  function tone(f, dur, type = 'square', vol = 0.06, at = 0, to = null) {
+    if (muted || !actx) return;
+    const t = actx.currentTime + at, o = actx.createOscillator(), g = actx.createGain();
+    o.type = type;
+    o.frequency.setValueAtTime(f, t);
+    if (to) o.frequency.exponentialRampToValueAtTime(to, t + dur);
+    g.gain.setValueAtTime(vol, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g).connect(actx.destination);
+    o.start(t); o.stop(t + dur + 0.02);
+  }
+  function noise(dur, vol = 0.2, at = 0) {
+    if (muted || !actx) return;
+    const n = Math.floor(actx.sampleRate * dur), buf = actx.createBuffer(1, n, actx.sampleRate), d = buf.getChannelData(0);
+    for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / n);
+    const s = actx.createBufferSource(), g = actx.createGain();
+    s.buffer = buf; g.gain.value = vol;
+    s.connect(g).connect(actx.destination);
+    s.start(actx.currentTime + at);
+  }
+  const sfx = {
+    click: () => tone(660, 0.05, 'square', 0.04),
+    ok: () => [523, 659, 784, 1047].forEach((f, i) => tone(f, 0.1, 'square', 0.06, i * 0.07)),
+    bad: () => tone(220, 0.25, 'sawtooth', 0.06, 0, 110),
+    tick: () => tone(1200, 0.03, 'square', 0.03),
+    roar: () => { tone(160, 0.7, 'sawtooth', 0.08, 0, 60); noise(0.6, 0.12); },
+    chomp: () => { noise(0.08, 0.35); noise(0.08, 0.35, 0.16); tone(90, 0.3, 'square', 0.08, 0, 50); },
+    hulk: () => [131, 165, 196, 262].forEach((f, i) => tone(f, 0.12, 'square', 0.08, i * 0.06)),
+    boing: () => tone(200, 0.35, 'sine', 0.12, 0, 700),
+    splash: () => noise(0.4, 0.2),
+    whoosh: () => tone(900, 0.3, 'triangle', 0.06, 0, 200),
+    throw: () => tone(500, 0.18, 'triangle', 0.06, 0, 1000),
+    phase: () => [392, 523, 659, 784, 659, 784, 1047].forEach((f, i) => tone(f, 0.12, 'square', 0.06, i * 0.1)),
+    lose: () => [392, 330, 262, 196].forEach((f, i) => tone(f, 0.22, 'triangle', 0.08, i * 0.2)),
+  };
+
+  // ---------- Voz (lee las letras en voz alta: Alvarito todavía no lee) ----------
+  const synth = window.speechSynthesis || null;
+  let voice = null;
+  function pickVoice() {
+    try {
+      const vs = synth.getVoices();
+      voice = vs.find(v => /^es[-_]ES/i.test(v.lang)) || vs.find(v => /^es/i.test(v.lang)) || null;
+    } catch (e) { voice = null; }
+  }
+  if (synth) { pickVoice(); try { synth.onvoiceschanged = pickVoice; } catch (e) { /* sin voces */ } }
+  function speak(text) {
+    if (muted || !synth) return;
+    try {
+      synth.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = 'es-ES';
+      if (voice) u.voice = voice;
+      u.rate = 0.9; u.pitch = 1.1;
+      synth.speak(u);
+    } catch (e) { /* el navegador no deja hablar */ }
+  }
+
+  // ---------- Letras ----------
+  const ALPHABET = 'ABCDEFGHIJKLMNÑOPQRSTUVWXYZ'.split('');
+  const NAME = {
+    A: 'a', B: 'be', C: 'ce', D: 'de', E: 'e', F: 'efe', G: 'ge', H: 'hache', I: 'i', J: 'jota', K: 'ka', L: 'ele', M: 'eme',
+    N: 'ene', Ñ: 'eñe', O: 'o', P: 'pe', Q: 'cu', R: 'erre', S: 'ese', T: 'te', U: 'u', V: 'uve', W: 'uve doble', X: 'equis', Y: 'ye', Z: 'zeta',
+  };
+  const WORDS = {
+    A: [['🐝', 'ABEJA'], ['✈️', 'AVIÓN'], ['🕷️', 'ARAÑA'], ['💧', 'AGUA']],
+    B: [['⚽', 'BALÓN'], ['⛵', 'BARCO'], ['🐋', 'BALLENA'], ['🧣', 'BUFANDA']],
+    C: [['🏠', 'CASA'], ['🚗', 'COCHE'], ['🐴', 'CABALLO'], ['🐫', 'CAMELLO']],
+    D: [['🦕', 'DINOSAURIO'], ['🎲', 'DADO'], ['🐬', 'DELFÍN'], ['🦷', 'DIENTE']],
+    E: [['🐘', 'ELEFANTE'], ['⭐', 'ESTRELLA'], ['🦔', 'ERIZO']],
+    F: [['🍓', 'FRESA'], ['🔥', 'FUEGO'], ['🌸', 'FLOR'], ['🦩', 'FLAMENCO']],
+    G: [['🐱', 'GATO'], ['🍪', 'GALLETA'], ['🎈', 'GLOBO'], ['🦍', 'GORILA']],
+    H: [['🍦', 'HELADO'], ['🥚', 'HUEVO'], ['🍃', 'HOJA'], ['🐜', 'HORMIGA']],
+    I: [['🏝️', 'ISLA'], ['🦎', 'IGUANA'], ['🧲', 'IMÁN']],
+    J: [['🦒', 'JIRAFA'], ['🧼', 'JABÓN'], ['🐗', 'JABALÍ']],
+    K: [['🥝', 'KIWI'], ['🐨', 'KOALA']],
+    L: [['🌙', 'LUNA'], ['🦁', 'LEÓN'], ['🍋', 'LIMÓN'], ['📚', 'LIBRO']],
+    M: [['🍎', 'MANZANA'], ['🐵', 'MONO'], ['🏍️', 'MOTO'], ['🍯', 'MIEL']],
+    N: [['☁️', 'NUBE'], ['🍊', 'NARANJA'], ['❄️', 'NIEVE']],
+    O: [['🐻', 'OSO'], ['🐑', 'OVEJA'], ['👁️', 'OJO']],
+    P: [['🦆', 'PATO'], ['🐶', 'PERRO'], ['🐟', 'PEZ'], ['🍕', 'PIZZA'], ['🐧', 'PINGÜINO']],
+    Q: [['🧀', 'QUESO']],
+    R: [['🐭', 'RATÓN'], ['🌹', 'ROSA'], ['🐸', 'RANA'], ['🤖', 'ROBOT']],
+    S: [['☀️', 'SOL'], ['🐍', 'SERPIENTE'], ['🍉', 'SANDÍA']],
+    T: [['🐢', 'TORTUGA'], ['🚂', 'TREN'], ['🍅', 'TOMATE'], ['🦈', 'TIBURÓN']],
+    U: [['🍇', 'UVA'], ['🦄', 'UNICORNIO']],
+    V: [['🐮', 'VACA'], ['🌋', 'VOLCÁN'], ['🎻', 'VIOLÍN'], ['🕯️', 'VELA']],
+    Y: [['🛥️', 'YATE']],
+    Z: [['👟', 'ZAPATILLA'], ['🥕', 'ZANAHORIA'], ['🦊', 'ZORRO']],
+  };
+  // Letras que se parecen: se mezclan en las fases avanzadas para aprender a distinguirlas.
+  const CONFUSE = { E: 'F', F: 'E', O: 'QC', Q: 'O', C: 'GO', G: 'C', M: 'NW', N: 'MÑ', Ñ: 'N', W: 'MV', P: 'RB', R: 'PB', B: 'PR', V: 'UY', U: 'V', I: 'LT', L: 'I', T: 'I', D: 'O' };
+  const MODES = {
+    vocales: { label: 'VOCALES', sample: 'A E I O U', letters: 'AEIOU' },
+    nombre: { label: 'SU NOMBRE', sample: 'A L V R I T O', letters: 'ALVRITO' },
+    poco: { label: 'POCO A POCO', sample: 'Vocales y más', phases: ['AEIOU', 'AEIOUMPL', 'AEIOUMPLSTND', 'AEIOUMPLSTNDBCRFG', ALPHABET.join('')] },
+    todas: { label: 'TODAS', sample: 'De la A a la Z', letters: ALPHABET.join('') },
+  };
+
+  // ---------- Personajes (pixel art) ----------
+  const PAL = {
+    "#": '#7c9c3c',
+    "%": '#120d20',
+    "*": '#d4e19a',
+    "+": '#4b6824',
+    "0": '#f3ead2',
+    "1": '#d9822b',
+    "2": '#9c5418',
+    "3": '#f2cf95',
+    "4": '#fff6dc',
+    "5": '#1b1530',
+    "6": '#b8323a',
+    "7": '#4f8fbf',
+    "8": '#2f5f8a',
+    "9": '#e8953a',
+    "A": '#e6ad8c',
+    "B": '#2f4f9e',
+    "D": '#8a7e74',
+    "E": '#e0603c',
+    "F": '#e8e4d8',
+    "H": '#5a3a24',
+    "I": '#a77bd0',
+    "J": '#6d4794',
+    "K": '#141418',
+    "L": '#a07a62',
+    "M": '#6a1d2a',
+    "N": '#1f3b73',
+    "O": '#5a4636',
+    "P": '#2a2c36',
+    "Q": '#78b052',
+    "R": '#8a4422',
+    "S": '#cf9673',
+    "T": '#c6e29a',
+    "U": '#55267a',
+    "V": '#2f7d32',
+    "W": '#3f7a2f',
+    "X": '#f2b94e',
+    "Y": '#f6d27a',
+    "a": '#f4cba9',
+    "b": '#86b6ea',
+    "c": '#f29c8a',
+    "d": '#3a2a20',
+    "e": '#2a1810',
+    "f": '#1d1d24',
+    "g": '#a3a8b6',
+    "h": '#2e1c12',
+    "j": '#3a64b0',
+    "k": '#15121f',
+    "l": '#5a5f78',
+    "m": '#8e2b3a',
+    "n": '#7a2a2a',
+    "o": '#e8e8e8',
+    "p": '#3a3d4a',
+    "q": '#f2c14e',
+    "r": '#c9645a',
+    "s": '#e9b48f',
+    "t": '#ecdcd6',
+    "u": '#7b3fa0',
+    "v": '#5cb85c',
+    "w": '#ffffff',
+    "x": '#b8683a',
+    "y": '#d9a441',
+    "z": '#a8762a',
+  };
+  // Alvarito, Danielito y los abuelos dibujados a partir de fotos; los dinos, con formas y contorno.
+  const SPRITES = {
+    DANI: [
+      '....hhHhhHhh....',
+      '..hhhhhhhhhhhh..',
+      '.hhHhhhHhhhhHhh.',
+      '.hhhhhhhhhhhhhh.',
+      'hhhHhhhhhHhhhhhh',
+      'hhhhshhhhhhshhhh',
+      '.hhsssssssssshh.',
+      '.hsHHssssssHHsh.',
+      'Sssweessssweesss',
+      'Sssweessssweesss',
+      '.sssssssSssssss.',
+      '.SsssssssssssS..',
+      '..sssnwwwwnsss..',
+      '...sssnnnnsss...',
+      '....ssssssss....',
+      '......SSSS......',
+      '...mmmmmmmmmm...',
+      '..mmmmmmmmmmmm..',
+      '.mmmtmtmmtmtmmm.',
+      '.mmmmmmmmmmmmmm.',
+      '.mMmmtmtmtmmmMm.',
+      '.mMmmmmmmmmmmMm.',
+      '.ssmmmmmmmmmmss.',
+      '...pppppppppp...',
+      '...ppppPPpppp...',
+      '...pppp..pppp...',
+      '...pppp..pppp...',
+      '..kkkkk..kkkkk..',
+      '..ooooo..ooooo..',
+    ],
+    DANI_YAY: [
+      '....hhHhhHhh....ss',
+      '..hhhhhhhhhhhh..ss',
+      '.hhHhhhHhhhhHhh.mm',
+      '.hhhhhhhhhhhhhh.mm',
+      'hhhHhhhhhHhhhhhhmm',
+      'hhhhshhhhhhshhhhmm',
+      '.hhsssssssssshh.mm',
+      '.hsHHssssssHHsh.mm',
+      'Sssweessssweesssmm',
+      'Sssweessssweesssmm',
+      '.sssssssSssssss.mm',
+      '.SsssssssssssS..mm',
+      '..sssnwwwwnsss..m.',
+      '...sssnnnnsss...m.',
+      '....ssssssss....m.',
+      '......SSSS....mmm.',
+      '...mmmmmmmmmmmm.m.',
+      '..mmmmmmmmmmmm....',
+      '.mmmtmtmmtmtmm....',
+      '.mmmmmmmmmmmmm....',
+      '.mMmmtmtmtmmmm....',
+      '.mMmmmmmmmmmmm....',
+      '.ssmmmmmmmmmmm....',
+      '...pppppppppp.....',
+      '...ppppPPpppp.....',
+      '...pppp..pppp.....',
+      '...pppp..pppp.....',
+      '..kkkkk..kkkkk....',
+      '..ooooo..ooooo....',
+    ],
+    ALVA_A: [
+      '....y.yYy.yy....',
+      '..yyYyyyyyyYyy..',
+      '.yYyyzyyYyyzyyy.',
+      'yyyyYyyyyyYyyYyy',
+      'yzyyyyyzyyyyyyzy',
+      'yyyYaayyyyaaYyyy',
+      'yyazaaaaaaaazayz',
+      'zyaazzaaaazzaayy',
+      'yyaaeeaaaaeeaayy',
+      'yyaaeeaaaaeeaayz',
+      'zycaaaaAAaaaacyy',
+      '.yaaawwwwwwaaay.',
+      '..aaanwwwwnaaa..',
+      '...aaaaaaaaaa...',
+      '...bbbbbbbbbb...',
+      '..bbBbbbbqbbbb..',
+      '.abbbbbBbbbbbba.',
+      '.abqbbbbbbBbbba.',
+      '...bbbbbbbbbb...',
+      '...bbBbbbbqbb...',
+      '....bbb..bbb....',
+      '....bbb..bbb....',
+      '....ggg..ggg....',
+      '...gggg..gggg...',
+    ],
+    ALVA_ROAR: [
+      '......y.yYy.yy......',
+      'aa..yyYyyyyyyYyy..aa',
+      'aa.yYyyzyyYyyzyyy.aa',
+      'aayyyyYyyyyyYyyYyyaa',
+      'bbyzyyyyyzyyyyyyzybb',
+      'bbyyyYaayyyyaaYyyybb',
+      'bbyyazaaaaaaaazayzbb',
+      'bbzyaazzaaaazzaayybb',
+      'bbyyaaeeaaaaeeaayybb',
+      'bbyyaaeeaaaaeeaayzbb',
+      'bbzycaaaaAAaaaacyybb',
+      'bb.yaaanwwwwnaaay.bb',
+      'bb..aaannnnnnaaa..bb',
+      'bb...aaawnnwaaa...bb',
+      'bbbbbbbbbbbbbbbbbbbb',
+      '....bbBbbbbqbbbb....',
+      '....bbbbbBbbbbbb....',
+      '....bqbbbbbbBbbb....',
+      '.....bbbbbbbbbb.....',
+      '.....bbBbbbbqbb.....',
+      '......bbb..bbb......',
+      '......bbb..bbb......',
+      '......ggg..ggg......',
+      '.....gggg..gggg.....',
+    ],
+    ALVA_HULK: [
+      '......y.yYy.yy......',
+      'vv..yyYyyyyyyYyy..vv',
+      'vv.yYyyzyyYyyzyyy.vv',
+      'vvyyyyYyyyyyYyyYyyvv',
+      'vvyzyyyyyzyyyyyyzyvv',
+      'vvyyyYaayyyyaaYyyyvv',
+      'vvyyazaaaaaaaazayzvv',
+      'vvzyaazzaaaazzaayyvv',
+      'vvyyaaeeaaaaeeaayyvv',
+      'vvyyaaeeaaaaeeaayzvv',
+      'vvzycaaaaAAaaaacyyvv',
+      'vv.yaaanwwwwnaaay.vv',
+      'vv..aaannnnnnaaa..vv',
+      'vv...aaawnnwaaa...vv',
+      'vvvvvvvvvvvvvvvvvvvv',
+      '....vvVvvvvvvvvv....',
+      '....vvvvvVvvvvvv....',
+      '....vvvvvvvvVvvv....',
+      '.....vvvvvvvvvv.....',
+      '.....vvVvvvvvvv.....',
+      '......uuu..uuu......',
+      '......UUU..UUU......',
+      '......vvv..vvv......',
+      '.....vvvv..vvvv.....',
+    ],
+    ABUELA: [
+      '....RRxRRRR.....',
+      '..RRRRRRRRxRR...',
+      '.RRxRRRRRRRRRR..',
+      '.RRRRRRRRRxRRRR.',
+      'RRRxsssssssRRRR.',
+      'RRRssssssssssRRR',
+      'RRsKKKKssKKKKsRR',
+      'RRsKlKKKKKlKKsRR',
+      'RRsKKKKssKKKKsRR',
+      'RRsssssSsssssRRR',
+      'RRssssrrrrsssRRR',
+      'RRRsssssssssRRxR',
+      '.RRx.sssss..RRR.',
+      '.RR..sssss...RR.',
+      '...ssssssssss...',
+      '..sssffffffsss..',
+      '.ssfFfffFffFfss.',
+      '.ssffFfffffffss.',
+      '.ssfffFffFfFfss.',
+      '..sfFffffffffs..',
+      '...fffFffFfff...',
+      '...ffFffffffFf..',
+      '...fffffFfffff..',
+      '....ssss..ssss..',
+      '....ssss..ssss..',
+      '....SSSS..SSSS..',
+      '...kkkkk..kkkkk.',
+    ],
+    ABUELO: [
+      '....dddddddd....',
+      '...ddDdddDdddd..',
+      '..ddddddddddddd.',
+      '..ddDssssssssDd.',
+      '..dssssssssssss.',
+      '.SsOOOOOsOOOOOsS',
+      '.SsOLLLOOOLLLOsS',
+      '..sOLLLOsOLLLOs.',
+      '..sssssSSsssss..',
+      '..ssnwwwwwwnss..',
+      '...ssnwwwwnss...',
+      '....ssssssss....',
+      '......SSSS......',
+      '..ssssssssssss..',
+      '.ssssssssssssss.',
+      '.sssSsssssSssss.',
+      '.ssssssssssssss.',
+      '.ssssSSSSSSssss.',
+      '.ss.ssssssss.ss.',
+      '.ss.ssssssss.ss.',
+      '....NNNNNNNN....',
+      '....NjNNNNjN....',
+      '....NNNN.NNN....',
+      '....ssss.sss....',
+      '....ssss.sss....',
+      '....ssss.sss....',
+      '....SSSS.SSS....',
+      '...kkkkk.kkkk...',
+    ],
+    RAPTOR_A: [
+      '......%%%1%%................................',
+      '...%%%122221%%..............................',
+      '%%%11111541111%.............................',
+      '11111111551111%............................%',
+      '111111111111111%........................%%%1',
+      '%11111111111111%.....................%%%1111',
+      '%11111111111111%..................%%%1111111',
+      '%166666666661111%.%%%%%%%.....%%%%1111111111',
+      '.%%1411411411111%%1111111%%%%%111111111111%%',
+      '...%111111111111121121121121111111111111%%..',
+      '....%%%%%%1111112112112112111111111111%%....',
+      '..........%1111111121121121111111111%%......',
+      '..........%112111121121121111111111%........',
+      '.........%%2221233233211211111111%%.........',
+      '........%2222223333333311111111%%...........',
+      '........%42%1133333333331111111%............',
+      '.........%%.%33333333333311111%.............',
+      '............%33331111133311111%.............',
+      '.............%333111113311111%..............',
+      '..............%311111331111%%...............',
+      '...............%11111311122%................',
+      '...............%1111%%%22222%...............',
+      '...............%1111%.%22222%...............',
+      '.............%%1111%..%%2222%...............',
+      '............%222222%.%222222%...............',
+      '............%222222%.%222222%...............',
+      '............%4%4%%%..%4%4%%%................',
+      '.............%.%......%.%...................',
+    ],
+    RAPTOR_B: [
+      '......%%%1%%................................',
+      '...%%%122221%%..............................',
+      '%%%11111541111%.............................',
+      '11111111551111%............................%',
+      '111111111111111%........................%%%1',
+      '%11111111111111%.....................%%%1111',
+      '%11111111111111%..................%%%1111111',
+      '%166666666661111%.%%%%%%%.....%%%%1111111111',
+      '.%%1411411411111%%1111111%%%%%111111111111%%',
+      '...%111111111111121121121121111111111111%%..',
+      '....%%%%%%1111112112112112111111111111%%....',
+      '..........%1111111121121121111111111%%......',
+      '..........%112111121121121111111111%........',
+      '.........%%2221233233211211111111%%.........',
+      '........%2222223333333311111111%%...........',
+      '........%42%1133333333331111111%............',
+      '.........%%.%33333333333311111%.............',
+      '............%33331111133311111%.............',
+      '.............%333111113311111%..............',
+      '..............%333111131111%%...............',
+      '...............%3311111112%.................',
+      '................%%1111122%..................',
+      '.................%1111122%..................',
+      '.................%%11112%...................',
+      '................%2222222%...................',
+      '................%2222222%...................',
+      '................%4444%%%....................',
+      '.................%%%%.......................',
+    ],
+    RAPTOR_BITE: [
+      '......%%%1%%................................',
+      '...%%%122221%%..............................',
+      '%%%11111541111%.............................',
+      '11111111551111%............................%',
+      '111111111111111%........................%%%1',
+      '%11111111111111%.....................%%%1111',
+      '%11111111111111%..................%%%1111111',
+      '%666666666666611%.%%%%%%%.....%%%%1111111111',
+      '.%46646646646611%%1111111%%%%%111111111111%%',
+      '.%66666666661611121121121121111111111111%%..',
+      '..%11111111111112112112112111111111111%%....',
+      '..%111111111111111121121121111111111%%......',
+      '...%1111111112111121121121111111111%........',
+      '...%11111112221233233211211111111%%.........',
+      '....%%%%%2222223333333311111111%%...........',
+      '........%42%1133333333331111111%............',
+      '.........%%.%33333333333311111%.............',
+      '............%33331111133311111%.............',
+      '.............%333111113311111%..............',
+      '..............%311111331111%%...............',
+      '...............%11111311122%................',
+      '...............%1111%%%22222%...............',
+      '...............%1111%.%22222%...............',
+      '.............%%1111%..%%2222%...............',
+      '............%222222%.%222222%...............',
+      '............%222222%.%222222%...............',
+      '............%4%4%%%..%4%4%%%................',
+      '.............%.%......%.%...................',
+    ],
+    TRICE_A: [
+      '.%...%0%....%%99099%%.............................',
+      '%0%.%000%%.%999999999%............................',
+      '000%%%0000%90999999909%...........................',
+      '%0000%%0000999EEEEE9999%..........................',
+      '.%0000%%00009EEEEEEE9999%%%%%%%%%%................',
+      '..%00000900000EEEEEEE9909777777777%%%.............',
+      '...%%0000900000EEEEEEE999777777777777%%.%%%.......',
+      '.....%000000007EEEEEEE99998877888778887%888%......',
+      '%.%%%%700077077EEEEEEEE999778877788777887%%8%.....',
+      '0%77777707777777EEEEEEE9997788777887778877%%8%....',
+      '%0777777775477777EEEEEE90977887778877788777%8%....',
+      '%0007777775577777EEEEEE999777777777777777777%.....',
+      '.%0777777777777777EEEEE999777777777777777777%.....',
+      '.%7777777777777777EEEE99997777777777777777777%....',
+      '..%77777777777777EEEEE999777777777777777777777%%%%',
+      '.%%77777777777777EEEE99097777777777777777777777777',
+      '%8888888777777777EEE999977777777777777777777777777',
+      '.%%77777777777777EE9999777777777777777777777777777',
+      '..%7777777777777999909777777777777777777777777%%%%',
+      '...%%%%%%77777779999977777777777777777777777%%....',
+      '.........%%%%%970997777777777777777777777777%.....',
+      '..............%%777777777777777777777777777%......',
+      '................%7777777777777777777777777%.......',
+      '.................%777777777777777777777777%.......',
+      '.................%887777777777777777777777%.......',
+      '.................%888877777777777777777777%.......',
+      '.................%88888%7777777777%8877777%.......',
+      '.................%88888%77777%%%%%%8877777%.......',
+      '................%8888888888888%..%888888888%......',
+      '................%8888888888888%..%888888888%......',
+      '.................%%%%%%0%0%0%%....%%0%0%0%%.......',
+      '.......................%.%.%........%.%.%.........',
+    ],
+    TRICE_B: [
+      '.%...%0%....%%99099%%.............................',
+      '%0%.%000%%.%999999999%............................',
+      '000%%%0000%90999999909%...........................',
+      '%0000%%0000999EEEEE9999%..........................',
+      '.%0000%%00009EEEEEEE9999%%%%%%%%%%................',
+      '..%00000900000EEEEEEE9909777777777%%%.............',
+      '...%%0000900000EEEEEEE999777777777777%%.%%%.......',
+      '.....%000000007EEEEEEE99998877888778887%888%......',
+      '%.%%%%700077077EEEEEEEE999778877788777887%%8%.....',
+      '0%77777707777777EEEEEEE9997788777887778877%%8%....',
+      '%0777777775477777EEEEEE90977887778877788777%8%....',
+      '%0007777775577777EEEEEE999777777777777777777%.....',
+      '.%0777777777777777EEEEE999777777777777777777%.....',
+      '.%7777777777777777EEEE99997777777777777777777%....',
+      '..%77777777777777EEEEE999777777777777777777777%%%%',
+      '.%%77777777777777EEEE99097777777777777777777777777',
+      '%8888888777777777EEE999977777777777777777777777777',
+      '.%%77777777777777EE9999777777777777777777777777777',
+      '..%7777777777777999909777777777777777777777777%%%%',
+      '...%%%%%%77777779999977777777777777777777777%%....',
+      '.........%%%%%970997777777777777777777777777%.....',
+      '..............%%7777777777777777777777777777%.....',
+      '................%777777777777777777777777777%.....',
+      '.................%77777777777777777777777777%.....',
+      '..................%%777777777777777777777777%.....',
+      '...................%887777777777777778%77777%.....',
+      '...................%887777777777778888%77777%.....',
+      '...................%8877777%%%%%%88888%77777%.....',
+      '..................%888888888%..%8888888888888%....',
+      '..................%888888888%..%8888888888888%....',
+      '...................%%0%0%0%%....%%%%%%0%0%0%%.....',
+      '.....................%.%.%............%.%.%.......',
+    ],
+    TRICE_BITE: [
+      '.%...%0%....%%99099%%.............................',
+      '%0%.%000%%.%999999999%............................',
+      '000%%%0000%90999999909%...........................',
+      '%0000%%0000999EEEEE9999%..........................',
+      '.%0000%%00009EEEEEEE9999%%%%%%%%%%................',
+      '..%00000900000EEEEEEE9909777777777%%%.............',
+      '...%%0000900000EEEEEEE999777777777777%%.%%%.......',
+      '.....%000000007EEEEEEE99998877888778887%888%......',
+      '%.%%%%700077077EEEEEEEE999778877788777887%%8%.....',
+      '0%77777707777777EEEEEEE9997788777887778877%%8%....',
+      '%0777777775477777EEEEEE90977887778877788777%8%....',
+      '%0007777775577777EEEEEE999777777777777777777%.....',
+      '.%0777777777777777EEEEE999777777777777777777%.....',
+      '%%7777777777777777EEEE99997777777777777777777%....',
+      '6%%77777777777777EEEEE999777777777777777777777%%%%',
+      '66666666677777777EEEE99097777777777777777777777777',
+      '%6666666677777777EEE999977777777777777777777777777',
+      '%6666666677777777EE9999777777777777777777777777777',
+      '%6%7777777777777999909777777777777777777777777%%%%',
+      '.%777777777777779999977777777777777777777777%%....',
+      '..%7777777%%%%970997777777777777777777777777%.....',
+      '...%777777%...%%777777777777777777777777777%......',
+      '....%%%%%%......%7777777777777777777777777%.......',
+      '.................%777777777777777777777777%.......',
+      '.................%887777777777777777777777%.......',
+      '.................%888877777777777777777777%.......',
+      '.................%88888%7777777777%8877777%.......',
+      '.................%88888%77777%%%%%%8877777%.......',
+      '................%8888888888888%..%888888888%......',
+      '................%8888888888888%..%888888888%......',
+      '.................%%%%%%0%0%0%%....%%0%0%0%%.......',
+      '.......................%.%.%........%.%.%.........',
+    ],
+    STEGO_A: [
+      '......................%....%........................',
+      '.....................%E%..%E%.......................',
+      '.................%...%E%..%E%...%...................',
+      '................%E%.%EEE%%EEE%.%E%..................',
+      '............%...%E%.%EEE%%EEE%.%E%...%..............',
+      '...........%E%.%EEE%%EEE%%EEE%%EEE%.%E%.............',
+      '...........%E%.%EEE%%EEE%%EEE%%EEE%.%E%.............',
+      '..........%EEE%%EEE%EEEEEEEEEE%EEE%%EEE%.......%...%',
+      '..........%EEE%EEEEEEQQQQQQQQQQQEEE%EEE%......%0%.%0',
+      '.........%EEEEEEEQQQQQQQQQQQQQQQQQQQEEEE%.....%0%.%0',
+      '.........%EEEEEQQQQQQQQQQQQQQQQQQQQQQQEE%....%00%%00',
+      '........%EEEEQQQQQQQQQQQQQQQQQQQQQQQQQQQE%...%00%%00',
+      '........%EEQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ%..%00%%00',
+      '.........%QQQQQWQQQQWQQQQWQQQQWQQQQWQQQQWQQ%%000%000',
+      '.........%QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ%%000%000',
+      '........%QQQQQQQQWQQQQWQQQQWQQQQWQQQQWQQQQWQ%%%QQQQQ',
+      '...%%%%%QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ',
+      '..%QQQQ%QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ%',
+      '.%QQQQQQQQQQQQQQQQQTTTTTTTTTTTQQQQQQQQQQQQQQQQQQQQ%.',
+      '%QQ54QQQQQQQQQQQTTTTTTTTTTTTTTTTTQQQQQQQQQQQQQQQQ%..',
+      'QQQ55QQQQQQQQQTTTTTTTTTTTTTTTTTTTTTQQQQQQQQQQQQ%%...',
+      'QQQQQQQQQQQQQTTTTTTTTTTTTTTTTTTTTTTTQQQQQQQQQQ%.....',
+      'QQQQQQQQQQQQTTTTTTTTTQQQQQTTTTTTTTTTTQQQQQQQQ%......',
+      'WWWWWQQQQQQQTTTTTTTTTQQQQQTTTTTTTTTTTQQQQQQQ%.......',
+      '%%QQQQQQQQQQTTTTTTTTTQQQQQTTTTTTTTTTTQQQQQQQ%.......',
+      '..%QQQQ%%%%%%TTTTTTTTQQQQQTTTTTTTTTTQQQQQQQQ%.......',
+      '...%%%%......%TTTTTTTQQQQQTTTTTTTTTQQQWQQQQQ%.......',
+      '..............%WTTTTTQQQQQTTTTTTTQQQ%WWQQQQQ%.......',
+      '..............%WWWWTTQQQQQTTTTQQ%%%%%WWQQQQQ%.......',
+      '..............%WWWWW%QQQQQ%%%%%%....%WWQQQQQ%.......',
+      '..............%WWWWW%QQQQQ%.........%WWQQQQQ%.......',
+      '..............%WWWWWWWWWWWW%........%WWWWWWWW%......',
+      '...............%%%%%WWWWWWW%.........%WWWWWWW%......',
+      '....................%%%%%%%...........%%%%%%%.......',
+    ],
+    STEGO_B: [
+      '......................%....%........................',
+      '.....................%E%..%E%.......................',
+      '.................%...%E%..%E%...%...................',
+      '................%E%.%EEE%%EEE%.%E%..................',
+      '............%...%E%.%EEE%%EEE%.%E%...%..............',
+      '...........%E%.%EEE%%EEE%%EEE%%EEE%.%E%.............',
+      '...........%E%.%EEE%%EEE%%EEE%%EEE%.%E%.............',
+      '..........%EEE%%EEE%EEEEEEEEEE%EEE%%EEE%.......%...%',
+      '..........%EEE%EEEEEEQQQQQQQQQQQEEE%EEE%......%0%.%0',
+      '.........%EEEEEEEQQQQQQQQQQQQQQQQQQQEEEE%.....%0%.%0',
+      '.........%EEEEEQQQQQQQQQQQQQQQQQQQQQQQEE%....%00%%00',
+      '........%EEEEQQQQQQQQQQQQQQQQQQQQQQQQQQQE%...%00%%00',
+      '........%EEQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ%..%00%%00',
+      '.........%QQQQQWQQQQWQQQQWQQQQWQQQQWQQQQWQQ%%000%000',
+      '.........%QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ%%000%000',
+      '........%QQQQQQQQWQQQQWQQQQWQQQQWQQQQWQQQQWQ%%%QQQQQ',
+      '...%%%%%QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ',
+      '..%QQQQ%QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ%',
+      '.%QQQQQQQQQQQQQQQQQTTTTTTTTTTTQQQQQQQQQQQQQQQQQQQQ%.',
+      '%QQ54QQQQQQQQQQQTTTTTTTTTTTTTTTTTQQQQQQQQQQQQQQQQ%..',
+      'QQQ55QQQQQQQQQTTTTTTTTTTTTTTTTTTTTTQQQQQQQQQQQQ%%...',
+      'QQQQQQQQQQQQQTTTTTTTTTTTTTTTTTTTTTTTQQQQQQQQQQ%.....',
+      'QQQQQQQQQQQQTTTTTTTQQQQQTTTTTTTTTTTTTQQQQQQQQQ%.....',
+      'WWWWWQQQQQQQTTTTTTTQQQQQTTTTTTTTTTTTTQQQQQQQQQ%.....',
+      '%%QQQQQQQQQQTTTTTTTQQQQQTTTTTTTTTTTTTQQQQQQQQQ%.....',
+      '..%QQQQ%%%%%%TTTTTTQQQQQTTTTTTTTTTTTQQQQ%QQQQQ%.....',
+      '...%%%%......%TTTTTQQQQQTTTTTTTTTTTQQQWW%QQQQQ%.....',
+      '..............%%TTTQQQQQTTTTTTTTTQQQWWWW%QQQQQ%.....',
+      '................%WWQQQQQTTTTTTQQ%%%WWWWW%QQQQQ%.....',
+      '................%WWQQQQQ%%%%%%%%..%WWWWW%QQQQQ%.....',
+      '................%WWQQQQQ%.........%WWWWW%QQQQQ%.....',
+      '................%WWWWWWWW%........%WWWWWWWWWWWW%....',
+      '.................%WWWWWWW%.........%%%%%WWWWWWW%....',
+      '..................%%%%%%%...............%%%%%%%.....',
+    ],
+    STEGO_BITE: [
+      '......................%....%........................',
+      '.....................%E%..%E%.......................',
+      '.................%...%E%..%E%...%...................',
+      '................%E%.%EEE%%EEE%.%E%..................',
+      '............%...%E%.%EEE%%EEE%.%E%...%..............',
+      '...........%E%.%EEE%%EEE%%EEE%%EEE%.%E%.............',
+      '...........%E%.%EEE%%EEE%%EEE%%EEE%.%E%.............',
+      '..........%EEE%%EEE%EEEEEEEEEE%EEE%%EEE%.......%...%',
+      '..........%EEE%EEEEEEQQQQQQQQQQQEEE%EEE%......%0%.%0',
+      '.........%EEEEEEEQQQQQQQQQQQQQQQQQQQEEEE%.....%0%.%0',
+      '.........%EEEEEQQQQQQQQQQQQQQQQQQQQQQQEE%....%00%%00',
+      '........%EEEEQQQQQQQQQQQQQQQQQQQQQQQQQQQE%...%00%%00',
+      '........%EEQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ%..%00%%00',
+      '.........%QQQQQWQQQQWQQQQWQQQQWQQQQWQQQQWQQ%%000%000',
+      '.........%QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ%%000%000',
+      '........%QQQQQQQQWQQQQWQQQQWQQQQWQQQQWQQQQWQ%%%QQQQQ',
+      '...%%%%%QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ',
+      '..%QQQQ%QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ%',
+      '.%QQQQQQQQQQQQQQQQQTTTTTTTTTTTQQQQQQQQQQQQQQQQQQQQ%.',
+      '%QQ54QQQQQQQQQQQTTTTTTTTTTTTTTTTTQQQQQQQQQQQQQQQQ%..',
+      'QQQ55QQQQQQQQQTTTTTTTTTTTTTTTTTTTTTQQQQQQQQQQQQ%%...',
+      'QQQQQQQQQQQQQTTTTTTTTTTTTTTTTTTTTTTTQQQQQQQQQQ%.....',
+      '666666QQQQQQTTTTTTTTTQQQQQTTTTTTTTTTTQQQQQQQQ%......',
+      '666666QQQQQQTTTTTTTTTQQQQQTTTTTTTTTTTQQQQQQQ%.......',
+      '666666QQQQQQTTTTTTTTTQQQQQTTTTTTTTTTTQQQQQQQ%.......',
+      '6%%QQQQ%%%%%%TTTTTTTTQQQQQTTTTTTTTTTQQQQQQQQ%.......',
+      '%..%%%%......%TTTTTTTQQQQQTTTTTTTTTQQQWQQQQQ%.......',
+      '..............%WTTTTTQQQQQTTTTTTTQQQ%WWQQQQQ%.......',
+      '..............%WWWWTTQQQQQTTTTQQ%%%%%WWQQQQQ%.......',
+      '..............%WWWWW%QQQQQ%%%%%%....%WWQQQQQ%.......',
+      '..............%WWWWW%QQQQQ%.........%WWQQQQQ%.......',
+      '..............%WWWWWWWWWWWW%........%WWWWWWWW%......',
+      '...............%%%%%WWWWWWW%.........%WWWWWWW%......',
+      '....................%%%%%%%...........%%%%%%%.......',
+    ],
+    PTERO_A: [
+      '..................%%%%J%................%.',
+      '...............%%%IIIIJ%........%%%%%%%%J%',
+      '...........%%%%IIIIIIJII%......%JJJJJJJJ%.',
+      '..........%IIIIIIIIIIJII%.....%JJJJJJJJJ%.',
+      '..........%IIIIIIIIIJIII%....%JJJJJJJJJ%..',
+      '...........%IIIIIIIIJIIII%..%JJJJJJJJJ%...',
+      '...........%IIIIIIIJIJJII%..%JJJJJJJJ%....',
+      '..........%%IIIIIIIJJIIII%.%JJJJJJJJJ%....',
+      '........%%IIIIIIJJJJIIIIII%JJJJJJJJJ%.....',
+      '.......%IIIIIJJJJJJIIIIIIIJJJJJJJJJ%......',
+      '......%III54IIJJJJIIIIIIIIJJJJJJJJJ%......',
+      '%%%%%%%IXI55IIJIIJIIIIIIIIIJJJJJJJ%.......',
+      'XXXXXXXXXIIIIIIIIIIIIIIIIIIIJJJJJ%........',
+      'XXXXXXXXXIIIIIIIIIIIIIIIIIIIIIIJ%.........',
+      '%%%%%%%%XIIIIIIIIIIIIIIIIIIIIIII%%%%%%%...',
+      '........%%IIIIIIIIIIIIIIIIIIIIIIIIIIIII%..',
+      '..........%%IIIIIIIIIIIIIIIIIIIIIII%%%%...',
+      '............%%%IIIIIIIIIIIIIIIII%%%.......',
+      '...............%IIIIIIIIIIIIIII%..........',
+      '................%%%IIIXIIIXI%%%...........',
+      '...................%%%X%%%X%..............',
+      '......................%X%.%X%.............',
+      '......................%X%.%X%.............',
+      '.......................%...%..............',
+    ],
+    PTERO_B: [
+      '.....................%%...................',
+      '...................%%JJ%..................',
+      '..........%%%...%%%JJ%%...................',
+      '........%%III%%%JJJJ%.....................',
+      '.......%IIIIIJJJJJ%%......................',
+      '......%III54IIJJJ%%.......................',
+      '%%%%%%%IXI55IIJI%%I%%%%%%%%%..............',
+      'XXXXXXXXXIIIIIIIIIIIIIIIIIII%%%...........',
+      'XXXXXXXXXIIIIIIIIIIIIIIIIIIIIII%..........',
+      '%%%%%%%%XIIIIIIIIIIIIIIIIIIIIIII%%%%%%%...',
+      '........%%IIIIIIIIIIIIIIIIIIIIIIIIIIIII%..',
+      '..........%%IIIIIIIIIIIIIIIIIIIIIII%%%%...',
+      '............%%%IIIIIIIIIIIIIIIII%%%.......',
+      '.............%IIIIIIIIIIIIIIIIIJ%.........',
+      '.............%IIJIIIIIXIIIXIJJJJJ%........',
+      '.............%IIIJIIIIXIIIXJJJJJJ%........',
+      '.............%IIIJIIIIIXIIIXJJJJJJ%.......',
+      '............%IIIIJIIIIIXIIJXJJJJJJJ%......',
+      '............%IIIIIJIIIIIII%JJJJJJJJ%......',
+      '............%IIIIIJIIIIIII%JJJJJJJJJ%.....',
+      '...........%IIIIIIIJIIIII%.%JJJJJJJJJ%....',
+      '...........%IIIIIIIJIIIII%..%JJJJJJJJ%....',
+      '...........%IIIIIIIIJIIII%...%JJJJJJJJ%...',
+      '...........%IIIIIIIIJIII%....%JJJJJJJJ%...',
+      '..........%IIIIIIIIIJIII%.....%JJJJJJJJ%..',
+      '..........%IIIIIIIIIIJII%......%JJJJJJJJ%.',
+      '...........%%%%IIIIIIJII%.......%%%%JJJJ%.',
+      '...............%%%IIIIJ%............%%%%J%',
+      '..................%%%%J%................%.',
+    ],
+    PTERO_BITE: [
+      '..................%%%%J%................%.',
+      '...............%%%IIIIJ%........%%%%%%%%J%',
+      '...........%%%%IIIIIIJII%......%JJJJJJJJ%.',
+      '..........%IIIIIIIIIIJII%.....%JJJJJJJJJ%.',
+      '..........%IIIIIIIIIJIII%....%JJJJJJJJJ%..',
+      '...........%IIIIIIIIJIIII%..%JJJJJJJJJ%...',
+      '...........%IIIIIIIJIJJII%..%JJJJJJJJ%....',
+      '%.........%%IIIIIIIJJIIII%.%JJJJJJJJJ%....',
+      'X%%%....%%IIIIIIJJJJIIIIII%JJJJJJJJJ%.....',
+      'XXXX%%.%IIIIIJJJJJJIIIIIIIJJJJJJJJJ%......',
+      '%6XXXX%III54IIJJJJIIIIIIIIJJJJJJJJJ%......',
+      '%6666XXXXI55IIJIIJIIIIIIIIIJJJJJJJ%.......',
+      '%6666666IIIIIIIIIIIIIIIIIIIIJJJJJ%........',
+      '%6666%%IXIIIIIIIIIIIIIIIIIIIIIIJ%.........',
+      '%6%%XXXXXIIIIIIIIIIIIIIIIIIIIIII%%%%%%%...',
+      'XXXXX%%%%%IIIIIIIIIIIIIIIIIIIIIIIIIIIII%..',
+      'X%%%%.....%%IIIIIIIIIIIIIIIIIIIIIII%%%%...',
+      '%...........%%%IIIIIIIIIIIIIIIII%%%.......',
+      '...............%IIIIIIIIIIIIIII%..........',
+      '................%%%IIIXIIIXI%%%...........',
+      '...................%%%X%%%X%..............',
+      '......................%X%.%X%.............',
+      '......................%X%.%X%.............',
+      '.......................%...%..............',
+    ],
+    TREX_A: [
+      '...........%%%%%#%%.............................',
+      '......%%%%%##+++++#%............................',
+      '.%%%%%###++++#######%%..........................',
+      '%###########+++++#####%.........................',
+      '%############444######%.........................',
+      '%############554######%........................%',
+      '%##+#########554######%......................%%#',
+      '.%####################%...................%%%###',
+      '.%####################%.................%%######',
+      '.%####################%..............%%%########',
+      '.%####################%%%%%%%%.....%%###########',
+      '.%#6666666666666666###%#######%%%%%############%',
+      '..%%#4##4##4##4#######+###+###+###+###########%.',
+      '....%####################+###+###+###########%..',
+      '....%####################+###+###+##########%...',
+      '.....%##################+###+###+##########%....',
+      '......%%%%%%%%%#########+###+###+#########%.....',
+      '..............%##########################%......',
+      '..............%##+###*****###############%......',
+      '.............%#+++#*********############%.......',
+      '............%%+++++**********##########%........',
+      '...........%++++#*************#########%........',
+      '............%+###******#####**#########%........',
+      '.............%##******#######**########%........',
+      '..............%#*****#########*#######%.........',
+      '..............%#****##################%.........',
+      '...............%****#################%..........',
+      '...............%#***#################%..........',
+      '................%***################%...........',
+      '.................%**##############%%............',
+      '..................%*#############%..............',
+      '...................%##########+++%..............',
+      '...................%########+++++%..............',
+      '..................%#####%%%%%++++%..............',
+      '.................%%####%...%%++++%..............',
+      '................%++++++%..%++++++%..............',
+      '................%++++++%..%++++++%..............',
+      '................%4%4%%%...%4%4%%%...............',
+      '.................%.%.......%.%..................',
+    ],
+    TREX_B: [
+      '...........%%%%%#%%.............................',
+      '......%%%%%##+++++#%............................',
+      '.%%%%%###++++#######%%..........................',
+      '%###########+++++#####%.........................',
+      '%############444######%.........................',
+      '%############554######%........................%',
+      '%##+#########554######%......................%%#',
+      '.%####################%...................%%%###',
+      '.%####################%.................%%######',
+      '.%####################%..............%%%########',
+      '.%####################%%%%%%%%.....%%###########',
+      '.%#6666666666666666###%#######%%%%%############%',
+      '..%%#4##4##4##4#######+###+###+###+###########%.',
+      '....%####################+###+###+###########%..',
+      '....%####################+###+###+##########%...',
+      '.....%##################+###+###+##########%....',
+      '......%%%%%%%%%#########+###+###+#########%.....',
+      '..............%##########################%......',
+      '..............%##+###*****###############%......',
+      '.............%#+++#*********############%.......',
+      '............%%+++++**********##########%........',
+      '...........%++++#*************#########%........',
+      '............%+###******#####**#########%........',
+      '.............%##******#######**########%........',
+      '..............%#*****#########*#######%.........',
+      '..............%#****##################%.........',
+      '...............%****#################%..........',
+      '...............%#***#################%..........',
+      '................%***################%...........',
+      '.................%**##############%%............',
+      '..................%**############%..............',
+      '...................%%*########%%%...............',
+      '.....................%######++%.................',
+      '......................%####+++%.................',
+      '.....................%%####++%..................',
+      '....................%++++++++%..................',
+      '....................%++++++++%..................',
+      '....................%4%4%4%%%...................',
+      '.....................%.%.%......................',
+    ],
+    TREX_BITE: [
+      '...........%%%%%#%%.............................',
+      '......%%%%%##+++++#%............................',
+      '.%%%%%###++++#######%%..........................',
+      '%###########+++++#####%.........................',
+      '%############444######%.........................',
+      '%############554######%........................%',
+      '%##+#########554######%......................%%#',
+      '.%####################%...................%%%###',
+      '.%####################%.................%%######',
+      '.%####################%..............%%%########',
+      '.%####################%%%%%%%%.....%%###########',
+      '.%66666666666666666666%#######%%%%%############%',
+      '..%4664664664664666666+###+###+###+###########%.',
+      '..%6666666666666666666###+###+###+###########%..',
+      '...%#66466466466666######+###+###+##########%...',
+      '...%#6##################+###+###+##########%....',
+      '....%###################+###+###+#########%.....',
+      '....%####################################%......',
+      '.....%###########+###*****###############%......',
+      '.....%#########+++#*********############%.......',
+      '......%%%%%%%%+++++**********##########%........',
+      '...........%++++#*************#########%........',
+      '............%+###******#####**#########%........',
+      '.............%##******#######**########%........',
+      '..............%#*****#########*#######%.........',
+      '..............%#****##################%.........',
+      '...............%****#################%..........',
+      '...............%#***#################%..........',
+      '................%***################%...........',
+      '.................%**##############%%............',
+      '..................%*#############%..............',
+      '...................%##########+++%..............',
+      '...................%########+++++%..............',
+      '..................%#####%%%%%++++%..............',
+      '.................%%####%...%%++++%..............',
+      '................%++++++%..%++++++%..............',
+      '................%++++++%..%++++++%..............',
+      '................%4%4%%%...%4%4%%%...............',
+      '.................%.%.......%.%..................',
+    ],
+  };
+
+  function drawSprite(g, rows, x, y, s, flipY = false) {
+    for (let r = 0; r < rows.length; r++) {
+      const row = rows[flipY ? rows.length - 1 - r : r];
+      for (let c = 0; c < row.length; c++) {
+        const ch = row[c];
+        if (ch === '.') continue;
+        g.fillStyle = PAL[ch];
+        g.fillRect(x + c * s, y + r * s, s, s);
+      }
+    }
+  }
+  // Apoya los pies en (cx, bottom), así las poses de distinto tamaño no saltan.
+  function drawSpriteAt(g, rows, cx, bottom, s, flipY) {
+    drawSprite(g, rows, Math.round(cx - rows[0].length * s / 2), bottom - rows.length * s, s, flipY);
+  }
+
+  // ---------- Escenario ----------
+  const W = 160, H = 90, FLOOR = 72, FEET = 82, SPR = 2;
+  const ALVA_CX = 50, HELPER_CX = 16, START = 114, CATCH = 64;
+  const cv = $('scene'), ctx = cv.getContext('2d');
+  ctx.imageSmoothingEnabled = false;
+  function R(x, y, w, h, c) { ctx.fillStyle = c; ctx.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h)); }
+  function tri(cx, top, base, height, c) {
+    for (let i = 0; i < height; i++) { const w = Math.max(1, base * (i + 1) / height); R(cx - w / 2, top + i, w, 1, c); }
+  }
+  function blob(cx, cy, rx, ry, c) {
+    for (let y = -ry; y <= ry; y++) { const w = Math.round(rx * Math.sqrt(1 - (y * y) / (ry * ry))); R(cx - w, cy + y, w * 2, 1, c); }
+  }
+
+  const BACKDROPS = {
+    selva() {
+      R(0, 0, W, FLOOR, '#2a5e44'); R(0, 0, W, 16, '#9bd8c4');
+      for (let x = -6; x < W; x += 22) { blob(x + 11, 22, 14, 12, '#23523a'); }
+      for (const x of [14, 74, 122]) { R(x, 16, 6, FLOOR - 16, '#5a3b22'); R(x + 1, 16, 2, FLOOR - 16, '#6e4a2c'); }
+      for (let x = 0; x < W; x += 14) { blob(x + 7, 4, 10, 5, '#3f8f4f'); blob(x + 2, 9, 5, 3, '#4fa75a'); }
+      for (const x of [42, 98, 146]) for (let y = 8; y < 46; y += 3) R(x + (y / 3) % 2, y, 1, 2, '#6fbf5a');
+      for (let x = 0; x < W; x += 9) { R(x, FLOOR - 6, 2, 6, '#4caf50'); R(x + 2, FLOOR - 9, 2, 9, '#5fbf5a'); R(x + 4, FLOOR - 5, 2, 5, '#4caf50'); }
+      R(0, FLOOR, W, H - FLOOR, '#6b4a2b');
+      for (let y = FLOOR + 3; y < H; y += 5) for (let x = (y % 2) * 6; x < W; x += 12) R(x, y, 4, 1, '#5a3d22');
+    },
+    playa() {
+      R(0, 0, W, 42, '#8fd3ff'); blob(132, 12, 7, 7, '#ffe27a');
+      R(18, 10, 18, 4, '#f3fbff'); R(22, 7, 9, 3, '#f3fbff'); R(70, 16, 22, 4, '#f3fbff');
+      R(0, 42, W, 14, '#3aa0d8'); for (let x = 0; x < W; x += 9) R(x + (x % 2) * 3, 46 + (x % 3) * 3, 5, 1, '#bfe9ff');
+      R(0, 56, W, H - 56, '#f1d79a'); for (let x = 0; x < W; x += 7) R(x, 60 + (x * 5) % 22, 1, 1, '#d9bd7c');
+      // la sombrilla de la foto, con su mesita naranja
+      R(103, 22, 2, 52, '#e8e8e8');
+      for (let i = 0; i < 12; i++) {
+        const w = 6 + i * 3.4;
+        for (let x = 0; x < w; x++) { const stripe = Math.floor((x / w) * 8) % 2; R(104 - w / 2 + x, 12 + i, 1, 1, stripe ? '#9fd0ef' : '#f6f8f8'); }
+      }
+      R(84, 64, 26, 3, '#f08a24'); R(86, 67, 1, 9, '#c86a14'); R(107, 67, 1, 9, '#c86a14');
+      R(91, 59, 12, 5, '#d9a441'); R(92, 58, 10, 1, '#e8b863');
+      R(20, 74, 26, 6, '#ef6b6b'); for (let x = 20; x < 46; x += 4) R(x, 74, 2, 6, '#f6f8f8');
+    },
+    pradera() {
+      R(0, 0, W, FLOOR, '#a6e3ff'); blob(26, 12, 6, 6, '#ffe27a');
+      blob(40, 64, 50, 22, '#7cc66a'); blob(128, 66, 56, 20, '#6ab85a');
+      R(96, 10, 22, 4, '#f3fbff'); R(100, 7, 12, 3, '#f3fbff');
+      for (let x = 4; x < W; x += 26) { R(x + 6, 40, 3, 22, '#7a5a3a'); blob(x + 7, 38, 8, 6, '#3f8f4f'); }
+      R(0, FLOOR, W, H - FLOOR, '#5aa64a');
+      for (let x = 0; x < W; x += 3) R(x, FLOOR - 1 - (x * 7) % 3, 1, 2 + (x * 5) % 3, '#4a9640');
+      for (let x = 6; x < W; x += 17) { R(x, FLOOR + 6 + (x % 7), 2, 2, '#ffd23f'); R(x + 9, FLOOR + 12 - (x % 5), 2, 2, '#ff8fb1'); }
+    },
+    montanas() {
+      R(0, 0, W, 30, '#f6c38a'); R(0, 30, W, FLOOR - 30, '#f2a96b');
+      tri(30, 12, 80, 50, '#8a6e66'); tri(30, 12, 22, 12, '#f3ede8');
+      tri(110, 6, 100, 56, '#7a5e58'); tri(110, 6, 26, 14, '#f3ede8');
+      tri(70, 26, 60, 36, '#957a70');
+      R(0, FLOOR - 6, W, 6, '#6d5650');
+      R(0, FLOOR, W, H - FLOOR, '#8a7466');
+      for (let x = 4; x < W; x += 13) { blob(x, FLOOR + 6 + (x % 9), 3, 2, '#6d5a50'); }
+    },
+    volcan() {
+      R(0, 0, W, 24, '#2a1426'); R(0, 24, W, 24, '#4a1e2a'); R(0, 48, W, FLOOR - 48, '#6a2a2a');
+      for (let i = 0; i < 18; i++) R((i * 37) % W, (i * 13) % 22, 1, 1, '#ffd2a8');
+      tri(96, 14, 120, 58, '#3a2424'); R(86, 12, 20, 4, '#ff6a3d'); R(88, 10, 16, 2, '#ffb23f');
+      for (let y = 16; y < 50; y += 2) { R(92 - (y - 16) / 3, y, 2, 2, '#ff6a3d'); R(100 + (y - 16) / 4, y, 1, 2, '#ff8a3d'); }
+      blob(96, 6, 14, 4, '#5a3a3a'); blob(88, 2, 8, 3, '#4a3030');
+      R(0, FLOOR, W, H - FLOOR, '#3a2a26');
+      for (let x = 0; x < W; x += 11) { R(x, FLOOR + 4 + (x * 3) % 12, 6, 1, '#ff6a3d'); R(x + 5, FLOOR + 5 + (x * 3) % 12, 1, 2, '#ff6a3d'); }
+    },
+  };
+
+  const PHASES = [
+    { bg: 'selva', name: 'La selva', dino: 'RAPTOR', who: 'el velociraptor', need: 4,
+      intro: 'Un velociraptor muy hambriento quiere darle un bocao a Alvarito. ¡Encuentra las letras para convertirte en Hulk!' },
+    { bg: 'playa', name: 'La playa', dino: 'TRICE', who: 'el triceratops', need: 4,
+      intro: 'Junto a la sombrilla de los abuelos aparece un triceratops con sus tres cuernos.' },
+    { bg: 'pradera', name: 'La pradera', dino: 'STEGO', who: 'el estegosaurio', need: 4,
+      intro: 'Un estegosaurio enorme mueve la cola llena de pinchos. ¡Cuidado!' },
+    { bg: 'montanas', name: 'Las montañas', dino: 'PTERO', who: 'el pterodáctilo', need: 4, fly: true,
+      intro: '¡Un pterodáctilo baja volando desde las montañas!' },
+    { bg: 'volcan', name: 'El volcán', dino: 'TREX', who: 'el T-Rex', need: 5, boss: true,
+      intro: 'El rey de los dinosaurios: ¡el T-Rex! Encuentra 5 letras y prepara el tirachinas.' },
+  ];
+
+  const TRAPS = [
+    { item: 'banana', text: '¡Una piel de plátano y el dino resbala!' },
+    { item: 'lego', text: '¡El dino pisa una pieza de Lego! ¡Ay, ay, ay!' },
+    { item: 'bucket', text: '¡Cubo de agua fría para el dino!' },
+    { item: 'feather', text: '¡Cosquillas con una pluma! El dino no para de reír.' },
+    { item: 'smash', text: '¡Hulk aplasta! El dino sale volando.' },
+  ];
+  const IDEAS = [
+    { item: 'ball', text: '¡Mira, dino, un balón!' },
+    { item: 'car', text: '¡Dino, persigue mi coche!' },
+    { item: 'teddy', text: '¡Toma, dino, un osito!' },
+  ];
+
+  // ---------- Objetos pequeños ----------
+  const ITEMS = {
+    fish(x, y) { R(x, y, 7, 3, '#d9a441'); R(x + 1, y + 1, 5, 1, '#b07e2c'); R(x + 7, y - 1, 2, 5, '#c98a3a'); R(x + 1, y, 1, 1, '#1b1530'); },
+    ball(x, y) { R(x, y + 1, 5, 3, '#ffffff'); R(x + 1, y, 3, 5, '#ffffff'); R(x + 2, y + 2, 1, 1, '#15121f'); R(x + 1, y + 1, 1, 1, '#15121f'); R(x + 3, y + 3, 1, 1, '#15121f'); },
+    car(x, y) { R(x, y + 1, 8, 3, '#e2412b'); R(x + 2, y, 4, 2, '#e2412b'); R(x + 3, y, 2, 1, '#bfe9ff'); R(x + 1, y + 4, 2, 1, '#15121f'); R(x + 5, y + 4, 2, 1, '#15121f'); },
+    teddy(x, y) { R(x + 1, y, 4, 4, '#a0612d'); R(x, y - 1, 2, 2, '#a0612d'); R(x + 4, y - 1, 2, 2, '#a0612d'); R(x + 1, y + 4, 4, 3, '#a0612d'); R(x + 2, y + 1, 1, 1, '#15121f'); },
+    stone(x, y) { R(x, y, 4, 3, '#8a8f9c'); R(x + 1, y - 1, 2, 1, '#a3a8b6'); },
+    banana(x, y) { R(x, y, 6, 2, '#ffd23f'); R(x - 1, y - 1, 2, 2, '#ffd23f'); R(x + 6, y - 1, 1, 1, '#7a5a1a'); },
+    lego(x, y) { R(x, y, 6, 4, '#e2412b'); R(x + 1, y - 1, 1, 1, '#e2412b'); R(x + 4, y - 1, 1, 1, '#e2412b'); },
+    bucket(x, y) {
+      R(x, y, 9, 6, '#9aa3b5'); R(x, y, 9, 1, '#c8ced9'); R(x + 1, y + 6, 7, 1, '#7d8597');
+      for (let i = 0; i < 6; i++) R(x + 1 + i * 1.4, y + 8 + ((S.t * 40 + i * 5) % 14), 1, 2, '#6fc3ff');
+    },
+    feather(x, y) { R(x + 2, y, 1, 8, '#e8e8e8'); R(x, y + 1, 2, 5, '#ffffff'); R(x + 3, y + 1, 2, 5, '#ffffff'); },
+    umbrella(x, y) {
+      R(x, y, 1, 18, '#e8e8e8');
+      for (let i = 0; i < 7; i++) { const w = 4 + i * 4; for (let k = 0; k < w; k++) R(x - w / 2 + k, y - 8 + i, 1, 1, Math.floor(k / w * 6) % 2 ? '#9fd0ef' : '#f6f8f8'); }
+    },
+    slingshot(x, y) { R(x, y, 1, 6, '#7a4a2a'); R(x - 2, y - 3, 1, 4, '#7a4a2a'); R(x + 2, y - 3, 1, 4, '#7a4a2a'); R(x - 1, y - 1, 3, 1, '#7a4a2a'); },
+    stars(x, y) {
+      for (let i = 0; i < 3; i++) {
+        const a = S.t * 6 + i * 2.1;
+        const sx = x + Math.cos(a) * 7, sy = y + Math.sin(a) * 2;
+        R(sx, sy - 1, 1, 3, '#ffd23f'); R(sx - 1, sy, 3, 1, '#ffd23f');
+      }
+    },
+  };
+
+  // ---------- Estado ----------
+  const S = {
+    screen: 'title', mode: store.get('ad-mode', 'poco'), speed: 'calma',
+    run: null, q: null, T: 30, left: 30, t: 0,
+    dinoX: START, pauseUntil: 0, pauseKind: null, falling: 0,
+    hulkUntil: 0, roarUntil: 0, jump: 0, sling: false,
+    helper: null, fx: [], props: [], bubble: null, daniReadyAt: 0, lastSaid: false,
+  };
+  if (!MODES[S.mode]) S.mode = 'poco';
+  const timers = new Set();
+  function later(fn, ms) { const id = setTimeout(() => { timers.delete(id); fn(); }, ms); timers.add(id); }
+  function clearTimers() { timers.forEach(clearTimeout); timers.clear(); }
+
+  const phase = () => PHASES[S.run ? S.run.phase : 0];
+  const dinoRows = (frame) => SPRITES[phase().dino + '_' + frame];
+  function newRun(mode, speed) {
+    return { mode, speed, phase: 0, got: 0, hearts: 3, found: [], missed: [], recent: [], usedAbuela: false, usedAbuelo: false };
+  }
+  function poolFor(r) {
+    const m = MODES[r.mode];
+    return (m.phases ? m.phases[Math.min(r.phase, m.phases.length - 1)] : m.letters).split('');
+  }
+
+  // ---------- Preguntas ----------
+  function makeQuestion() {
+    const r = S.run, pool = poolFor(r);
+    let target = pick(pool);
+    for (let i = 0; i < 20 && r.recent.includes(target); i++) target = pick(pool);
+    r.recent.push(target);
+    if (r.recent.length > Math.min(3, pool.length - 1)) r.recent.shift();
+    const types = ['see', 'see'];
+    if (r.phase >= 1 && WORDS[target]) types.push('word');
+    if (r.phase >= 2) types.push('hear');
+    if (r.phase >= 3 && WORDS[target]) types.push('word');
+    const type = pick(types);
+    const n = Math.min(r.phase === 0 ? 3 : 4, pool.length);
+    const opts = [target];
+    const conf = (CONFUSE[target] || '').split('').filter(l => pool.includes(l));
+    if (r.phase >= 2 && conf.length) opts.push(pick(conf));
+    for (const l of shuffle(pool)) { if (opts.length >= n) break; if (!opts.includes(l)) opts.push(l); }
+    const q = { type, letter: target, options: shuffle(opts) };
+    if (type === 'word') { const [emoji, word] = pick(WORDS[target]); q.emoji = emoji; q.word = word; }
+    return q;
+  }
+  const question = q => q.type === 'word' ? `¿Con qué letra empieza ${q.word.toLowerCase()}?` : `¿Dónde está la ${NAME[q.letter]}?`;
+  function hintFor(q) {
+    if (q.type === 'word') return { text: `${q.word.charAt(0)} de ${q.word} ${q.emoji}`, say: `${q.word.toLowerCase()} empieza por la ${NAME[q.letter]}` };
+    const w = WORDS[q.letter];
+    if (!w) return { text: `Busca la ${q.letter}`, say: `Busca la ${NAME[q.letter]}` };
+    const [emoji, word] = w[0];
+    return { text: `${q.letter} de ${word} ${emoji}`, say: `La ${NAME[q.letter]}, de ${word.toLowerCase()}` };
+  }
+  function timeFor() {
+    const base = S.run.speed === 'rapido' ? 20 : 30;
+    return Math.max(14, base - S.run.phase * 2 + (S.q && S.q.type === 'word' ? 5 : 0));
+  }
+
+  // ---------- Pintado ----------
+  function draw() {
+    const ph = phase();
+    BACKDROPS[ph.bg]();
+    S.props.forEach(p => { if (p.under) ITEMS[p.kind](p.x(), p.y()); });
+
+    // dino
+    const eating = S.t < S.pauseUntil && S.pauseKind === 'eat';
+    const biting = S.screen === 'bite' && S.dinoX < CATCH + 6;
+    let frame = 'A';
+    if (biting) frame = 'BITE';
+    else if (eating) frame = Math.floor(S.t * 4) % 2 ? 'BITE' : 'A';
+    else if (S.screen === 'play' || Math.abs(S.dinoTarget - S.dinoX) > 0.5) frame = Math.floor(S.t * (ph.fly ? 6 : 5)) % 2 ? 'B' : 'A';
+    const rows = dinoRows(frame);
+    const bottom = ph.fly ? 56 + Math.round(Math.sin(S.t * 3) * 3) : FEET;
+    if (S.falling) {
+      drawSprite(ctx, rows, Math.round(S.dinoX), bottom - rows.length * SPR + Math.round(S.falling * 30), SPR, true);
+    } else {
+      drawSprite(ctx, rows, Math.round(S.dinoX), bottom - rows.length * SPR, SPR);
+    }
+
+    // familia que viene a ayudar
+    if (S.helper && S.t < S.helper.until) {
+      const sp = { dani: SPRITES.DANI_YAY, abuela: SPRITES.ABUELA, abuelo: SPRITES.ABUELO }[S.helper.who];
+      drawSpriteAt(ctx, sp, HELPER_CX, FEET, SPR);
+      if (S.helper.who === 'abuelo') ITEMS.umbrella(HELPER_CX + 12, 32);
+    }
+
+    // Alvarito
+    const hulk = S.t < S.hulkUntil, roar = S.t < S.roarUntil;
+    const jy = S.jump > 0 ? Math.round(Math.sin((1 - S.jump / 0.5) * Math.PI) * 8) : 0;
+    const bob = S.screen === 'play' && Math.floor(S.t * 2) % 2 ? 1 : 0;
+    const alva = hulk ? SPRITES.ALVA_HULK : roar ? SPRITES.ALVA_ROAR : SPRITES.ALVA_A;
+    drawSpriteAt(ctx, alva, ALVA_CX, FEET - jy + bob, SPR);
+    if (S.sling) ITEMS.slingshot(ALVA_CX + 22, FEET - 34);
+
+    S.props.forEach(p => { if (!p.under) ITEMS[p.kind](p.x(), p.y()); });
+    S.fx.forEach(f => {
+      const p = Math.min(1, (S.t - f.t0) / f.dur);
+      ITEMS[f.kind](f.x0 + (f.x1 - f.x0) * p, f.y0 + (f.y1 - f.y0) * p - f.arc * 4 * p * (1 - p));
+    });
+  }
+  const dinoHead = () => ({ x: S.dinoX + 12, y: (phase().fly ? 56 : FEET) - dinoRows('A').length * SPR + 4 });
+
+  function say(text, x, dur = 1.8) { S.bubble = { text, x, until: S.t + dur }; }
+  function updateBubble() {
+    const el = $('bubble');
+    const b = S.bubble;
+    const show = b && S.t < b.until;
+    el.hidden = !show;
+    if (show) {
+      if (el.textContent !== b.text) el.textContent = b.text;
+      el.style.left = Math.max(26, Math.min(74, (typeof b.x === 'function' ? b.x() : b.x) / W * 100)) + '%';
+    }
+  }
+  function flash(text, cls = '', ms = 1000) {
+    const el = $('crash');
+    el.textContent = text;
+    el.className = 'crash' + (cls ? ' ' + cls : '');
+    el.hidden = false;
+    later(() => { el.hidden = true; }, ms);
+  }
+  function shake() {
+    if (reducedMotion) return;
+    const app = $('app');
+    app.classList.remove('shake'); void app.offsetWidth; app.classList.add('shake');
+    later(() => app.classList.remove('shake'), 550);
+  }
+
+  // ---------- Marcador y paneles ----------
+  function updateHud() {
+    const r = S.run, ph = phase();
+    const hearts = r ? r.hearts : 3;
+    $('hearts').innerHTML = [0, 1, 2].map(i => `<span class="${i < hearts ? 'on' : ''}">♥</span>`).join('');
+    $('hearts').setAttribute('aria-label', `${hearts} vidas`);
+    const got = r ? r.got : 0;
+    $('progress').innerHTML = `<span>${(r ? r.phase : 0) + 1}/${PHASES.length}</span>` +
+      Array.from({ length: ph.need }, (_, i) => `<i class="${i < got ? 'on' : ''}"></i>`).join('');
+    $('progress').setAttribute('aria-label', `Fase ${(r ? r.phase : 0) + 1} de ${PHASES.length}, ${got} de ${ph.need} letras`);
+    $('phaseTag').textContent = ph.name.toUpperCase();
+    $('timerText').textContent = (ph.who.replace(/^el /, 'EL ') + ' llega en').toUpperCase();
+  }
+  function updateTimer() {
+    const ratio = S.T ? Math.max(0, S.left / S.T) : 1;
+    const bar = $('bar');
+    bar.style.width = (ratio * 100).toFixed(1) + '%';
+    bar.className = S.t < S.pauseUntil ? 'paused' : ratio > 0.5 ? '' : ratio > 0.25 ? 'mid' : 'low';
+    $('secs').textContent = S.t < S.pauseUntil ? 'PARADO' : Math.ceil(Math.max(0, S.left)) + ' s';
+  }
+  function updateHelpers() {
+    const r = S.run, play = S.screen === 'play';
+    const daniWait = Math.ceil(S.daniReadyAt - S.t);
+    const dani = $('helpDani');
+    dani.disabled = !play || daniWait > 0;
+    const sub = daniWait > 0 && r ? `Espera ${daniWait}` : 'Pista';
+    if ($('daniSub').textContent !== sub) $('daniSub').textContent = sub;
+    $('helpAbuela').disabled = !play || !r || r.usedAbuela;
+    $('helpAbuelo').disabled = !play || !r || r.usedAbuelo;
+  }
+
+  function renderQuestion(q, interactive = true) {
+    $('prompt').textContent = q.type === 'word' ? '¿Con qué letra empieza?' : q.type === 'hear' ? '¿Dónde está la…?' : `¿Dónde está la ${q.letter}?`;
+    const t = $('target');
+    if (q.type === 'word') {
+      t.innerHTML = `<span class="emoji">${q.emoji}</span><span class="word"><span class="slot">?</span>${q.word.slice(1)}</span>`;
+    } else if (q.type === 'hear') {
+      t.innerHTML = `<span class="name">«${NAME[q.letter]}»</span>`;
+    } else {
+      t.innerHTML = `<span class="big">${q.letter}</span>`;
+    }
+    $('hint').hidden = true;
+    $('feedback').hidden = true;
+    const box = $('answers');
+    box.innerHTML = '';
+    box.style.gridTemplateColumns = `repeat(${q.options.length}, 1fr)`;
+    q.options.forEach((l, i) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.id = 'ans' + i;
+      b.className = 'ans';
+      b.textContent = l;
+      b.dataset.l = l;
+      b.disabled = !interactive;
+      b.setAttribute('aria-label', `Letra ${NAME[l]}`);
+      b.addEventListener('click', () => answer(b, l));
+      box.appendChild(b);
+    });
+  }
+  function revealAnswer() {
+    const q = S.q;
+    document.querySelectorAll('.ans').forEach(b => { b.disabled = true; if (b.dataset.l === q.letter) b.classList.add('right'); });
+    const slot = document.querySelector('.target .slot');
+    if (slot) slot.textContent = q.letter;
+    if (q.type === 'hear') $('target').innerHTML = `<span class="big">${q.letter}</span>`;
+  }
+
+  // ---------- Ventanas ----------
+  function showCard(html, actions) {
+    const card = $('card');
+    card.innerHTML = html;
+    const row = document.createElement('div');
+    row.className = 'btns';
+    actions.forEach(a => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'btn ' + (a.cls || '');
+      b.innerHTML = a.label;
+      b.addEventListener('click', () => { ensureAudio(); sfx.click(); a.go(); });
+      row.appendChild(b);
+    });
+    card.appendChild(row);
+    $('overlay').hidden = false;
+    const first = row.querySelector('button');
+    if (first) first.focus({ preventScroll: true });
+  }
+  function hideCard() { $('overlay').hidden = true; }
+  function paintArt(id, w, h, fn) {
+    const c = $(id);
+    if (!c) return;
+    c.width = w; c.height = h;
+    const g = c.getContext('2d');
+    g.imageSmoothingEnabled = false;
+    fn(g);
+  }
+  function resetScene() {
+    S.dinoX = START; S.dinoTarget = START; S.pauseUntil = 0; S.falling = 0; S.sling = false;
+    S.hulkUntil = 0; S.roarUntil = 0; S.helper = null; S.fx = []; S.props = []; S.bubble = null;
+  }
+
+  function showTitle() {
+    clearTimers();
+    S.screen = 'title'; S.run = null; resetScene();
+    S.q = { type: 'see', letter: 'A', options: ['A', 'E', 'O'] };
+    renderQuestion(S.q, false);
+    S.T = 30; S.left = 30;
+    updateHud(); updateTimer(); updateHelpers();
+    showCard(`
+      <canvas class="art" id="titleArt"></canvas>
+      <h1 class="logo"><span class="a">ALVARITO</span><span class="y">Y LOS</span><span class="d">DINOS</span></h1>
+      <p>Los dinosaurios quieren darle un bocao a Alvarito. Cada vez que encuentra la letra, se pone su disfraz de Hulk y les hace una trampa.</p>
+      <h2>¿QUÉ LETRAS JUGAMOS?</h2>
+      <div class="modes" id="modes">
+        ${Object.entries(MODES).map(([k, m]) => `<button type="button" class="mode" data-m="${k}" aria-pressed="${k === S.mode}">${m.label}<small>${m.sample}</small></button>`).join('')}
+      </div>
+      <p class="small">Danielito, la abuela y el abuelo ayudan si hace falta.</p>
+    `, [
+      { label: 'CON CALMA<small>Los dinos van despacio</small>', go: () => startRun('calma') },
+      { label: 'RÁPIDO<small>Los dinos corren más</small>', cls: 'green', go: () => startRun('rapido') },
+    ]);
+    document.querySelectorAll('#modes .mode').forEach(b => b.addEventListener('click', () => {
+      ensureAudio(); sfx.click();
+      S.mode = b.dataset.m; store.set('ad-mode', S.mode);
+      document.querySelectorAll('#modes .mode').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    }));
+    paintArt('titleArt', 88, 46, g => {
+      g.fillStyle = '#21493e'; g.fillRect(0, 42, 88, 4);
+      drawSpriteAt(g, SPRITES.ALVA_HULK, 13, 43, 1);
+      drawSprite(g, SPRITES.TREX_BITE, 36, 43 - SPRITES.TREX_BITE.length, 1);
+    });
+  }
+
+  function startRun(speed) {
+    S.run = newRun(S.mode, speed);
+    showPhaseIntro();
+  }
+
+  function showPhaseIntro() {
+    clearTimers();
+    const r = S.run, ph = phase();
+    S.screen = 'intro'; resetScene();
+    r.got = 0; r.usedAbuela = false; r.usedAbuelo = false; S.daniReadyAt = 0;
+    S.q = makeQuestion();
+    S.T = timeFor(); S.left = S.T;
+    renderQuestion(S.q, false);
+    updateHud(); updateTimer(); updateHelpers();
+    showCard(`
+      <h2>FASE ${r.phase + 1} DE ${PHASES.length}</h2>
+      <h1 class="${ph.boss ? 'bad' : ''}">${ph.name.toUpperCase()}</h1>
+      <canvas class="art" id="dinoArt"></canvas>
+      <p>${ph.intro}</p>
+      <p class="small">Encuentra ${ph.need} letras para que ${ph.who} se vaya.</p>
+    `, [{ label: '¡VAMOS!', cls: 'green', go: startQuestion }]);
+    const rows = dinoRows('A');
+    paintArt('dinoArt', rows[0].length + 8, rows.length + 4, g => drawSprite(g, rows, 4, 2, 1));
+    $('dinoArt').style.width = Math.min(260, (rows[0].length + 8) * 4) + 'px';
+  }
+
+  function startQuestion() {
+    clearTimers();
+    hideCard();
+    const first = S.screen === 'intro';
+    S.q = S.q && S.screen === 'intro' ? S.q : makeQuestion();
+    S.T = timeFor(); S.left = S.T; S.lastSaid = false;
+    S.hulkUntil = 0; S.roarUntil = 0; S.props = []; S.sling = false;
+    renderQuestion(S.q);
+    updateHud(); updateTimer();
+    S.screen = 'play';
+    updateHelpers();
+    if (first) { sfx.roar(); say('¡GRRRR!', () => S.dinoX + 16); }
+    later(() => speak(question(S.q)), first ? 600 : 150);
+  }
+
+  function answer(btn, l) {
+    if (S.screen !== 'play') return;
+    ensureAudio();
+    const q = S.q, r = S.run;
+    if (l === q.letter) {
+      correct(btn);
+    } else {
+      btn.classList.add('wrong');
+      btn.disabled = true;
+      sfx.bad();
+      S.left = Math.max(0, S.left - 4);
+      if (!r.missed.includes(q.letter)) r.missed.push(q.letter);
+      speak(`Esa es la ${NAME[l]}. ${q.type === 'word' ? '¿Con qué letra empieza ' + q.word.toLowerCase() + '?' : 'Busca la ' + NAME[q.letter] + '.'}`);
+      say('¡ÑAM, ÑAM!', () => S.dinoX + 16, 1.2);
+    }
+  }
+
+  function correct(btn) {
+    const q = S.q, r = S.run, ph = phase();
+    S.screen = 'anim';
+    revealAnswer();
+    btn.classList.add('right');
+    r.got++;
+    if (!r.found.includes(q.letter)) r.found.push(q.letter);
+    updateHud(); updateHelpers();
+    sfx.ok();
+    later(sfx.hulk, 250);
+    S.hulkUntil = S.t + 2.4; S.jump = 0.5;
+    flash('¡HULK!', 'green', 700);
+    speak(q.type === 'word' ? `¡Sí! ${q.word.toLowerCase()} empieza por la ${NAME[q.letter]}` : `¡Muy bien! ¡La ${NAME[q.letter]}!`);
+
+    if (ph.boss && r.got >= ph.need) { finalShot(); return; }
+
+    const trap = pick(TRAPS);
+    const fb = $('feedback');
+    fb.textContent = trap.text;
+    fb.hidden = false;
+    if (trap.item === 'bucket') S.props.push({ kind: 'bucket', x: () => dinoHead().x, y: () => dinoHead().y - 10 });
+    else if (trap.item === 'feather') S.props.push({ kind: 'feather', x: () => dinoHead().x - 6, y: () => dinoHead().y + 4 });
+    else if (trap.item !== 'smash') S.props.push({ kind: trap.item, under: true, x: () => S.dinoX + 18, y: () => FEET - 2 });
+    later(() => {
+      if (trap.item === 'bucket') sfx.splash(); else sfx.boing();
+      if (trap.item === 'smash') { shake(); flash('¡ZAS!', '', 600); }
+      S.left = S.T;                               // el dino sale disparado hacia atrás
+      S.props.push({ kind: 'stars', x: () => dinoHead().x + 6, y: () => dinoHead().y - 4 });
+      say(pick(['¡AAARGH!', '¡AY, AY!', '¡JO!']), () => S.dinoX + 16, 1.2);
+    }, 600);
+    later(() => {
+      if (r.got >= ph.need) phaseComplete(); else { S.q = null; startQuestion(); }
+    }, 2400);
+  }
+
+  function finalShot() {
+    const fb = $('feedback');
+    fb.textContent = '¡Hulk saca el tirachinas!';
+    fb.hidden = false;
+    S.sling = true;
+    S.hulkUntil = S.t + 10;
+    later(() => {
+      sfx.throw();
+      const h = dinoHead();
+      S.fx.push({ kind: 'stone', x0: ALVA_CX + 22, y0: FEET - 38, x1: h.x + 4, y1: h.y + 2, arc: 10, t0: S.t, dur: 0.6, hit: () => {
+        sfx.chomp(); sfx.roar(); shake();
+        flash('¡TOMA!', '', 1600);
+        S.props.push({ kind: 'stars', x: () => dinoHead().x + 6, y: () => dinoHead().y - 4 });
+        S.falling = 0.0001;
+      } });
+    }, 700);
+    later(victory, 3300);
+  }
+
+  function bite() {
+    const r = S.run, ph = phase();
+    S.screen = 'bite';
+    document.querySelectorAll('.ans').forEach(b => { b.disabled = true; });
+    updateHelpers();
+    later(() => {
+      sfx.chomp(); shake();
+      flash('¡ÑAM! ¡BOCAO!', '', 1200);
+      S.roarUntil = S.t + 2.5;
+      r.hearts--;
+      if (!r.missed.includes(S.q.letter)) r.missed.push(S.q.letter);
+      updateHud();
+      revealAnswer();
+      speak(`¡Ñam! Era la ${NAME[S.q.letter]}`);
+      later(() => {
+        const last = r.hearts <= 0;
+        showCard(`
+          <h1 class="bad">¡BOCAO!</h1>
+          <p>${ph.who.charAt(0).toUpperCase() + ph.who.slice(1)} le ha dado un bocao a Alvarito en el pijama.</p>
+          <p>Era la letra <b>${S.q.letter}</b>.</p>
+          <p class="small">${last ? 'Alvarito ya no tiene más corazones...' : `Le quedan ${r.hearts} ${r.hearts === 1 ? 'corazón' : 'corazones'}.`}</p>
+        `, [{ label: last ? 'VER QUÉ PASA' : 'SEGUIR', go: () => {
+          if (last) { gameOver(); return; }
+          S.left = S.T; S.q = null; startQuestion();
+        } }]);
+      }, 1500);
+    }, 450);
+  }
+
+  // ---------- Ayudas ----------
+  function callDani() {
+    if (S.screen !== 'play' || S.t < S.daniReadyAt) return;
+    ensureAudio();
+    S.daniReadyAt = S.t + 10;
+    S.helper = { who: 'dani', until: S.t + 3 };
+    const idea = pick(IDEAS);
+    say(idea.text, HELPER_CX + 14, 2);
+    sfx.throw();
+    const fromX = HELPER_CX + 8;
+    S.fx.push({ kind: idea.item, x0: fromX, y0: FEET - 46, x1: Math.min(W - 10, S.dinoX + 40), y1: FEET - 6, arc: 18, t0: S.t, dur: 0.9, hit: () => {
+      S.pauseUntil = S.t + 3; S.pauseKind = 'distract';
+      S.left = Math.min(S.T, S.left + S.T * 0.25);
+    } });
+    // pista: quita una letra que no es y dice una palabra que empieza por la buena
+    const wrong = [...document.querySelectorAll('.ans:not(:disabled)')].filter(b => b.dataset.l !== S.q.letter);
+    if (wrong.length > 1) { const b = pick(wrong); b.disabled = true; b.classList.add('gone'); }
+    const h = hintFor(S.q);
+    $('hint').textContent = h.text;
+    $('hint').hidden = false;
+    later(() => speak(h.say), 300);
+    updateHelpers();
+  }
+  function callAbuela() {
+    const r = S.run;
+    if (S.screen !== 'play' || r.usedAbuela) return;
+    ensureAudio();
+    r.usedAbuela = true;
+    S.helper = { who: 'abuela', until: S.t + 3.5 };
+    say('¡Pescaíto frito!', HELPER_CX + 14, 2.2);
+    speak('¡Pescaíto frito para los dinos!');
+    for (let i = 0; i < 3; i++) {
+      later(() => {
+        sfx.throw();
+        const h = dinoHead();
+        S.fx.push({ kind: 'fish', x0: HELPER_CX + 6, y0: FEET - 40, x1: h.x - 4 + i * 3, y1: h.y + 10, arc: 16, t0: S.t, dur: 0.7, hit: () => {
+          if (i === 0) { S.pauseUntil = S.t + 8; S.pauseKind = 'eat'; say('¡ÑAM, ÑAM, ÑAM!', () => S.dinoX + 16, 2); }
+        } });
+      }, i * 250);
+    }
+    updateHelpers();
+  }
+  function callAbuelo() {
+    const r = S.run;
+    if (S.screen !== 'play' || r.usedAbuelo) return;
+    ensureAudio();
+    r.usedAbuelo = true;
+    S.helper = { who: 'abuelo', until: S.t + 3 };
+    say('¡Fuera de aquí, dino!', HELPER_CX + 14, 2);
+    speak('¡Fuera de aquí, dino!');
+    sfx.whoosh();
+    later(() => { S.left = S.T; S.pauseUntil = S.t + 1.5; S.pauseKind = 'scared'; sfx.boing(); }, 400);
+    updateHelpers();
+  }
+  $('helpDani').addEventListener('click', callDani);
+  $('helpAbuela').addEventListener('click', callAbuela);
+  $('helpAbuelo').addEventListener('click', callAbuelo);
+  $('sayBtn').addEventListener('click', () => { ensureAudio(); if (S.q) speak(question(S.q)); });
+
+  // ---------- Final de fase y de partida ----------
+  function lettersHtml(list, cls = '') { return `<div class="letters ${cls}">${list.map(l => `<span>${l}</span>`).join('')}</div>`; }
+
+  function phaseComplete() {
+    clearTimers();
+    const r = S.run, ph = phase();
+    S.screen = 'phase';
+    sfx.phase();
+    speak(`¡Bien! ${ph.who} se ha ido corriendo`);
+    showCard(`
+      <h1 class="green">¡FASE SUPERADA!</h1>
+      <p>${ph.who.charAt(0).toUpperCase() + ph.who.slice(1)} se ha ido corriendo. ¡Alvarito es un súper Hulk!</p>
+      <h2>LETRAS ENCONTRADAS</h2>
+      ${lettersHtml(r.found)}
+    `, [{ label: 'SIGUIENTE FASE', cls: 'green', go: () => { r.phase++; showPhaseIntro(); } }]);
+  }
+
+  function victory() {
+    clearTimers();
+    const r = S.run;
+    S.screen = 'end';
+    sfx.phase();
+    speak('¡Alvarito ha vencido al T-Rex!');
+    showCard(`
+      <h1 class="green">¡ALVARITO HA VENCIDO AL T-REX!</h1>
+      <canvas class="art" id="winArt"></canvas>
+      <p>Con una piedra de su tirachinas, Hulk Alvarito ha dejado al T-Rex viendo estrellitas.</p>
+      <h2>LETRAS ENCONTRADAS</h2>
+      ${lettersHtml(r.found)}
+      ${r.missed.length ? `<h2>PARA REPASAR</h2>${lettersHtml(r.missed, 'miss')}` : '<p class="small">¡Sin fallar ni una letra!</p>'}
+    `, [
+      { label: 'JUGAR OTRA VEZ', cls: 'green', go: () => startRun(r.speed) },
+      { label: 'MENÚ', cls: 'ghost', go: showTitle },
+    ]);
+    paintArt('winArt', 92, 46, g => {
+      g.fillStyle = '#21493e'; g.fillRect(0, 42, 92, 4);
+      drawSpriteAt(g, SPRITES.ALVA_HULK, 14, 43, 1);
+      drawSprite(g, SPRITES.TREX_A, 40, 43 - SPRITES.TREX_A.length, 1, true);
+      g.fillStyle = '#ffd23f';
+      [[46, 6], [56, 3], [66, 7]].forEach(([x, y]) => { g.fillRect(x, y - 1, 1, 3); g.fillRect(x - 1, y, 3, 1); });
+    });
+  }
+
+  function gameOver() {
+    const r = S.run, ph = phase();
+    S.screen = 'end';
+    sfx.lose();
+    showCard(`
+      <h1 class="bad">¡ESTA VEZ GANA ${ph.who.replace(/^el /, 'EL ').toUpperCase()}!</h1>
+      <p>Alvarito se ha quedado sin corazones, pero ya casi lo tenía.</p>
+      ${r.missed.length ? `<h2>PARA REPASAR</h2>${lettersHtml(r.missed, 'miss')}` : ''}
+    `, [
+      { label: 'INTENTARLO OTRA VEZ', cls: 'green', go: () => { r.hearts = 3; showPhaseIntro(); } },
+      { label: 'MENÚ', cls: 'ghost', go: showTitle },
+    ]);
+  }
+
+  // ---------- Bucle ----------
+  let last = performance.now();
+  function loop(now) {
+    const dt = Math.min(0.1, (now - last) / 1000);
+    last = now;
+    S.t += dt;
+    if (S.screen === 'play' && !document.hidden && S.t >= S.pauseUntil) {
+      const before = S.left;
+      S.left -= dt;
+      if (Math.ceil(before) !== Math.ceil(S.left) && S.left <= 5 && S.left > 0) sfx.tick();
+      if (!S.lastSaid && S.left < 5) { S.lastSaid = true; say('¡Que te como!', () => S.dinoX + 16, 1.5); }
+      if (S.left <= 0) { S.left = 0; bite(); }
+    }
+    if (S.screen === 'play' || S.screen === 'anim' || S.screen === 'bite') updateTimer();
+    S.dinoTarget = S.screen === 'bite' ? CATCH : START - (START - CATCH) * Math.min(1, 1 - S.left / S.T);
+    S.dinoX += (S.dinoTarget - S.dinoX) * Math.min(1, dt * (S.screen === 'bite' ? 9 : 5));
+    if (S.falling) S.falling = Math.min(1, S.falling + dt * 1.2);
+    if (S.jump > 0) S.jump = Math.max(0, S.jump - dt);
+    S.fx = S.fx.filter(f => { if (S.t - f.t0 >= f.dur) { if (f.hit) f.hit(); return false; } return true; });
+    draw();
+    updateBubble();
+    updateHelpers();
+    requestAnimationFrame(loop);
+  }
+
+  // ---------- Botones de la familia con su cara ----------
+  [['helpDani', SPRITES.DANI], ['helpAbuela', SPRITES.ABUELA], ['helpAbuelo', SPRITES.ABUELO]].forEach(([id, rows]) => {
+    const c = $(id).querySelector('canvas');
+    const g = c.getContext('2d');
+    g.imageSmoothingEnabled = false;
+    drawSprite(g, rows.slice(0, 15), 0, 1, 1);
+  });
+
+  // ---------- Sonido on/off ----------
+  const muteBtn = $('mute');
+  function syncMute() {
+    muteBtn.setAttribute('aria-pressed', String(muted));
+    muteBtn.setAttribute('aria-label', muted ? 'Poner el sonido' : 'Quitar el sonido');
+  }
+  muteBtn.addEventListener('click', () => {
+    muted = !muted; store.set('ad-muted', muted); syncMute();
+    if (muted && synth) { try { synth.cancel(); } catch (e) { /* nada */ } }
+    ensureAudio(); sfx.click();
+  });
+  syncMute();
+
+  // ---------- Arranque (conserva la partida si la página se actualiza) ----------
+  const hot = window.claude && window.claude.hot;
+  if (hot && hot.snapshot) hot.snapshot(() => ({ run: S.run, mode: S.mode }));
+  function start(data) {
+    if (data && data.run) {
+      S.mode = data.mode || S.mode;
+      S.run = Object.assign(newRun(S.mode, 'calma'), data.run);
+      showPhaseIntro();
+    } else {
+      showTitle();
+    }
+    requestAnimationFrame(t => { last = t; loop(t); });
+  }
+  if (hot && hot.ready) hot.ready(start); else start(hot && hot.data ? hot.data : {});
+})();
+</script>
+<!-- juego:fin -->
+</body>
+</html>
