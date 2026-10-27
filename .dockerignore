@@ -13,3 +13,4 @@ tests/
 .pytest_cache
 *.md
 !README.md
+juegos/

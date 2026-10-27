@@ -1,0 +1,2092 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#120a1e">
+<title>Santiago en Moto</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#120a1e;--fg:#fff3c4;--accent:#ffd400;--btn:#2b1a47;--btn-on:#ffd400;--btn-fg-on:#120a1e}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#120a1e;--fg:#fff3c4;--accent:#ffd400;--btn:#2b1a47;--btn-on:#ffd400;--btn-fg-on:#120a1e}}
+:root[data-theme="dark"]{--bg:#120a1e;--fg:#fff3c4;--accent:#ffd400;--btn:#2b1a47;--btn-on:#ffd400;--btn-fg-on:#120a1e}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);overflow:hidden;overscroll-behavior:none}
+body{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:8px 16px;font-family:"Press Start 2P",monospace;user-select:none;-webkit-user-select:none;touch-action:none}
+#game{display:block;image-rendering:pixelated;image-rendering:crisp-edges;background:#000;box-shadow:0 0 0 3px #000,0 0 0 6px var(--accent);touch-action:none;max-width:100%}
+#opts{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+#pad{display:none;width:100%;max-width:560px;justify-content:space-between;align-items:center;gap:12px}
+body.touch #pad{display:flex}
+.grp{display:grid;gap:8px}
+#dpad{grid-template-columns:repeat(3,54px);grid-template-rows:repeat(2,50px)}
+#acts{grid-template-columns:repeat(2,74px);grid-template-rows:repeat(2,50px)}
+.b{background:var(--btn);color:var(--fg);border:3px solid var(--accent);border-radius:10px;font:inherit;font-size:9px;line-height:1.4;display:flex;align-items:center;justify-content:center;padding:4px 8px;touch-action:none;cursor:pointer;text-align:center}
+.b.on{background:var(--btn-on);color:var(--btn-fg-on)}
+.small{font-size:8px;padding:6px 8px;border-width:2px}
+.up{grid-column:2;grid-row:1}.lf{grid-column:1;grid-row:2}.dn{grid-column:2;grid-row:2}.rt{grid-column:3;grid-row:2}
+.ok{grid-column:1 / span 2}
+</style>
+</head>
+<body>
+<canvas id="game" width="320" height="240" aria-label="Santiago en Moto, videojuego retro"></canvas>
+<div id="opts">
+  <button class="b small" id="bMusic" type="button">MUSICA: SI</button>
+  <button class="b small" id="bVoice" type="button">VOCES: SI</button>
+  <button class="b small" id="bFull" type="button">PANTALLA</button>
+</div>
+<div id="pad">
+  <div class="grp" id="dpad">
+    <button class="b up" data-k="up" type="button">▲</button>
+    <button class="b lf" data-k="left" type="button">◀</button>
+    <button class="b dn" data-k="down" type="button">▼</button>
+    <button class="b rt" data-k="right" type="button">▶</button>
+  </div>
+  <div class="grp" id="acts">
+    <button class="b" data-k="throwL" type="button">◀ LANZA</button>
+    <button class="b" data-k="throwR" type="button">LANZA ▶</button>
+    <button class="b ok" data-k="action" type="button">OK / ¡ZAS!</button>
+  </div>
+</div>
+<script>
+(() => {
+'use strict';
+// ============================================================
+//  SANTIAGO EN MOTO — Anita y Alvarito recorren Santiago (Cabo Verde)
+//  Juego retro estilo Paperboy, todo en un archivo: canvas 320x240,
+//  música chiptune de funaná con Web Audio y voces con speechSynthesis.
+// ============================================================
+const W = 320, H = 240;
+const cv = document.getElementById('game');
+const g = cv.getContext('2d');
+g.imageSmoothingEnabled = false;
+const FONT = '"Press Start 2P", monospace';
+const isTouch = matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
+if (isTouch) document.body.classList.add('touch');
+
+function resize() {
+  const pad = document.getElementById('pad'), opts = document.getElementById('opts');
+  const ah = innerHeight - (isTouch ? pad.offsetHeight : 0) - opts.offsetHeight - 40;
+  const aw = innerWidth - 32;
+  let s = Math.min(aw / W, ah / H);
+  if (s >= 2) s = Math.floor(s);
+  s = Math.max(0.6, s);
+  cv.style.width = (W * s) + 'px';
+  cv.style.height = (H * s) + 'px';
+}
+addEventListener('resize', resize);
+
+// ---------------------------------------------------------- utilidades
+const rnd = (a, b) => a + Math.random() * (b - a);
+const ri = (a, b) => Math.floor(a + Math.random() * (b - a + 1));
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
+const R = Math.round;
+function rect(x, y, w, h, c) { g.fillStyle = c; g.fillRect(R(x), R(y), R(w), R(h)); }
+function circ(x, y, r, c) { g.fillStyle = c; g.beginPath(); g.arc(R(x), R(y), Math.max(0.5, r), 0, Math.PI * 2); g.fill(); }
+function ell(x, y, rx, ry, c) { g.fillStyle = c; g.beginPath(); g.ellipse(R(x), R(y), Math.max(0.5, rx), Math.max(0.5, ry), 0, 0, Math.PI * 2); g.fill(); }
+function poly(pts, c) { g.fillStyle = c; g.beginPath(); pts.forEach((p, i) => i ? g.lineTo(p[0], p[1]) : g.moveTo(p[0], p[1])); g.closePath(); g.fill(); }
+function line(x1, y1, x2, y2, c, w = 1) { g.strokeStyle = c; g.lineWidth = w; g.beginPath(); g.moveTo(x1, y1); g.lineTo(x2, y2); g.stroke(); }
+// la fuente pixel dibuja las mayúsculas con tilde en minúscula: en mayúsculas se escriben sin tilde
+const FIXCAPS = { 'Á': 'A', 'É': 'E', 'Í': 'I', 'Ó': 'O', 'Ú': 'U', 'Ã': 'A', 'Õ': 'O' };
+function txt(s, x, y, c = '#fff', size = 8, align = 'left', outline = null) {
+  s = s.replace(/[ÁÉÍÓÚÃÕ]/g, ch => FIXCAPS[ch]);
+  g.font = size + 'px ' + FONT; g.textAlign = align; g.textBaseline = 'top';
+  if (outline) { g.lineJoin = 'round'; g.lineWidth = Math.max(2, Math.round(size / 3)); g.strokeStyle = outline; g.strokeText(s, R(x), R(y)); }
+  g.fillStyle = c; g.fillText(s, R(x), R(y));
+}
+function tw(s, size = 8) { g.font = size + 'px ' + FONT; return g.measureText(s.replace(/[ÁÉÍÓÚÃÕ]/g, ch => FIXCAPS[ch])).width; }
+function wrap(s, maxW, size = 8) {
+  const out = [];
+  for (const para of s.split('\n')) {
+    let ln = '';
+    for (const w of para.split(' ')) {
+      const t = ln ? ln + ' ' + w : w;
+      if (tw(t, size) > maxW && ln) { out.push(ln); ln = w; } else ln = t;
+    }
+    out.push(ln);
+  }
+  return out;
+}
+function panel(x, y, w, h, bg = '#1f1233', border = '#ffd400') {
+  rect(x, y, w, h, border); rect(x + 2, y + 2, w - 4, h - 4, '#000'); rect(x + 3, y + 3, w - 6, h - 6, bg);
+}
+// dibuja un sprite "mirando a la derecha" y lo voltea si dir < 0
+function M(x, y, dir) { return (dx, dy, w, h, c) => rect(dir >= 0 ? x + dx : x - dx - w, y + dy, w, h, c); }
+function blink(rate = 3) { return (performance.now() / 1000 * rate) % 1 < 0.6; }
+
+// ---------------------------------------------------------- opciones y guardado
+const store = {
+  get(k, d) { try { const v = localStorage.getItem('santiagoMoto.' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem('santiagoMoto.' + k, JSON.stringify(v)); } catch (e) { /* sin almacenamiento */ } }
+};
+const opt = { music: store.get('music', true), voice: store.get('voice', true) };
+const G = { score: 0, lives: 3, hi: store.get('hi', 0) };
+
+// ---------------------------------------------------------- audio
+let AC = null, master, musicG, sfxG, noiseBuf;
+function audioInit() {
+  if (AC) { if (AC.state === 'suspended') AC.resume(); return; }
+  const C = window.AudioContext || window.webkitAudioContext;
+  if (!C) return;
+  AC = new C();
+  master = AC.createGain(); master.gain.value = 0.7; master.connect(AC.destination);
+  musicG = AC.createGain(); musicG.gain.value = opt.music ? 0.3 : 0; musicG.connect(master);
+  sfxG = AC.createGain(); sfxG.gain.value = 0.8; sfxG.connect(master);
+  noiseBuf = AC.createBuffer(1, AC.sampleRate, AC.sampleRate);
+  const d = noiseBuf.getChannelData(0);
+  for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+}
+const now = () => AC ? AC.currentTime : 0;
+function tone(f, dur, type = 'square', vol = 0.15, slide = 0, at = 0, dest = null) {
+  if (!AC) return;
+  const t = at || AC.currentTime;
+  const o = AC.createOscillator(), e = AC.createGain();
+  o.type = type; o.frequency.setValueAtTime(f, t);
+  if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(30, f + slide), t + dur);
+  e.gain.setValueAtTime(0.0001, t);
+  e.gain.linearRampToValueAtTime(vol, t + 0.006);
+  e.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.connect(e); e.connect(dest || sfxG); o.start(t); o.stop(t + dur + 0.05);
+}
+function noise(dur, vol = 0.2, freq = 2000, ftype = 'lowpass', at = 0, dest = null) {
+  if (!AC) return;
+  const t = at || AC.currentTime;
+  const s = AC.createBufferSource(); s.buffer = noiseBuf;
+  const f = AC.createBiquadFilter(); f.type = ftype; f.frequency.value = freq;
+  const e = AC.createGain(); e.gain.setValueAtTime(vol, t); e.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  s.connect(f); f.connect(e); e.connect(dest || sfxG); s.start(t, Math.random() * 0.5); s.stop(t + dur + 0.05);
+}
+const SFX = {
+  throw() { tone(320, 0.14, 'square', 0.1, 700); noise(0.08, 0.08, 3000, 'highpass'); },
+  hit() { [660, 880, 1320].forEach((f, i) => tone(f, 0.09, 'square', 0.12, 0, now() + i * 0.06)); },
+  pickup() { [523, 659, 784, 1046].forEach((f, i) => tone(f, 0.08, 'triangle', 0.16, 0, now() + i * 0.05)); },
+  power() { [392, 523, 659, 784, 1046, 1318].forEach((f, i) => tone(f, 0.1, 'square', 0.1, 0, now() + i * 0.05)); },
+  crash() { noise(0.55, 0.45, 900); tone(220, 0.5, 'sawtooth', 0.18, -170); },
+  splat() { noise(0.14, 0.4, 1300); tone(160, 0.1, 'square', 0.14, -100); },
+  whiff() { noise(0.1, 0.12, 2500, 'bandpass'); },
+  cluck() { for (let i = 0; i < 3; i++) tone(rnd(650, 950), 0.05, 'square', 0.09, -350, now() + i * 0.07); },
+  honk() { tone(370, 0.12, 'square', 0.12); tone(466, 0.12, 'square', 0.08); tone(370, 0.22, 'square', 0.12, 0, now() + 0.16); tone(466, 0.22, 'square', 0.08, 0, now() + 0.16); },
+  bee() { for (let i = 0; i < 9; i++) tone(i % 2 ? 410 : 460, 0.05, 'sawtooth', 0.08, 0, now() + i * 0.045); },
+  woof() { tone(280, 0.09, 'sawtooth', 0.16, -150); tone(250, 0.11, 'sawtooth', 0.16, -150, now() + 0.15); },
+  hee() { tone(700, 0.25, 'sawtooth', 0.1, 300); tone(300, 0.35, 'sawtooth', 0.1, -100, now() + 0.25); },
+  monkey() { [500, 720, 520, 820].forEach((f, i) => tone(f, 0.07, 'square', 0.09, 250, now() + i * 0.08)); },
+  slip() { tone(900, 0.45, 'triangle', 0.14, -750); },
+  blip() { tone(900 + Math.random() * 150, 0.025, 'square', 0.035); },
+  select() { tone(660, 0.06, 'square', 0.1); tone(990, 0.08, 'square', 0.1, 0, now() + 0.06); },
+  shutter() { noise(0.04, 0.4, 6000, 'highpass'); noise(0.06, 0.3, 3000, 'highpass', now() + 0.08); },
+  sizzle() { noise(0.35, 0.06, 5000, 'highpass'); },
+  burn() { noise(0.3, 0.3, 900); tone(520, 0.3, 'sawtooth', 0.1, -320); },
+  boing() { tone(140, 0.28, 'sine', 0.3, 420); },
+  nom() { tone(300, 0.06, 'square', 0.1, 120); tone(260, 0.07, 'square', 0.1, 120, now() + 0.09); },
+  plop() { tone(200, 0.07, 'sine', 0.14, -120); },
+  empty() { tone(150, 0.15, 'square', 0.1); tone(110, 0.2, 'square', 0.1, 0, now() + 0.12); },
+  beep(hi) { tone(hi ? 1046 : 523, hi ? 0.35 : 0.15, 'square', 0.12); },
+  gulp() { [220, 260, 220, 300].forEach((f, i) => tone(f, 0.07, 'sine', 0.2, 60, now() + i * 0.09)); },
+  win() { [523, 659, 784, 1046, 784, 1046, 1318].forEach((f, i) => tone(f, i === 6 ? 0.4 : 0.11, 'square', 0.12, 0, now() + i * 0.1)); },
+  lose() { [523, 466, 415, 349].forEach((f, i) => tone(f, i === 3 ? 0.5 : 0.18, 'square', 0.12, 0, now() + i * 0.18)); },
+  pinch() { tone(1200, 0.06, 'square', 0.1, -600); tone(1000, 0.06, 'square', 0.1, -500, now() + 0.08); }
+};
+// sonido continuo (motor, zumbido de moscas)
+function makeLoop(type, freq, filt, lfoRate, lfoDepth, target = 'freq') {
+  if (!AC) return { set() {}, stop() {} };
+  const o = AC.createOscillator(); o.type = type; o.frequency.value = freq;
+  const f = AC.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = filt;
+  const e = AC.createGain(); e.gain.value = 0;
+  const l = AC.createOscillator(); l.frequency.value = lfoRate;
+  const lg = AC.createGain(); lg.gain.value = lfoDepth;
+  l.connect(lg); lg.connect(target === 'freq' ? o.frequency : e.gain);
+  o.connect(f); f.connect(e); e.connect(sfxG); o.start(); l.start();
+  return {
+    o, l, e,
+    set(vol, fr, lr) {
+      const t = AC.currentTime;
+      e.gain.setTargetAtTime(vol, t, 0.05);
+      if (fr) o.frequency.setTargetAtTime(fr, t, 0.08);
+      if (lr) l.frequency.setTargetAtTime(lr, t, 0.08);
+    },
+    stop() { try { e.gain.setTargetAtTime(0, AC.currentTime, 0.03); o.stop(AC.currentTime + 0.2); l.stop(AC.currentTime + 0.2); } catch (err) { /* ya parado */ } }
+  };
+}
+
+// ---------------------------------------------------------- música (funaná chiptune)
+const NOTE = { C: 0, 'C#': 1, D: 2, 'D#': 3, E: 4, F: 5, 'F#': 6, G: 7, 'G#': 8, A: 9, 'A#': 10, B: 11 };
+function mf(n) { const m = n.match(/^([A-G]#?)(\d)$/); return 440 * Math.pow(2, (NOTE[m[1]] + (+m[2] + 1) * 12 - 69) / 12); }
+const CH = {
+  A: ['A3', 'C#4', 'E4'], E: ['G#3', 'B3', 'E4'], D: ['A3', 'D4', 'F#4'],
+  Am: ['A3', 'C4', 'E4'], G: ['G3', 'B3', 'D4'], F: ['F3', 'A3', 'C4'], E7: ['G#3', 'B3', 'D4']
+};
+const ROOT = { A: 'A2', E: 'E2', D: 'D2', Am: 'A2', G: 'G2', F: 'F2', E7: 'E2' };
+const SONGS = {
+  ride: { bpm: 150, chords: ['A', 'E', 'A', 'E', 'A', 'E', 'D', 'E'], lead:
+    'E5 . C#5 . E5 . C#5 . A4 . C#5 . E5 F#5 E5 . ' +
+    'D5 . B4 . D5 . B4 . G#4 . B4 . D5 E5 D5 . ' +
+    'C#5 . E5 . A5 . E5 . C#5 . E5 . A5 B5 A5 . ' +
+    'F#5 . E5 . D5 . C#5 . B4 . G#4 . B4 - - . ' +
+    'A5 . A5 . F#5 . E5 . C#5 . E5 . F#5 . E5 . ' +
+    'B5 . G#5 . E5 . D5 . B4 . D5 . E5 . D5 . ' +
+    'D5 F#5 A5 F#5 D5 F#5 A5 F#5 D5 F#5 A5 F#5 B5 A5 F#5 . ' +
+    'E5 . G#5 . B5 . G#5 . A5 - - - . . . . ' },
+  title: { bpm: 118, chords: ['A', 'E', 'A', 'E', 'D', 'A', 'E', 'A'], lead:
+    'A4 . . C#5 E5 . . . F#5 . E5 . C#5 . . . ' +
+    'B4 . . D5 E5 . . . G#5 . F#5 . E5 . . . ' +
+    'A4 . . C#5 E5 . A5 . G#5 . F#5 . E5 . C#5 . ' +
+    'D5 . . B4 E5 . . . B4 - - - . . . . ' +
+    'F#5 . . A5 F#5 . D5 . F#5 . A5 . B5 . A5 . ' +
+    'E5 . . C#5 A4 . C#5 . E5 . A5 . E5 . C#5 . ' +
+    'D5 . B4 . G#4 . B4 . E5 . D5 . B4 . G#4 . ' +
+    'A4 - - - . . E5 . A5 - - - . . . . ' },
+  mini: { bpm: 168, chords: ['Am', 'G', 'F', 'E7'], lead:
+    'A4 . C5 . E5 . C5 . A4 . C5 . E5 . A5 . ' +
+    'G4 . B4 . D5 . B4 . G4 . B4 . D5 . G5 . ' +
+    'F4 . A4 . C5 . A4 . F4 . A4 . C5 . F5 . ' +
+    'E5 . D5 . C5 . B4 . G#4 . B4 . E5 . . . ' }
+};
+for (const k in SONGS) {
+  const s = SONGS[k];
+  s.tok = s.lead.trim().split(/\s+/);
+  s.len = s.tok.length;
+}
+const BASSPAT = [1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0];
+const Music = {
+  name: null, step: 0, next: 0, speed: 1,
+  play(n) { if (this.name === n) return; this.name = n; this.step = 0; this.next = now() + 0.06; },
+  stop() { this.name = null; },
+  update() {
+    if (!AC || !this.name || !opt.music) return;
+    const s = SONGS[this.name];
+    const sd = 60 / (s.bpm * this.speed) / 4;
+    if (this.next < AC.currentTime - 0.25) this.next = AC.currentTime + 0.03;
+    while (this.next < AC.currentTime + 0.12) {
+      this.playStep(s, this.step, this.next, sd);
+      this.step = (this.step + 1) % s.len;
+      this.next += sd;
+    }
+  },
+  playStep(s, i, t, sd) {
+    const tk = s.tok[i];
+    if (tk !== '.' && tk !== '-') {
+      let n = 1; while (s.tok[(i + n) % s.len] === '-') n++;
+      tone(mf(tk), sd * n * 0.92, 'square', 0.1, 0, t, musicG);
+      tone(mf(tk) * 1.006, sd * n * 0.9, 'square', 0.04, 0, t, musicG); // fuelle del acordeón (gaita)
+    }
+    const bar = Math.floor(i / 16) % s.chords.length, st = i % 16, ch = s.chords[bar];
+    if (BASSPAT[st]) tone(mf(ROOT[ch]) * (st === 14 ? 1.5 : 1), sd * 1.6, 'triangle', 0.22, 0, t, musicG);
+    if (st % 4 === 2) CH[ch].forEach(n => tone(mf(n), sd * 0.8, 'square', 0.025, 0, t, musicG));
+    // ferrinho: el hierro rascado del funaná
+    noise(sd * 0.8, st % 4 === 2 ? 0.09 : 0.035, 7000, 'highpass', t, musicG);
+  }
+};
+
+// ---------------------------------------------------------- voces
+const VP = {
+  alvarito: { l: ['es-es', 'es'], p: 0.7, r: 1.08 },
+  anita: { l: ['es-es', 'es'], p: 1.5, r: 1.12 },
+  narr: { l: ['es-es', 'es'], p: 1.0, r: 1.02 },
+  bia: { l: ['pt-pt', 'pt-br', 'pt', 'es'], p: 1.15, r: 1.0 },
+  tuta: { l: ['pt-pt', 'pt-br', 'pt', 'es'], p: 1.3, r: 1.05 },
+  npc: { l: ['pt-pt', 'pt-br', 'pt', 'es'], p: 1.1, r: 1.12 }
+};
+const Voice = {
+  list: [],
+  init() {
+    if (!('speechSynthesis' in window)) return;
+    const load = () => { this.list = speechSynthesis.getVoices(); };
+    load(); speechSynthesis.onvoiceschanged = load;
+  },
+  find(prefs) {
+    for (const p of prefs) {
+      const v = this.list.find(v => v.lang.replace('_', '-').toLowerCase().startsWith(p));
+      if (v) return v;
+    }
+    return null;
+  },
+  say(who, text, force = false) {
+    if (!opt.voice || !('speechSynthesis' in window)) return;
+    if (speechSynthesis.speaking || speechSynthesis.pending) { if (!force) return; speechSynthesis.cancel(); }
+    const P = VP[who] || VP.narr;
+    const u = new SpeechSynthesisUtterance(text.replace(/[¡¿]/g, '').replace(/\.\.\./g, ','));
+    const v = this.find(P.l);
+    if (v) { u.voice = v; u.lang = v.lang; } else u.lang = 'es-ES';
+    u.pitch = P.p; u.rate = P.r; u.volume = 1;
+    try { speechSynthesis.speak(u); } catch (e) { /* sin voz */ }
+  },
+  stop() { if ('speechSynthesis' in window) speechSynthesis.cancel(); }
+};
+Voice.init();
+
+// ---------------------------------------------------------- entrada
+const keys = {}, pressed = {};
+const KEYMAP = {
+  ArrowLeft: 'left', KeyA: 'left', ArrowRight: 'right', KeyD: 'right', ArrowUp: 'up', KeyW: 'up', ArrowDown: 'down', KeyS: 'down',
+  KeyZ: 'throwL', KeyQ: 'throwL', KeyX: 'throwR', KeyE: 'throwR', Space: 'action', Enter: 'action',
+  KeyM: 'music', KeyV: 'voice', KeyP: 'pause', Escape: 'pause'
+};
+addEventListener('keydown', e => {
+  const a = KEYMAP[e.code]; if (!a) return;
+  e.preventDefault(); audioInit();
+  if (!keys[a]) pressed[a] = true;
+  keys[a] = true;
+});
+addEventListener('keyup', e => { const a = KEYMAP[e.code]; if (a) keys[a] = false; });
+const ptr = { x: 160, y: 120, down: false, moved: false };
+function toLocal(e) { const r = cv.getBoundingClientRect(); return { x: (e.clientX - r.left) / r.width * W, y: (e.clientY - r.top) / r.height * H }; }
+cv.addEventListener('pointerdown', e => { e.preventDefault(); audioInit(); const p = toLocal(e); ptr.x = p.x; ptr.y = p.y; ptr.down = true; ptr.moved = true; pressed.tap = true; });
+cv.addEventListener('pointermove', e => { const p = toLocal(e); ptr.x = p.x; ptr.y = p.y; ptr.moved = true; });
+addEventListener('pointerup', () => { ptr.down = false; });
+document.querySelectorAll('[data-k]').forEach(b => {
+  const k = b.dataset.k;
+  const on = e => { e.preventDefault(); audioInit(); if (!keys[k]) pressed[k] = true; keys[k] = true; b.classList.add('on'); };
+  const off = () => { keys[k] = false; b.classList.remove('on'); };
+  b.addEventListener('pointerdown', on);
+  ['pointerup', 'pointerleave', 'pointercancel'].forEach(ev => b.addEventListener(ev, off));
+});
+const act = () => pressed.action || pressed.tap;
+function clearPressed() { for (const k in pressed) delete pressed[k]; ptr.moved = false; }
+
+const bMusic = document.getElementById('bMusic'), bVoice = document.getElementById('bVoice');
+function refreshOpts() {
+  bMusic.textContent = 'MUSICA: ' + (opt.music ? 'SI' : 'NO');
+  bVoice.textContent = 'VOCES: ' + (opt.voice ? 'SI' : 'NO');
+  if (musicG) musicG.gain.value = opt.music ? 0.3 : 0;
+}
+function toggleMusic() { audioInit(); opt.music = !opt.music; store.set('music', opt.music); refreshOpts(); }
+function toggleVoice() { opt.voice = !opt.voice; store.set('voice', opt.voice); if (!opt.voice) Voice.stop(); refreshOpts(); }
+bMusic.addEventListener('click', toggleMusic);
+bVoice.addEventListener('click', toggleVoice);
+document.getElementById('bFull').addEventListener('click', () => {
+  const el = document.documentElement;
+  try { if (!document.fullscreenElement) el.requestFullscreen && el.requestFullscreen(); else document.exitFullscreen(); } catch (e) { /* no disponible */ }
+  setTimeout(resize, 300);
+});
+refreshOpts();
+
+// ---------------------------------------------------------- imágenes (fotos pixeladas)
+const IMG = {};
+['cara-alvarito', 'cara-anita', 'postal-moto', 'postal-rua-banana', 'postal-casa-pintada', 'postal-atun', 'postal-rui-vaz',
+ 'postal-selfie-poilao', 'postal-poilao', 'postal-playa', 'postal-strela', 'postal-grogue', 'postal-mirador', 'postal-selfie-monte']
+  .forEach(n => { const i = new Image(); i.src = 'assets/' + n + '.png'; IMG[n] = i; });
+const imgOk = i => i && i.complete && i.naturalWidth > 0;
+
+// ---------------------------------------------------------- partículas y onomatopeyas
+let pops = [], sparts = [], shake = 0;
+function pop(text, x, y, color = '#ffd400', size = 14, life = 1.1) { pops.push({ text, x, y, color, size, t: 0, life }); }
+function sburst(x, y, n, colors, spd = 80, grav = 200, s = 2, life = 0.8) {
+  for (let i = 0; i < n; i++) sparts.push({ x, y, vx: rnd(-spd, spd), vy: rnd(-spd * 1.3, spd * 0.3), grav, life: rnd(life * 0.5, life), t: 0, c: pick(colors), s });
+}
+function updateFx(dt) {
+  for (const p of pops) p.t += dt;
+  pops = pops.filter(p => p.t < p.life);
+  for (const p of sparts) { p.t += dt; p.vy += p.grav * dt; p.x += p.vx * dt; p.y += p.vy * dt; }
+  sparts = sparts.filter(p => p.t < p.life);
+  if (shake > 0) shake = Math.max(0, shake - dt);
+}
+function drawFx() {
+  for (const p of sparts) rect(p.x, p.y, p.s, p.s, p.c);
+  for (const p of pops) {
+    const k = p.t < 0.12 ? 0.5 + p.t / 0.12 * 0.75 : Math.max(1, 1.25 - (p.t - 0.12) * 2);
+    const a = p.t > p.life - 0.3 ? (p.life - p.t) / 0.3 : 1;
+    const w = tw(p.text, p.size) * k;
+    const x = clamp(p.x, w / 2 + 4, W - w / 2 - 4), y = clamp(p.y - p.t * 22, 16, H - 20);
+    g.save(); g.globalAlpha = a; g.translate(R(x), R(y)); g.scale(k, k);
+    txt(p.text, 0, -p.size / 2, p.color, p.size, 'center', '#000');
+    g.restore();
+  }
+}
+
+// ---------------------------------------------------------- sprites
+const SKINS = ['#8d5524', '#6b3e1f', '#a0663a', '#c68642', '#5a3418'];
+const SHIRTS = ['#e74c3c', '#2e86de', '#27ae60', '#f39c12', '#8e44ad', '#16a085', '#fdfefe', '#d35400'];
+const SCARVES = ['#e74c3c', '#f1c40f', '#9b59b6', '#1abc9c', '#e67e22', '#2980b9'];
+
+function wheel(x, y, t) {
+  circ(x, y, 4, '#111'); circ(x, y, 2, '#8a8a8a');
+  rect(x + Math.cos(t) * 3 - 0.5, y + Math.sin(t) * 3 - 0.5, 1, 1, '#ddd');
+}
+// la moto amarilla TORO TANK con Alvarito al manillar y Anita detrás
+function drawMoto(x, y, t, o = {}) {
+  x = R(x); y = R(y);
+  const b = o.bob || 0, wt = t * (o.speed || 80) / 6;
+  ell(x, y, 18, 3, 'rgba(0,0,0,.3)');
+  if (o.turbo) { // estela de grogue
+    for (let i = 0; i < 3; i++) rect(x - 26 - i * 7 - (t * 60 % 7), y - 10 + i * 3 + b, 6, 1, i % 2 ? '#ffb347' : '#ff6a00');
+    if (blink(12)) { rect(x - 20, y - 9 + b, 3, 2, '#ff6a00'); rect(x - 22, y - 9 + b, 2, 2, '#ffd400'); }
+  }
+  wheel(x - 10, y - 4, wt); wheel(x + 11, y - 4, wt);
+  const yel = o.star ? ['#ffd400', '#ff5a5a', '#5ad7ff', '#7CFC00'][Math.floor(t * 12) % 4] : '#ffd400';
+  rect(x - 15, y - 11 + b, 17, 5, yel);
+  rect(x - 15, y - 7 + b, 6, 2, '#2a2a2a');
+  rect(x - 3, y - 7 + b, 11, 2, '#2a2a2a');
+  poly([[x + 5, y - 8 + b], [x + 8, y - 20 + b], [x + 12, y - 20 + b], [x + 12, y - 8 + b]], yel);
+  rect(x + 9, y - 10 + b, 2, 6, '#222');
+  rect(x + 11, y - 17 + b, 2, 2, '#fff8b0');
+  rect(x - 15, y - 13 + b, 14, 2, '#1d1d1d');
+  rect(x - 19, y - 19 + b, 6, 6, '#151515'); rect(x - 18, y - 17 + b, 4, 2, '#d33');
+  rect(x + 7, y - 22 + b, 6, 1, '#111');
+  // Anita (pelo largo rizado, top rojo)
+  const hw = Math.sin(t * 14) * 1.5;
+  poly([[x - 13, y - 31 + b], [x - 8, y - 32 + b], [x - 8, y - 20 + b], [x - 16 + hw, y - 17 + b], [x - 18 + hw, y - 24 + b]], '#4a2e1a');
+  rect(x - 14 + hw, y - 22 + b, 2, 2, '#5d3a22');
+  rect(x - 12, y - 23 + b, 6, 10, '#b3202a');
+  rect(x - 9, y - 13 + b, 2, 6, '#e8a882'); rect(x - 9, y - 7 + b, 3, 1, '#fff');
+  rect(x - 11, y - 30 + b, 5, 6, '#e8a882');
+  rect(x - 12, y - 32 + b, 7, 2, '#4a2e1a'); rect(x - 12, y - 30 + b, 2, 7, '#4a2e1a');
+  rect(x - 7, y - 28 + b, 1, 1, '#222'); rect(x - 8, y - 26 + b, 2, 1, '#a0302a');
+  rect(x - 6, y - 21 + b, 6, 2, '#e8a882');
+  // Alvarito (pelo revuelto, barba, camiseta azul clara)
+  rect(x - 2, y - 13 + b, 6, 3, '#3a3f4a');
+  rect(x + 3, y - 11 + b, 2, 4, '#e8a882'); rect(x + 3, y - 7 + b, 3, 1, '#333');
+  rect(x - 3, y - 23 + b, 7, 10, '#9ccbd6'); rect(x - 3, y - 23 + b, 2, 10, '#7fb0bd');
+  rect(x + 3, y - 21 + b, 6, 2, '#9ccbd6'); rect(x + 8, y - 22 + b, 2, 2, '#e8a882');
+  rect(x - 2, y - 31 + b, 6, 7, '#e8a882');
+  rect(x - 2, y - 27 + b, 6, 3, '#4a2e1a'); rect(x - 1, y - 24 + b, 4, 1, '#4a2e1a');
+  rect(x - 3, y - 33 + b, 7, 3, '#3b2414');
+  const tuft = Math.sin(t * 18) > 0 ? 1 : 0;
+  rect(x - 4, y - 34 + b - tuft, 2, 2, '#3b2414'); rect(x, y - 35 + b + tuft, 2, 2, '#3b2414'); rect(x + 3, y - 34 + b, 2, 1, '#3b2414');
+  rect(x + 2, y - 29 + b, 1, 1, '#222'); rect(x + 4, y - 28 + b, 1, 1, '#c98463'); rect(x + 2, y - 26 + b, 2, 1, '#e8a882');
+  if (o.star) for (let i = 0; i < 4; i++) { const a = t * 6 + i * Math.PI / 2; rect(x + Math.cos(a) * 20, y - 18 + Math.sin(a) * 12, 2, 2, '#fff'); }
+}
+function drawCrashMoto(x, y, t, k) {
+  g.save(); g.translate(R(x), R(y)); g.rotate(-Math.min(1.4, k * 4) * 0.9);
+  drawMoto(0, 0, 0, {}); g.restore();
+  for (let i = 0; i < 3; i++) { const a = t * 8 + i * 2.1; rect(x + Math.cos(a) * 9 - 6, y - 26 + Math.sin(a) * 3, 2, 2, '#ffd400'); }
+}
+function drawPerson(x, y, o) {
+  x = R(x); y = R(y);
+  const t = o.t || 0, sk = o.skin || '#8d5524';
+  ell(x, y, 5, 1.5, 'rgba(0,0,0,.25)');
+  const st = o.walk ? (Math.sin(t * 12) > 0 ? 1 : 0) : 0, jump = o.jump ? -Math.abs(Math.sin(t * 9)) * 4 : 0;
+  y += jump;
+  rect(x - 3, y - 8 + st, 2, 8 - st, o.pants || '#333'); rect(x + 1, y - 8 + (1 - st), 2, 8 - (1 - st), o.pants || '#333');
+  rect(x - 3, y - 1, 2, 1, '#222'); rect(x + 1, y - 1, 2, 1, '#222');
+  if (o.skirt) rect(x - 4, y - 11, 8, 6, o.skirt);
+  rect(x - 4, y - 16, 8, 7, o.shirt || '#e74c3c');
+  if (o.apron) rect(x - 3, y - 14, 6, 8, '#fdfefe');
+  if (o.wave) { const a = Math.sin(t * 10) > 0; rect(x + 4, y - (a ? 22 : 20), 2, 6, sk); rect(x - 6, y - 15, 2, 5, sk); }
+  else if (o.armsUp) { rect(x - 6, y - 22, 2, 7, sk); rect(x + 4, y - 22, 2, 7, sk); }
+  else { rect(x - 6, y - 15, 2, 6, sk); rect(x + 4, y - 15, 2, 6, sk); }
+  rect(x - 3, y - 22, 6, 6, sk);
+  rect(x - 2, y - 20, 1, 1, '#111'); rect(x + 1, y - 20, 1, 1, '#111');
+  rect(x - 1, y - 18, 2, 1, o.happy ? '#fff' : '#3a1a0a');
+  if (o.hair) rect(x - 3, y - 23, 6, 2, o.hair);
+  if (o.scarf) { rect(x - 4, y - 25, 8, 4, o.scarf); rect(x + 3, y - 23, 2, 3, o.scarf); }
+  if (o.hat) { rect(x - 5, y - 23, 10, 1, o.hat); rect(x - 3, y - 26, 6, 3, o.hat); }
+  if (o.camera) rect(x + 3, y - 16, 4, 3, '#222');
+  if (o.earring) rect(x - 4, y - 18, 1, 1, '#ffd400');
+}
+function drawGoat(x, y, t, dir, col = '#ece5d3') {
+  const r = M(R(x), R(y), dir), l = Math.sin(t * 10) > 0 ? 1 : 0;
+  ell(x, y, 8, 2, 'rgba(0,0,0,.25)');
+  r(-6, -5, 2, 5, '#5a4a3a'); r(-2, -5 + l, 2, 5 - l, '#5a4a3a'); r(2, -5, 2, 5, '#5a4a3a'); r(5, -5 + (1 - l), 2, 5 - (1 - l), '#5a4a3a');
+  r(-7, -11, 14, 6, col); r(-3, -11, 5, 3, '#8b5a2b'); r(-9, -12, 2, 2, col);
+  r(6, -15, 4, 5, col); r(9, -13, 2, 3, col); r(8, -14, 1, 1, '#000');
+  r(6, -17, 1, 2, '#666'); r(8, -18, 1, 3, '#666'); r(8, -10, 1, 2, '#aaa');
+}
+function drawDog(x, y, t, dir) {
+  const r = M(R(x), R(y), dir), l = Math.sin(t * 16) > 0 ? 1 : 0, wag = Math.sin(t * 20) > 0 ? 1 : 0;
+  ell(x, y, 7, 2, 'rgba(0,0,0,.25)');
+  r(-5, -4, 2, 4 - l, '#7a5230'); r(3, -4, 2, 4 - (1 - l), '#7a5230');
+  r(-6, -9, 11, 5, '#c08a4a'); r(-8, -11 - wag, 2, 3, '#c08a4a');
+  r(4, -13, 5, 5, '#c08a4a'); r(8, -11, 3, 2, '#c08a4a'); r(10, -11, 1, 1, '#000');
+  r(4, -14, 2, 2, '#7a5230'); r(7, -12, 1, 1, '#000');
+}
+function drawHen(x, y, t, dir, col = '#f2efe6') {
+  const r = M(R(x), R(y), dir), flap = Math.sin(t * 25) > 0 ? 1 : 0;
+  ell(x, y, 4, 1.5, 'rgba(0,0,0,.25)');
+  r(-1, -2, 1, 2, '#f4b400'); r(1, -2, 1, 2, '#f4b400');
+  r(-3, -7, 6, 5, col); r(-5, -9, 2, 3, col === '#f2efe6' ? '#d9d4c5' : '#6e3a1b');
+  r(2, -10, 3, 3, col); r(3, -12, 2, 2, '#e02020'); r(5, -9, 2, 1, '#f4b400'); r(4, -7, 1, 1, '#e02020'); r(3, -10, 1, 1, '#000');
+  r(-2, -6 - flap, 3, 2, col === '#f2efe6' ? '#d9d4c5' : '#6e3a1b');
+}
+function drawDonkey(x, y, t, dir) {
+  const r = M(R(x), R(y), dir), l = Math.sin(t * 6) > 0 ? 1 : 0;
+  ell(x, y, 10, 2, 'rgba(0,0,0,.25)');
+  r(-7, -5, 2, 5, '#6e6e6e'); r(-3, -5 + l, 2, 5 - l, '#6e6e6e'); r(3, -5, 2, 5, '#6e6e6e'); r(6, -5 + (1 - l), 2, 5 - (1 - l), '#6e6e6e');
+  r(-8, -12, 16, 7, '#8d8d8d'); r(-6, -6, 12, 1, '#bbb');
+  r(6, -16, 3, 5, '#8d8d8d'); r(7, -18, 6, 4, '#8d8d8d'); r(12, -17, 2, 3, '#555');
+  r(7, -23, 1, 5, '#777'); r(9, -22, 1, 4, '#777'); r(10, -17, 1, 1, '#000'); r(5, -17, 2, 6, '#555');
+  r(-10, -11, 2, 5, '#555');
+}
+function drawMonkey(x, y, t, o = {}) {
+  x = R(x); y = R(y);
+  const fur = '#8b8f5a', j = o.jump ? -Math.abs(Math.sin(t * 8)) * 3 : 0;
+  y += j;
+  rect(x + 3, y - 3, 5, 1, fur); rect(x + 7, y - 6, 1, 3, fur);
+  rect(x - 3, y - 8, 6, 7, fur); rect(x - 2, y - 6, 4, 4, '#b8b88a');
+  rect(x - 3, y - 13, 6, 5, fur); rect(x - 2, y - 12, 4, 3, '#2b2b2b');
+  rect(x - 3, y - 13, 6, 1, '#e8e8d0');
+  rect(x - 1, y - 11, 1, 1, '#fff'); rect(x + 1, y - 11, 1, 1, '#fff');
+  if (o.wave) { const a = Math.sin(t * 10) > 0; rect(x + 3, y - (a ? 14 : 12), 2, 5, fur); rect(x - 5, y - 7, 2, 4, fur); }
+  else { rect(x - 5, y - 8, 2, 5, fur); rect(x + 3, y - 8, 2, 5, fur); }
+  if (o.eat) { rect(x + 2, y - 11, 3, 2, '#ffe135'); rect(x + 4, y - 12, 1, 1, '#6b4a1a'); }
+  if (o.carry) iconHen(x + 6, y - 8, true);
+}
+function drawRunMonkey(x, y, t, dir, carry) {
+  const r = M(R(x), R(y), dir), l = Math.sin(t * 18) > 0 ? 1 : 0, fur = '#8b8f5a';
+  ell(x, y, 6, 1.5, 'rgba(0,0,0,.25)');
+  r(-5, -4, 2, 4 - l, fur); r(3, -4, 2, 4 - (1 - l), fur);
+  r(-6, -9, 11, 5, fur); r(-10, -12, 1, 4, fur); r(-9, -12, 3, 1, fur);
+  r(4, -13, 5, 5, fur); r(6, -12, 3, 3, '#2b2b2b'); r(4, -13, 5, 1, '#e8e8d0'); r(7, -11, 1, 1, '#fff');
+  if (carry) iconHen(x + dir * 2, y - 14, true);
+}
+function drawVan(x, y, t, dir, stripe) {
+  const r = M(R(x), R(y), dir);
+  ell(x, y, 16, 3, 'rgba(0,0,0,.3)');
+  r(-13, -21, 26, 15, '#f2f2f2'); r(-13, -13, 26, 2, stripe);
+  r(-11, -19, 5, 4, '#6fa8dc'); r(-5, -19, 5, 4, '#6fa8dc'); r(1, -19, 5, 4, '#6fa8dc'); r(8, -20, 4, 6, '#6fa8dc');
+  r(9, -18, 2, 2, '#6b3e1f'); r(12, -10, 2, 2, '#fff8b0'); r(12, -8, 2, 2, '#999');
+  r(-11, -23, 20, 2, '#555'); r(-9, -26, 8, 3, '#c0392b'); r(0, -25, 6, 2, '#2e86de');
+  circ(x - 8 * dir, y - 5, 3, '#111'); circ(x + 8 * dir, y - 5, 3, '#111');
+  circ(x - 8 * dir, y - 5, 1, '#888'); circ(x + 8 * dir, y - 5, 1, '#888');
+}
+function drawRock(x, y) { x = R(x); y = R(y); ell(x, y, 8, 2, 'rgba(0,0,0,.3)'); poly([[x - 7, y], [x - 6, y - 6], [x - 1, y - 9], [x + 5, y - 7], [x + 7, y]], '#6b6b6b'); poly([[x - 5, y - 5], [x - 1, y - 8], [x + 3, y - 6], [x - 2, y - 4]], '#8a8a8a'); }
+function drawHole(x, y) { ell(x, y - 1, 9, 3, '#2a2420'); ell(x, y - 1, 7, 2, '#0f0b09'); }
+function drawPeel(x, y) { x = R(x); y = R(y); rect(x - 3, y - 2, 6, 2, '#ffe135'); rect(x - 5, y - 4, 2, 2, '#ffe135'); rect(x + 3, y - 4, 2, 2, '#ffe135'); rect(x - 1, y - 3, 2, 1, '#b58b00'); }
+function drawSand(x, y) { ell(x, y - 1, 19, 6, '#e7cf8f'); ell(x - 3, y - 2, 12, 3, '#f2dea6'); rect(x + 6, y - 3, 1, 1, '#c9ae6c'); rect(x - 9, y, 1, 1, '#c9ae6c'); }
+function drawCrab(x, y, t) {
+  x = R(x); y = R(y);
+  const c = Math.sin(t * 12) > 0 ? 1 : 0;
+  ell(x, y - 3, 4, 2.5, '#e04a2f');
+  rect(x - 7, y - 6 - c, 2, 2, '#e04a2f'); rect(x + 5, y - 6 - (1 - c), 2, 2, '#e04a2f');
+  rect(x - 5, y - 4, 1, 1, '#e04a2f'); rect(x + 4, y - 4, 1, 1, '#e04a2f');
+  rect(x - 4, y - 1, 1, 1, '#b5341f'); rect(x + 3, y - 1, 1, 1, '#b5341f');
+  rect(x - 1, y - 6, 1, 1, '#000'); rect(x + 1, y - 6, 1, 1, '#000');
+}
+function drawBall(x, y, z, t) {
+  ell(x, y, 4, 1.5, 'rgba(0,0,0,.25)');
+  const cx = R(x), cy = R(y - 5 - z), cols = ['#e74c3c', '#fff', '#2e86de', '#f1c40f'];
+  for (let i = 0; i < 4; i++) { g.fillStyle = cols[i]; g.beginPath(); g.moveTo(cx, cy); g.arc(cx, cy, 5, t * 4 + i * Math.PI / 2, t * 4 + (i + 1) * Math.PI / 2); g.fill(); }
+}
+function heart(x, y, c = '#ff3b6b') { x = R(x); y = R(y); rect(x - 3, y - 2, 2, 1, c); rect(x + 1, y - 2, 2, 1, c); rect(x - 4, y - 1, 8, 2, c); rect(x - 3, y + 1, 6, 1, c); rect(x - 2, y + 2, 4, 1, c); rect(x - 1, y + 3, 2, 1, c); }
+function bubble(x, y, icon) { x = R(x); y = R(y); rect(x - 8, y - 14, 16, 12, '#000'); rect(x - 7, y - 13, 14, 10, '#fff'); rect(x - 1, y - 3, 3, 2, '#fff'); rect(x - 1, y - 2, 1, 2, '#000'); icon(x, y - 8); }
+// iconos pequeños
+function iconPastel(x, y) { ell(x, y + 1, 4, 2.5, '#e0a040'); rect(x - 4, y + 1, 8, 1, '#b9742a'); rect(x - 2, y - 1, 1, 1, '#f4c56a'); }
+function iconBanana(x, y) { x = R(x); y = R(y); rect(x - 3, y + 1, 6, 2, '#ffe135'); rect(x - 5, y, 2, 2, '#ffe135'); rect(x + 3, y - 1, 2, 2, '#ffe135'); rect(x + 5, y - 2, 1, 1, '#6b4a1a'); rect(x - 2, y + 2, 4, 1, '#d9b800'); }
+function iconHen(x, y, bag) {
+  x = R(x); y = R(y);
+  if (bag) { rect(x - 5, y - 5, 10, 10, 'rgba(160,210,255,.55)'); rect(x - 1, y - 7, 2, 2, 'rgba(160,210,255,.9)'); }
+  ell(x - 1, y + 1, 3, 2.5, '#f2efe6'); rect(x + 1, y - 3, 2, 2, '#f2efe6'); rect(x + 1, y - 4, 2, 1, '#e02020'); rect(x + 3, y - 2, 1, 1, '#f4b400');
+}
+function iconCachupa(x, y) { x = R(x); y = R(y); ell(x, y + 1, 6, 3, '#222'); rect(x - 5, y - 2, 10, 3, '#333'); ell(x, y - 2, 5, 1.5, '#c9a227'); rect(x - 2, y - 3, 1, 1, '#7a2e1a'); rect(x + 2, y - 3, 1, 1, '#fff'); if (blink(4)) { rect(x - 2, y - 7, 1, 3, '#ddd'); rect(x + 2, y - 8, 1, 3, '#ddd'); } }
+function iconStar(x, y, t = 0) { x = R(x); y = R(y); const k = Math.abs(Math.cos(t * 3)); const pts = []; for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, r = i % 2 ? 2 : 5; pts.push([x + Math.cos(a) * r * Math.max(0.25, k), y + Math.sin(a) * r]); } poly(pts, '#ffd400'); }
+function iconGrogue(x, y) { x = R(x); y = R(y); rect(x - 3, y - 4, 7, 9, '#000'); rect(x - 2, y - 4, 5, 8, '#dff3f7'); rect(x - 2, y, 5, 4, '#d99a1e'); rect(x - 2, y, 5, 1, '#f2c14e'); rect(x - 1, y - 3, 1, 3, '#fff'); }
+function iconStrela(x, y) { x = R(x); y = R(y); rect(x - 1, y - 8, 3, 3, '#5a2e0c'); rect(x - 3, y - 5, 7, 11, '#6b3a12'); rect(x - 3, y - 2, 7, 5, '#f39c12'); rect(x, y - 1, 1, 3, '#e02020'); rect(x - 1, y, 3, 1, '#e02020'); rect(x - 1, y - 9, 3, 1, '#c9a227'); }
+function iconHelmet(x, y) { x = R(x); y = R(y); rect(x - 3, y - 3, 6, 2, '#ffd400'); rect(x - 4, y - 1, 8, 3, '#ffd400'); rect(x - 1, y - 1, 4, 2, '#222'); }
+const AMMO_ICON = { pastel: iconPastel, banana: iconBanana, hen: (x, y) => iconHen(x, y, true) };
+
+// decorados
+function drawHouseCosta(x, y, d) {
+  x = R(x); y = R(y);
+  rect(x - 14, y - 20, 28, 20, d.c); rect(x - 14, y - 21, 28, 2, '#00000022');
+  rect(x - 10, y - 15, 5, 5, '#2e4a62'); rect(x + 5, y - 15, 5, 5, '#2e4a62');
+  rect(x - 2, y - 10, 5, 10, '#5a3a1a');
+  if (d.rebar) { [-11, -4, 5, 11].forEach(dx => rect(x + dx, y - 25, 1, 5, '#555')); }
+}
+function drawHouseBanana(x, y, d) {
+  x = R(x); y = R(y);
+  rect(x - 16, y - 16, 32, 16, d.paint ? '#9a9590' : '#8f8a83');
+  for (let i = 0; i < 6; i++) rect(x - 15 + (i * 7) % 28, y - 14 + (i * 5) % 12, 5, 2, '#7a756e');
+  if (d.paint) for (let i = 0; i < 10; i++) rect(x - 15 + (i * 11) % 30, y - 15 + (i * 7) % 14, 1, 3, pick(['#e74c3c', '#f1c40f', '#3498db', '#2ecc71', '#fff']));
+  poly([[x - 19, y - 16], [x + 19, y - 16], [x + 14, y - 27], [x - 14, y - 27]], '#b8945a');
+  for (let i = -16; i < 17; i += 4) rect(x + i, y - 17, 1, 2, '#8a6d3b');
+  rect(x - 12, y - 11, 6, 11, '#6b4423'); rect(x + 3, y - 12, 7, 6, '#6fa8dc'); rect(x + 6, y - 12, 1, 6, '#3d6f99');
+}
+function drawBananaPlant(x, y, t) {
+  x = R(x); y = R(y);
+  rect(x - 1, y - 14, 3, 14, '#6b8e23');
+  const s = Math.sin(t * 2 + x) * 1;
+  poly([[x, y - 14], [x - 12 + s, y - 20], [x - 14 + s, y - 15]], '#3cb043');
+  poly([[x + 1, y - 14], [x + 13 + s, y - 21], [x + 15 + s, y - 16]], '#2e8b2e');
+  poly([[x, y - 14], [x - 4, y - 27], [x + 2, y - 26]], '#3cb043');
+  poly([[x + 1, y - 15], [x + 9, y - 26], [x + 11, y - 23]], '#4cc053');
+}
+function drawPalm(x, y, t) {
+  x = R(x); y = R(y);
+  ell(x + 4, y, 8, 2, 'rgba(0,0,0,.2)');
+  for (let i = 0; i < 8; i++) rect(x + i * 0.7 - 1, y - i * 4 - 4, 3, 4, i % 2 ? '#8b6b3e' : '#7a5c33');
+  const tx = x + 6, ty = y - 34, s = Math.sin(t * 1.5 + x) * 1.5;
+  [[-14, 4], [-10, -6], [0, -9], [10, -6], [14, 4], [6, 8], [-6, 8]].forEach(([dx, dy]) => line(tx, ty, tx + dx + s, ty + dy, '#2f8f3a', 2));
+  rect(tx - 2, ty - 1, 4, 3, '#6b4a1a');
+}
+function drawTree(x, y, d) {
+  x = R(x); y = R(y);
+  ell(x, y, 10, 3, 'rgba(0,0,0,.2)');
+  rect(x - 1, y - 12, 3, 12, '#6b4a2b');
+  const c = d.dark ? ['#2f6f2c', '#3a8a36', '#285e26'] : ['#3f8f3a', '#4fa64a', '#357a31'];
+  ell(x, y - 18, 11, 7, c[0]); ell(x - 4, y - 21, 7, 5, c[1]); ell(x + 5, y - 19, 6, 4, c[2]);
+}
+function drawEuca(x, y) { x = R(x); y = R(y); rect(x - 1, y - 22, 2, 22, '#d8d2c4'); ell(x, y - 26, 5, 9, '#5d8a68'); ell(x + 2, y - 20, 4, 5, '#6f9c78'); }
+function drawBush(x, y) { ell(x, y - 3, 7, 4, '#4f9e3c'); ell(x + 3, y - 5, 4, 3, '#63b04c'); }
+function drawBoat(x, y, d) { x = R(x); y = R(y); poly([[x - 13, y - 6], [x + 13, y - 6], [x + 9, y], [x - 9, y]], d.c); rect(x - 13, y - 7, 26, 1, '#fff'); rect(x - 9, y - 3, 18, 1, '#e74c3c'); }
+function drawUmbrella(x, y, d) { x = R(x); y = R(y); rect(x, y - 16, 1, 16, '#ddd'); poly([[x - 9, y - 14], [x + 10, y - 14], [x + 1, y - 21]], d.c); rect(x - 6, y - 15, 3, 1, '#fff'); rect(x + 4, y - 15, 3, 1, '#fff'); }
+function drawTerrace(x, y) { rect(x - 22, y - 3, 44, 3, '#7d6b55'); rect(x - 22, y - 6, 44, 3, '#6aa84f'); rect(x - 20, y - 8, 40, 2, '#7fbf5a'); }
+function drawWallSeg(x, y) { rect(x - 14, y - 6, 28, 6, '#d8d2c4'); for (let i = 0; i < 4; i++) rect(x - 13 + i * 7, y - 5 + (i % 2) * 2, 5, 2, '#bdb5a5'); }
+function drawSign(x, y, d) {
+  const w = tw(d.text, 8) + 10;
+  x = R(x); y = R(y);
+  rect(x - w / 2 + 3, y - 18, 2, 18, '#777'); rect(x + w / 2 - 5, y - 18, 2, 18, '#777');
+  rect(x - w / 2, y - 31, w, 14, '#fff'); rect(x - w / 2 + 1, y - 30, w - 2, 12, '#1b4f9c');
+  txt(d.text, x, y - 28, '#fff', 8, 'center');
+}
+function drawRuiVaz(x, y) {
+  x = R(x); y = R(y);
+  rect(x - 52, y - 6, 104, 6, '#3d3d42'); rect(x - 52, y - 7, 104, 2, '#d4a017');
+  const L = [['R', '#d32f2f'], ['U', '#ff7043'], ['I', '#fdd835'], [' ', ''], ['V', '#4fc3f7'], ['A', '#4fc3f7'], ['Z', '#1e40af']];
+  L.forEach(([ch, c], i) => { if (ch !== ' ') { txt(ch, x - 48 + i * 15, y - 26, c, 16, 'left', '#fff'); } });
+}
+function drawPelourinho(x, y) {
+  x = R(x); y = R(y);
+  ell(x, y, 10, 3, 'rgba(0,0,0,.25)');
+  rect(x - 9, y - 3, 18, 3, '#d5d5d5'); rect(x - 7, y - 5, 14, 2, '#e8e8e8');
+  rect(x - 2, y - 30, 4, 25, '#f5f5f5'); rect(x + 1, y - 30, 1, 25, '#cfcfcf');
+  rect(x - 4, y - 33, 8, 3, '#eee'); circ(x, y - 35, 2, '#eee');
+}
+function drawPoilao(x, y, t) {
+  x = R(x); y = R(y);
+  ell(x, y, 40, 8, 'rgba(0,0,0,.25)');
+  poly([[x - 34, y], [x - 14, y - 20], [x - 10, y - 70], [x + 10, y - 70], [x + 14, y - 20], [x + 34, y]], '#8d8a80');
+  [[-26, -16], [-14, -8], [0, -6], [14, -8], [26, -16]].forEach(([dx, dy]) => line(x + dx * 0.4, y - 60, x + dx, y + dy * 0.1, '#6f6c63', 2));
+  ell(x, y - 88, 55, 22, '#2f7a2c'); ell(x - 30, y - 80, 28, 14, '#3a8f36'); ell(x + 32, y - 84, 26, 13, '#2a6d28'); ell(x + 5, y - 100, 34, 12, '#46a041');
+  if (blink(1.5)) rect(x - 8, y - 108, 3, 3, '#fff6a0');
+}
+function drawFinish(x, y) {
+  x = R(x); y = R(y);
+  const w = 112;
+  rect(x - w / 2, y - 40, 3, 40, '#555'); rect(x + w / 2 - 3, y - 40, 3, 40, '#555');
+  rect(x - w / 2, y - 46, w, 12, '#1b4f9c');
+  rect(x - w / 2, y - 39, w, 2, '#fff'); rect(x - w / 2, y - 38, w, 1, '#e02020');
+  txt('META', x, y - 45, '#ffd400', 8, 'center');
+  for (let i = 0; i < 10; i++) { const a = i / 10 * Math.PI * 2; rect(x - 40 + Math.cos(a) * 4, y - 41 + Math.sin(a) * 3, 1, 1, '#ffd400'); }
+}
+function drawGrillStand(x, y, t, o = {}) {
+  x = R(x); y = R(y);
+  ell(x, y, 14, 3, 'rgba(0,0,0,.25)');
+  drawPerson(x + 2, y - 4, { skin: o.skin, shirt: o.shirt, scarf: o.scarf, apron: true, t, happy: o.happy, wave: !o.happy, earring: true });
+  rect(x - 12, y - 11, 24, 3, '#8b5a2b'); rect(x - 11, y - 8, 2, 8, '#6b4423'); rect(x + 9, y - 8, 2, 8, '#6b4423');
+  rect(x - 9, y - 15, 18, 5, '#2b2b2b'); rect(x - 8, y - 16, 16, 1, blink(6) ? '#ff5722' : '#ffab40');
+  for (let i = 0; i < 3; i++) { const k = (t * 0.8 + i / 3) % 1; ell(x - 4 + i * 4 + Math.sin(k * 6) * 2, y - 18 - k * 16, 2 + k * 3, 2 + k * 2, `rgba(220,220,220,${0.6 * (1 - k)})`); }
+}
+
+// ---------------------------------------------------------- escena: diálogo
+const NAMES = { anita: 'ANITA', alvarito: 'ALVARITO', narr: 'NARRADOR', bia: 'NHA BIA', tuta: 'NHA TUTA' };
+function drawNpcFace(x, y, who) {
+  rect(x, y, 40, 48, who === 'bia' ? '#7fb3d5' : '#f5b041');
+  if (who === 'narr') {
+    rect(x, y, 40, 48, '#003893');
+    rect(x, y + 28, 40, 4, '#fff'); rect(x, y + 32, 40, 3, '#cf2027'); rect(x, y + 35, 40, 4, '#fff');
+    for (let i = 0; i < 10; i++) { const a = i / 10 * Math.PI * 2; rect(x + 14 + Math.cos(a) * 9, y + 32 + Math.sin(a) * 9, 2, 2, '#f7d116'); }
+    return;
+  }
+  const sk = who === 'bia' ? '#6b3e1f' : '#8d5524', sc = who === 'bia' ? '#e74c3c' : '#9b59b6';
+  rect(x + 8, y + 40, 24, 8, who === 'bia' ? '#27ae60' : '#f1c40f');
+  rect(x + 12, y + 14, 16, 22, sk); rect(x + 16, y + 34, 8, 6, sk);
+  rect(x + 9, y + 6, 22, 10, sc); rect(x + 9, y + 8, 4, 12, sc); rect(x + 27, y + 8, 4, 12, sc); rect(x + 18, y + 3, 10, 5, sc);
+  rect(x + 15, y + 21, 3, 2, '#fff'); rect(x + 22, y + 21, 3, 2, '#fff'); rect(x + 16, y + 21, 1, 2, '#000'); rect(x + 23, y + 21, 1, 2, '#000');
+  rect(x + 16, y + 29, 8, 2, '#fff'); rect(x + 16, y + 31, 8, 1, '#7a2e1a');
+  rect(x + 10, y + 26, 2, 3, '#ffd400'); rect(x + 28, y + 26, 2, 3, '#ffd400');
+}
+function drawPortrait(x, y, who) {
+  rect(x - 2, y - 2, 44, 52, '#ffd400'); rect(x - 1, y - 1, 42, 50, '#000');
+  const im = who === 'anita' ? IMG['cara-anita'] : who === 'alvarito' ? IMG['cara-alvarito'] : null;
+  if (im && imgOk(im)) g.drawImage(im, x, y, 40, 48);
+  else drawNpcFace(x, y, who);
+}
+const Dialog = {
+  enter(a) { this.lines = a.lines; this.bg = a.bg; this.i = 0; this.c = 0; this.t = 0; this.blipT = 0; this.startLine(); Music.play(a.music || 'title'); },
+  startLine() { const L = this.lines[this.i]; this.c = 0; this.t = 0; Voice.say(L[0], L[1], true); },
+  update(dt) {
+    const L = this.lines[this.i];
+    this.t += dt;
+    const prev = Math.floor(this.c);
+    this.c = Math.min(L[1].length, this.c + dt * 45);
+    if (Math.floor(this.c) !== prev && Math.floor(this.c) % 2 === 0 && this.c < L[1].length) SFX.blip();
+    if (act()) {
+      if (this.c < L[1].length) this.c = L[1].length;
+      else { SFX.select(); this.i++; if (this.i >= this.lines.length) { next(); return; } this.startLine(); }
+    }
+  },
+  draw() {
+    BG[this.bg] ? BG[this.bg]() : BG.title();
+    const L = this.lines[this.i], who = L[0];
+    panel(4, 162, 312, 74);
+    drawPortrait(12, 175, who);
+    rect(8, 152, tw(NAMES[who] || who, 8) + 12, 14, '#ffd400');
+    txt(NAMES[who] || who, 14, 155, '#000');
+    const lines = wrap(L[1].slice(0, Math.floor(this.c)), 244, 8);
+    lines.slice(0, 5).forEach((ln, k) => txt(ln, 62, 172 + k * 11, '#fff3c4'));
+    if (this.c >= L[1].length && blink(2)) txt('▼', 300, 222, '#ffd400');
+  }
+};
+
+// ---------------------------------------------------------- fondos reutilizables
+const BG = {
+  title() {
+    for (let i = 0; i < 12; i++) rect(0, i * 10, W, 10, ['#ff9a5a', '#ffab66', '#ffbb73', '#ffc982', '#ffd793', '#ffe3a6', '#bfe3f2', '#a8d8ef', '#93cdeb', '#7fc2e6', '#6db8e1', '#5daedc'][11 - i]);
+    circ(250, 60, 18, '#fff3b0');
+    poly([[0, 150], [40, 110], [70, 125], [110, 80], [150, 118], [190, 95], [230, 130], [270, 100], [320, 140], [320, 160], [0, 160]], '#3f7f3a');
+    poly([[105, 86], [110, 80], [116, 88]], '#e9f0e6');
+    rect(0, 150, W, 90, '#1f6fb5');
+    for (let i = 0; i < 18; i++) rect((i * 37 + performance.now() / 40) % W, 160 + (i * 13) % 70, 8, 1, '#7fc4ff');
+  },
+  tuna() { Flies.drawScene(); },
+  house() { Paint.drawScene(); },
+  tree() { Selfie.drawBg(); },
+  beach() { Grill.drawBg(); },
+  map() { MapScene.drawMap(1); }
+};
+
+// ---------------------------------------------------------- escena: postal
+const Postcard = {
+  enter(a) { this.a = a; this.t = 0; Music.play('title'); SFX.win(); Voice.say('narr', a.title, true); },
+  update(dt) { this.t += dt; if (this.t > 0.6 && act()) { SFX.select(); next(); } },
+  draw() {
+    rect(0, 0, W, H, '#003893');
+    for (let i = 0; i < 10; i++) { const a = i / 10 * Math.PI * 2 + this.t * 0.2; rect(160 + Math.cos(a) * 140, 120 + Math.sin(a) * 105, 3, 3, '#f7d116'); }
+    const k = Math.min(1, this.t * 3);
+    txt('¡POSTAL DESBLOQUEADA!', 160, 6, '#ffd400', 8, 'center', '#000');
+    const im = IMG[this.a.img], land = im && imgOk(im) && im.naturalWidth > im.naturalHeight;
+    const cx = 10, cy = 20, cw = 300, ch = 200;
+    g.save(); g.translate(0, (1 - k) * 200);
+    rect(cx + 3, cy + 3, cw, ch, 'rgba(0,0,0,.4)');
+    rect(cx, cy, cw, ch, '#fbf6e9');
+    const pw = land ? 160 : 120, ph = land ? 120 : 160;
+    rect(cx + 7, cy + 7, pw + 6, ph + 6, '#222');
+    if (im && imgOk(im)) g.drawImage(im, cx + 10, cy + 10, pw, ph); else rect(cx + 10, cy + 10, pw, ph, '#999');
+    const tx = cx + pw + 22, tw2 = cw - pw - 30;
+    // sello con la bandera de Cabo Verde
+    rect(cx + cw - 34, cy + 8, 26, 20, '#fff'); rect(cx + cw - 32, cy + 10, 22, 16, '#003893');
+    rect(cx + cw - 32, cy + 19, 22, 2, '#fff'); rect(cx + cw - 32, cy + 20, 22, 1, '#cf2027');
+    rect(cx + cw - 27, cy + 16, 1, 1, '#f7d116'); rect(cx + cw - 25, cy + 22, 1, 1, '#f7d116'); rect(cx + cw - 23, cy + 15, 1, 1, '#f7d116');
+    const tl = wrap(this.a.title, tw2 - 34, 8);
+    tl.forEach((l, i) => txt(l, tx, cy + 10 + i * 11, '#b3202a'));
+    const body = wrap(this.a.text, land ? tw2 : tw2, 8);
+    const y0 = cy + 14 + tl.length * 11;
+    body.forEach((l, i) => { if (y0 + i * 10 < cy + ch - 12) txt(l, tx, y0 + i * 10, '#2b2b2b'); });
+    if (land) {
+      const extra = wrap(this.a.extra || '', pw, 8);
+      extra.forEach((l, i) => txt(l, cx + 10, cy + ph + 20 + i * 10, '#2b2b2b'));
+    }
+    g.restore();
+    if (this.t > 0.6 && blink(2)) txt(isTouch ? 'TOCA PARA SEGUIR' : 'ESPACIO PARA SEGUIR', 160, 228, '#fff', 8, 'center', '#000');
+  }
+};
+
+// ---------------------------------------------------------- escena: mapa de la isla
+const ISLAND = [[90, 30], [70, 48], [75, 60], [85, 78], [80, 98], [78, 120], [83, 145], [80, 165], [78, 185], [75, 200], [70, 225], [68, 250], [70, 268], [75, 290], [85, 320], [100, 340], [130, 360], [150, 375], [180, 390], [210, 395], [240, 400], [270, 405], [288, 400], [305, 385], [320, 360], [330, 345], [345, 325], [335, 300], [330, 270], [315, 240], [300, 220], [280, 200], [260, 190], [235, 170], [220, 158], [200, 135], [185, 118], [160, 100], [140, 85], [125, 65], [115, 55], [100, 35]];
+const PLACES = {
+  'TARRAFAL': [85, 78], 'MALAGUETA': [150, 165], 'BOA ENTRADA': [146, 220], 'ASSOMADA': [152, 238], 'PICO DA ANTÓNIA': [180, 272],
+  'RUI VAZ': [215, 289], 'CIDADE VELHA': [211, 393], 'PRAIA': [288, 397], 'PEDRA BADEJO': [268, 203], 'S. DOMINGOS': [245, 296]
+};
+const LEGS = [
+  [[288, 397], [250, 402], [211, 393]],
+  [[211, 393], [225, 356], [215, 289], [186, 244], [152, 238], [146, 220]],
+  [[146, 220], [150, 190], [150, 165], [152, 144], [120, 110], [85, 78]]
+];
+const MP = ([x, y]) => [-22 + x * 0.5, 4 + (y - 20) * 0.5];
+function legPoint(leg, k) {
+  const pts = LEGS[leg].map(MP);
+  let tot = 0; const seg = [];
+  for (let i = 1; i < pts.length; i++) { const l = Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]); seg.push(l); tot += l; }
+  let d = k * tot;
+  for (let i = 0; i < seg.length; i++) {
+    if (d <= seg[i]) { const u = d / seg[i]; return [pts[i][0] + (pts[i + 1][0] - pts[i][0]) * u, pts[i][1] + (pts[i + 1][1] - pts[i][1]) * u]; }
+    d -= seg[i];
+  }
+  return pts[pts.length - 1];
+}
+const MapScene = {
+  enter(a) { this.a = a; this.t = 0; Music.play('title'); Voice.say('narr', a.title, true); },
+  update(dt) { this.t += dt; if (act()) { if (this.t < 3) this.t = 3; else { SFX.select(); next(); } } },
+  drawMap(k) {
+    rect(0, 0, W, H, '#1c5d99');
+    const tt = performance.now() / 1000;
+    for (let i = 0; i < 40; i++) rect((i * 53 + tt * 6) % 160, (i * 29) % H, 5, 1, '#3b7fc0');
+    const pts = ISLAND.map(MP);
+    g.lineWidth = 4; g.strokeStyle = '#e7d39a'; g.beginPath(); pts.forEach((p, i) => i ? g.lineTo(p[0], p[1]) : g.moveTo(p[0], p[1])); g.closePath(); g.stroke();
+    poly(pts, '#4f9a3f');
+    // relieve: Malagueta y Pico da Antónia
+    const mtn = (x, y, s, c) => { const [a, b] = MP([x, y]); poly([[a - s, b + s * 0.6], [a, b - s * 0.8], [a + s, b + s * 0.6]], c); poly([[a - s * 0.3, b - s * 0.3], [a, b - s * 0.8], [a + s * 0.3, b - s * 0.3]], '#eef3e6'); };
+    poly([MP([110, 150]), MP([175, 145]), MP([200, 230]), MP([130, 250])], '#3f8732');
+    poly([MP([150, 260]), MP([215, 250]), MP([240, 320]), MP([170, 330])], '#3f8732');
+    mtn(150, 165, 9, '#2f6f2a'); mtn(180, 272, 11, '#2f6f2a'); mtn(200, 280, 7, '#357a30');
+    // rutas
+    for (let l = 0; l < 3; l++) {
+      const lp = LEGS[l].map(MP);
+      const leg = this.a ? this.a.leg : 3, done = l < leg, cur = l === leg;
+      g.setLineDash(done ? [] : [3, 3]);
+      g.strokeStyle = done ? '#ffd400' : '#fff3c4'; g.lineWidth = done ? 2 : 1;
+      g.beginPath(); lp.forEach((p, i) => i ? g.lineTo(p[0], p[1]) : g.moveTo(p[0], p[1])); g.stroke();
+      if (cur) {
+        g.setLineDash([]); g.strokeStyle = '#ffd400'; g.lineWidth = 2; g.beginPath();
+        const steps = 40;
+        for (let s = 0; s <= steps * k; s++) { const p = legPoint(l, s / steps); s ? g.lineTo(p[0], p[1]) : g.moveTo(p[0], p[1]); }
+        g.stroke();
+      }
+    }
+    g.setLineDash([]);
+    for (const n in PLACES) {
+      const [x, y] = MP(PLACES[n]);
+      rect(x - 2, y - 2, 4, 4, '#000'); rect(x - 1, y - 1, 2, 2, n === 'BOA ENTRADA' ? '#7CFC00' : '#fff');
+    }
+    g.save(); g.scale(0.75, 0.75);
+    const sc = (n, dx, dy, al) => { const [x, y] = MP(PLACES[n]); txt(n, (x + dx) / 0.75, (y + dy) / 0.75, '#fff', 8, al || 'left', '#000'); };
+    sc('TARRAFAL', 4, -4); sc('MALAGUETA', 4, -4); sc('BOA ENTRADA', 4, -9); sc('ASSOMADA', 4, -1);
+    sc('RUI VAZ', 4, -8); sc('CIDADE VELHA', -48, 5); sc('PRAIA', 2, 2); sc('PICO DA ANTÓNIA', -40, 9);
+    g.restore();
+    txt('N', 14, 10, '#fff', 8, 'left', '#000'); rect(17, 20, 1, 8, '#fff');
+    txt('ILHA DE SANTIAGO', 6, 226, '#ffd400', 8, 'left', '#000');
+  },
+  draw() {
+    const k = Math.min(1, this.t / 3);
+    this.drawMap(k);
+    const p = legPoint(this.a.leg, k);
+    const bob = Math.sin(this.t * 20) > 0 ? 1 : 0;
+    g.save(); g.translate(R(p[0]), R(p[1]) + 4 - bob); g.scale(0.5, 0.5); drawMoto(0, 0, this.t, {}); g.restore();
+    panel(156, 6, 158, 228);
+    txt(this.a.phase, 166, 16, '#ffd400');
+    const tl = wrap(this.a.title, 140, 8); tl.forEach((l, i) => txt(l, 166, 30 + i * 11, '#fff'));
+    const body = wrap(this.a.text, 140, 8);
+    const y0 = 36 + tl.length * 11;
+    body.forEach((l, i) => txt(l, 166, y0 + i * 10, '#fff3c4'));
+    if (this.t > 3 && blink(2)) txt(isTouch ? 'TOCA: ¡VAMOS!' : 'ESPACIO: ¡VAMOS!', 235, 218, '#7CFC00', 8, 'center');
+  }
+};
+
+// ---------------------------------------------------------- escena: carrera estilo Paperboy
+//  El mundo usa (x lateral, d distancia). La proyección en diagonal da el aire Paperboy.
+let camD = 0;
+const K = 0.5, PY = 196, CX = 112;
+const proj = (x, d) => [CX + x + (d - camD) * K, PY - (d - camD)];
+const OBDEF = {
+  goat: { w: 14, l: 8, hit: 'crash', feed: true }, dog: { w: 12, l: 7, hit: 'crash', feed: true },
+  chicken: { w: 7, l: 6, hit: 'feathers' }, hen: { w: 9, l: 8, hit: 'collect' },
+  aluguer: { w: 22, l: 24, hit: 'crash' }, hole: { w: 16, l: 7, hit: 'crash', flat: true },
+  peel: { w: 9, l: 6, hit: 'slip', flat: true }, rock: { w: 14, l: 9, hit: 'crash' },
+  donkey: { w: 18, l: 9, hit: 'crash', feed: true }, tourist: { w: 9, l: 6, hit: 'crash' },
+  sand: { w: 34, l: 22, hit: 'sand', flat: true }, crab: { w: 9, l: 5, hit: 'pinch' },
+  ball: { w: 10, l: 8, hit: 'ball' }, thief: { w: 11, l: 7, hit: 'thief', feed: true },
+  ammo: { w: 14, l: 12, hit: 'ammo' }, cachupa: { w: 14, l: 12, hit: 'life' }, star: { w: 14, l: 12, hit: 'star' },
+  grogue: { w: 14, l: 12, hit: 'grogue' }, strela: { w: 14, l: 12, hit: 'strela' }
+};
+const CRASH = {
+  goat: ['¡BEEEE!', 'alvarito', '¡Cabra loca!', 'bee'], dog: ['¡GUAU!', 'anita', '¡Ese perro nos ha pillado!', 'woof'],
+  aluguer: ['¡PI-PIII!', 'alvarito', '¡Ay, el aluguer!', 'honk'], hole: ['¡CATAPUM!', 'anita', '¡Menudo bache!', null],
+  rock: ['¡CRACK!', 'alvarito', '¡Piedra va!', null], donkey: ['¡IIII-OOO!', 'anita', '¡Burro a la vista... tarde!', 'hee'],
+  tourist: ['¡UY!', 'alvarito', '¡Perdón, perdón! ¡Sorry!', null]
+};
+const LEVELS = [
+  { short: 'FASE 1', name: 'PRAIA > CIDADE VELHA', len: 3600, ammo: 12, ammoName: 'PASTÉIS', icon: 'pastel', target: 'person',
+    zones: [[0, 'costa'], [1750, 'cidade']], tgap: [120, 175], ogap: [85, 140],
+    obs: { goat: 3, dog: 3, chicken: 3, aluguer: 3, hole: 3, peel: 3, tourist: 2 },
+    picks: ['ammo', 'star', 'star', 'grogue', 'ammo', 'cachupa', 'star', 'strela', 'ammo', 'star', 'grogue'],
+    signs: [[1700, 'CIDADE VELHA'], [1950, 'RUA BANANA']], specials: [[3150, 'pelourinho', 100]],
+    hitPops: ['¡ÑAM!', '¡OBRIGADU!', '¡SABI!', '¡ÑAM ÑAM!'],
+    hitLines: [['anita', '¡Toma pastel!'], ['alvarito', '¡Con diabo dentro!'], ['anita', '¡Bon apetit!'], ['npc', '¡Obrigadu!'], ['npc', '¡Sabi sabi!']] },
+  { short: 'FASE 2', name: 'RUI VAZ > POILÃO', len: 4000, ammo: 12, ammoName: 'BANANAS', icon: 'banana', target: 'monkey',
+    zones: [[0, 'monte']], tgap: [110, 165], ogap: [75, 125],
+    obs: { goat: 4, donkey: 3, aluguer: 3, rock: 4, dog: 2, chicken: 2 },
+    picks: ['ammo', 'star', 'grogue', 'star', 'ammo', 'cachupa', 'strela', 'star', 'ammo', 'grogue', 'star', 'cachupa'],
+    signs: [[250, 'S. DOMINGOS'], [1250, 'RUI VAZ'], [2500, 'ASSOMADA'], [3250, 'BOA ENTRADA']],
+    specials: [[1420, 'ruivaz', 92], [4090, 'poilao', 105]], fog: [[700, 1150], [1800, 2250], [2900, 3200]],
+    hitPops: ['¡UH UH AH AH!', '¡ÑAM!', '¡BANANA!'],
+    hitLines: [['alvarito', '¡Toma banana, macaquito!'], ['anita', '¡Plátano exprés!'], ['alvarito', '¡Directo a la rama!'], ['anita', '¡Qué mono más mono!']] },
+  { short: 'FASE 3', name: 'MALAGUETA > TARRAFAL', len: 4200, ammo: 0, ammoName: 'GALLINAS', icon: 'hen', target: 'grill',
+    zones: [[0, 'malagueta'], [1500, 'praia']], tgap: [140, 200], ogap: [80, 130], hens: true,
+    obs: { dog: 3, aluguer: 3, sand: 3, crab: 4, ball: 3, thief: 3, hole: 2 },
+    picks: ['star', 'grogue', 'star', 'cachupa', 'strela', 'star', 'grogue', 'star', 'strela'],
+    signs: [[200, 'SERRA DA MALAGUETA'], [1450, 'TARRAFAL']], specials: [],
+    hitPops: ['¡OBRIGADU!', '¡SABI!', '¡CLOC CLOC!'],
+    hitLines: [['npc', '¡Obrigadu, fidju!'], ['anita', '¡Gallina entregada!'], ['alvarito', '¡Cloc cloc, a la brasa!'], ['npc', '¡Sabi!']] }
+];
+const GROUND = {
+  costa: [[-400, -112, 'sea'], [-112, -62, '#e4c99a'], [-62, -52, '#bdb7a9'], [-52, 52, 'asphalt'], [52, 62, '#bdb7a9'], [62, 400, '#c99a62']],
+  cidade: [[-400, -62, '#9c8f80'], [-62, -52, '#d9d2c3'], [-52, 52, 'cobble'], [52, 62, '#d9d2c3'], [62, 400, '#9c8f80']],
+  monte: [[-400, -58, '#5f9e3c'], [-58, -52, '#8a6a3b'], [-52, 52, 'cobble'], [52, 58, '#8a6a3b'], [58, 400, '#4f8f32']],
+  malagueta: [[-400, -58, '#3f7f30'], [-58, -52, '#7a5a30'], [-52, 52, 'cobble'], [52, 58, '#7a5a30'], [58, 400, '#357528']],
+  praia: [[-400, -118, 'sea'], [-118, -100, '#9fd8e8'], [-100, -58, '#f3e3b5'], [-58, -52, '#d8c48f'], [-52, 52, 'asphalt'], [52, 58, '#d8c48f'], [58, 400, '#efd9a3']]
+};
+function mkOb(type, x, d, extra = {}) {
+  const D = OBDEF[type];
+  return Object.assign({ type, x, d, w: D.w, l: D.l, vx: 0, vd: 0, z: 0, vz: 0, t: Math.random() * 3, dir: 1, active: false }, extra);
+}
+const Ride = {
+  enter(li) {
+    this.li = li; const L = this.L = LEVELS[li];
+    G.lives = Math.max(G.lives, 3);
+    this.scoreAtStart = G.score;
+    this.p = { x: 0, d: 0, v: 0, crash: 0, inv: 0, slip: 0, slipDir: 0, sand: 0, cd: 0, turbo: 0, star: 0, t: 0 };
+    this.ammo = L.ammo; this.proj = []; this.wparts = []; this.served = 0; this.combo = 1;
+    this.state = 'ready'; this.st = 0; this.t = 0; this.fogA = 0; this.fogSaid = false; this.lastCount = 4;
+    this.build();
+    camD = 0; pops = []; sparts = [];
+    Music.play('ride'); Music.speed = 1;
+    if (this.engine) this.engine.stop();
+    this.engine = makeLoop('sawtooth', 50, 520, 14, 0.015, 'gain');
+    store.set('step', step); store.set('score', G.score);
+  },
+  zoneAt(d) { let z = this.L.zones[0][1]; for (const [a, t] of this.L.zones) if (d >= a) z = t; return z; },
+  build() {
+    const L = this.L, ents = [], decor = [];
+    let d = 260, n = 0;
+    while (d < L.len - 150) {
+      const z = this.zoneAt(d), one = z === 'costa' || z === 'praia';
+      const side = one ? 1 : (Math.random() < 0.5 ? -1 : 1);
+      ents.push({ type: 'target', kind: L.target, x: side * 80, d, side, served: false, missed: false, t: Math.random() * 5,
+        skin: pick(SKINS), shirt: pick(SHIRTS), scarf: pick(SCARVES), hair: pick(['#111', '#2b1a0e', '#3b2414']), w: 0, l: 0 });
+      n++; d += rnd(L.tgap[0], L.tgap[1]);
+    }
+    this.targets = n;
+    const pool = []; for (const k in L.obs) for (let i = 0; i < L.obs[k]; i++) pool.push(k);
+    d = 380;
+    while (d < L.len - 120) {
+      const type = pick(pool), side = Math.random() < 0.5 ? -1 : 1;
+      let e;
+      switch (type) {
+        case 'goat': e = mkOb(type, rnd(-40, 40), d, { dir: side, seed: rnd(0, 6) }); break;
+        case 'dog': e = mkOb(type, side * 58, d, { dir: -side }); break;
+        case 'chicken': e = mkOb(type, side * 60, d, { dir: -side, col: pick(['#f2efe6', '#a0522d']) }); break;
+        case 'aluguer': {
+          const parked = Math.random() < 0.25;
+          e = mkOb(type, parked ? side * 30 : -26, d, { dir: parked ? 1 : -1, parked, stripe: pick(['#27ae60', '#f1c40f', '#e74c3c', '#2e86de']) });
+          break;
+        }
+        case 'donkey': e = mkOb(type, side * 58, d, { dir: -side }); break;
+        case 'tourist': e = mkOb(type, side * 58, d, { dir: -side }); break;
+        case 'crab': e = mkOb(type, rnd(-40, 40), d, { dir: side }); break;
+        case 'ball': e = mkOb(type, side * 60, d, { dir: -side }); break;
+        case 'thief': e = mkOb(type, side * 62, d, { dir: -side }); break;
+        default: e = mkOb(type, rnd(-38, 38), d);
+      }
+      ents.push(e);
+      d += rnd(L.ogap[0], L.ogap[1]) * (1 - 0.3 * d / L.len);
+    }
+    if (L.hens) {
+      d = 160;
+      while (d < L.len - 250) {
+        const k = ri(1, 3), side = Math.random() < 0.5 ? -1 : 1;
+        for (let i = 0; i < k; i++) ents.push(mkOb('hen', side * rnd(56, 66), d + i * 14, { dir: -side, col: pick(['#f2efe6', '#a0522d', '#f2efe6']) }));
+        d += rnd(130, 200);
+      }
+    }
+    const step2 = (L.len - 600) / L.picks.length;
+    L.picks.forEach((k, i) => ents.push(mkOb(k, rnd(-36, 36), 450 + i * step2 + rnd(-30, 30))));
+    // decorado según la zona
+    for (let i = 0; i < L.zones.length; i++) {
+      const a = L.zones[i][0], b = i + 1 < L.zones.length ? L.zones[i + 1][0] : L.len + 400, z = L.zones[i][1];
+      for (let dd = a + 10; dd < b; ) {
+        switch (z) {
+          case 'costa':
+            decor.push({ k: 'houseCosta', x: rnd(104, 124), d: dd, c: pick(['#f6c1cc', '#ffe08a', '#9fd3e6', '#c9e4a6', '#f7a76c', '#ffffff']), rebar: Math.random() < 0.5 });
+            if (Math.random() < 0.6) decor.push({ k: pick(['boat', 'rock', 'palm']), x: rnd(-100, -76), d: dd + 20, c: pick(['#2e86de', '#27ae60', '#e67e22', '#c0392b']) });
+            dd += rnd(48, 70); break;
+          case 'cidade':
+            decor.push({ k: 'houseBanana', x: -114, d: dd, paint: Math.random() < 0.2 }); decor.push({ k: 'houseBanana', x: 114, d: dd + 18, paint: Math.random() < 0.2 });
+            decor.push({ k: 'banana', x: pick([-96, 96]), d: dd + 22 });
+            dd += rnd(40, 52); break;
+          case 'monte': case 'malagueta':
+            decor.push({ k: pick(['tree', 'tree', 'euca', 'bush', 'terrace']), x: rnd(90, 150), d: dd, dark: z === 'malagueta' });
+            decor.push({ k: pick(['tree', 'euca', 'bush', 'terrace', 'tree']), x: -rnd(90, 150), d: dd + rnd(0, 20), dark: z === 'malagueta' });
+            dd += rnd(26, 42); break;
+          case 'praia':
+            decor.push({ k: pick(['palm', 'umbrella', 'palm', 'boat']), x: rnd(-96, -74), d: dd, c: pick(['#e74c3c', '#2e86de', '#f1c40f', '#27ae60']) });
+            if (Math.random() < 0.6) decor.push({ k: pick(['palm', 'houseCosta']), x: rnd(108, 126), d: dd + 15, c: pick(['#ffe08a', '#9fd3e6', '#fff']), rebar: true });
+            dd += rnd(44, 66); break;
+        }
+      }
+    }
+    L.signs.forEach(([d2, text]) => decor.push({ k: 'sign', x: 64 + tw(text, 8) / 2, d: d2, text }));
+    L.specials.forEach(([d2, k, x]) => decor.push({ k, x, d: d2 }));
+    this.ents = ents; this.decor = decor;
+  },
+  update(dt) {
+    const p = this.p, L = this.L;
+    this.t += dt; p.t += dt;
+    for (const w of this.wparts) { w.t += dt; w.x += w.vx * dt; w.d += w.vd * dt; w.vz -= w.grav * dt; w.z = Math.max(0, w.z + w.vz * dt); }
+    this.wparts = this.wparts.filter(w => w.t < w.life);
+    if (!this.engine.o && AC) this.engine = makeLoop('sawtooth', 50, 520, 14, 0.015, 'gain');
+    if (this.state === 'ready') {
+      this.st += dt;
+      const c = 3 - Math.floor(this.st);
+      if (c !== this.lastCount) { this.lastCount = c; if (c > 0) { SFX.beep(false); } else { SFX.beep(true); this.state = 'go'; Voice.say('anita', '¡Vamos!', true); pop('¡VAMOS!', 160, 110, '#7CFC00', 24, 1.2); } }
+      camD = p.d; this.engine.set(0.03, 45);
+      return;
+    }
+    if (this.state === 'over') { this.st += dt; this.engine.set(0, 40); if (this.st > 1 && act()) { G.score = this.scoreAtStart; G.lives = 3; Ride.enter(this.li); } return; }
+    if (this.state === 'done') {
+      this.st += dt; p.v = Math.max(40, p.v - 60 * dt); p.d += p.v * dt; camD = p.d; this.engine.set(0.03, 45 + p.v * 0.5);
+      if (this.st > 1.2 && act()) { this.engine.stop(); Music.speed = 1; next(); }
+      return;
+    }
+    // ---- control de la moto
+    if (p.cd > 0) p.cd -= dt;
+    if (p.turbo > 0) { p.turbo -= dt; if (p.turbo <= 0) Music.speed = 1; }
+    if (p.star > 0) p.star -= dt;
+    if (p.crash > 0) {
+      p.crash -= dt; p.v = Math.max(0, p.v - 220 * dt);
+      if (p.crash <= 0) {
+        if (G.lives <= 0) { this.state = 'over'; this.st = 0; SFX.lose(); Music.stop(); Voice.say('narr', '¡Game over! Ni la cachupa os salva.', true); }
+        else p.inv = 1.6;
+      }
+    } else {
+      let steer = (keys.left ? -1 : 0) + (keys.right ? 1 : 0);
+      if (p.slip > 0) { p.slip -= dt; steer = p.slipDir * 1.7; }
+      p.x += steer * (p.turbo > 0 ? 115 : 95) * dt;
+      const top = p.turbo > 0 ? 175 : 135;
+      const tv = keys.up ? top : keys.down ? 38 : (p.turbo > 0 ? 130 : 82);
+      p.v += (tv - p.v) * Math.min(1, dt * 1.8);
+      if (p.sand > 0) { p.sand -= dt; p.v = Math.min(p.v, 45); }
+      if (pressed.throwL) this.throwIt(-1);
+      if (pressed.throwR) this.throwIt(1);
+      if (act()) this.throwIt(this.autoSide());
+    }
+    if (p.inv > 0) p.inv -= dt;
+    p.x = clamp(p.x, -46, 46);
+    p.d += p.v * dt;
+    camD = p.d;
+    this.engine.set(0.045, 42 + p.v * 0.55, 8 + p.v * 0.1);
+    // ---- entidades
+    for (const e of this.ents) {
+      const dd = e.d - p.d;
+      if (dd < -90) { e.dead = true; continue; }
+      if (dd > 320) continue;
+      e.t += dt;
+      if (e.type === 'target') {
+        if (e.served) e.st = (e.st || 0) + dt;
+        if (!e.served && !e.missed && e.d < p.d - 30) { e.missed = true; this.combo = 1; }
+        continue;
+      }
+      if (e.flying) { e.x += e.vx * dt; e.vz -= 320 * dt; e.z += e.vz * dt; if (e.z < -5) e.dead = true; continue; }
+      if (!e.active && dd < 230) e.active = true;
+      if (e.active) this.behave(e, dt, dd);
+      e.x += e.vx * dt; e.d += e.vd * dt;
+      if (p.crash <= 0 && !e.dead && Math.abs(e.x - p.x) < (e.w + 14) / 2 && Math.abs(e.d - p.d) < (e.l + 10) / 2 && (e.z || 0) < 14) this.hitOb(e);
+    }
+    this.ents = this.ents.filter(e => !e.dead);
+    // ---- proyectiles
+    for (const pr of this.proj) {
+      pr.t += dt; pr.x += pr.vx * dt; pr.d += pr.vd * dt; pr.vz -= 280 * dt; pr.z += pr.vz * dt;
+      for (const e of this.ents) {
+        if (e.type === 'target' && !e.served && Math.abs(pr.x - e.x) < 16 && Math.abs(pr.d - e.d) < 22) { this.serve(e); pr.dead = true; break; }
+        const D = OBDEF[e.type];
+        if (D && D.feed && !e.fed && !e.flying && Math.abs(pr.x - e.x) < e.w / 2 + 6 && Math.abs(pr.d - e.d) < e.l / 2 + 8) {
+          e.fed = true; pr.dead = true; G.score += 15; SFX.nom();
+          const [sx, sy] = proj(e.x, e.d); pop('¡ÑAM!', sx, sy - 24, '#ffb347', 10);
+          if (e.type === 'thief') { e.vx *= 0.3; }
+          break;
+        }
+      }
+      if (!pr.dead && pr.z <= 0) { pr.dead = true; this.burst(pr.x, pr.d, 0, 4, ['#c9a36b', '#fff'], 30, 2); SFX.plop(); }
+    }
+    this.proj = this.proj.filter(pr => !pr.dead);
+    // ---- niebla en la montaña
+    if (L.fog) {
+      const inF = L.fog.some(([a, b]) => p.d > a && p.d < b);
+      this.fogA += ((inF ? 1 : 0) - this.fogA) * Math.min(1, dt * 1.5);
+      if (inF && !this.fogSaid) { this.fogSaid = true; Voice.say('anita', '¡Qué niebla! ¡No veo nada!'); pop('¡NIEBLA!', 160, 60, '#fff', 12); }
+      if (!inF && this.fogA < 0.1) this.fogSaid = false;
+    }
+    if (p.d >= L.len && this.state === 'go') {
+      this.state = 'done'; this.st = 0;
+      this.bonus = this.served * 50 + G.lives * 100;
+      G.score += this.bonus;
+      SFX.win(); Voice.say(pick(['anita', 'alvarito']), '¡Llegamos! ¡Fase superada!', true);
+      pop('¡META!', 160, 100, '#ffd400', 24, 1.6);
+    }
+  },
+  behave(e, dt, dd) {
+    const p = this.p;
+    switch (e.type) {
+      case 'goat': e.vx = Math.sin(e.t * 0.9 + e.seed) * 14; e.dir = e.vx >= 0 ? 1 : -1; e.x = clamp(e.x, -50, 50); break;
+      case 'dog':
+        if (!e.chased && dd < 150) { e.chased = true; e.ct = 0; SFX.woof(); const [sx, sy] = proj(e.x, e.d); pop('¡GUAU!', sx, sy - 20, '#fff', 10); }
+        if (e.chased && (e.ct += dt) < 3.5 && !e.fed) { e.vx = clamp((p.x - e.x) * 2, -48, 48); e.vd = p.v * 0.45; e.dir = e.vx >= 0 ? 1 : -1; }
+        else { e.vx = e.fed ? 0 : e.vx * 0.95; e.vd = 0; }
+        break;
+      case 'chicken': case 'hen': case 'donkey': case 'ball': case 'thief': {
+        const sp = { chicken: 48, hen: 34, donkey: 12, ball: 40, thief: 58 }[e.type] * (e.fed ? 0.4 : 1);
+        if (e.type === 'hen') { if (e.x > 70) e.dir = -1; if (e.x < -70) e.dir = 1; e.vx = e.dir * sp; }
+        else if (Math.abs(e.x) < 78) e.vx = e.dir * sp; else e.vx = 0;
+        if (e.type === 'ball') e.z = Math.abs(Math.sin(e.t * 5)) * 12;
+        if (e.type === 'chicken' && !e.clucked && dd < 120) { e.clucked = true; SFX.cluck(); }
+        break;
+      }
+      case 'tourist':
+        if (!e.stopped && Math.abs(e.x) < 8) { e.stopped = true; e.wait = 1.3; const [sx, sy] = proj(e.x, e.d); pop('¡FOTO!', sx, sy - 28, '#fff', 10); SFX.shutter(); }
+        if (e.wait > 0) { e.wait -= dt; e.vx = 0; } else if (Math.abs(e.x) < 78) e.vx = e.dir * 16; else e.vx = 0;
+        break;
+      case 'crab': e.vx = Math.sin(e.t * 2) * 55; break;
+      case 'aluguer':
+        if (!e.parked) e.vd = -70;
+        if (!e.honked && dd < 200 && !e.parked) { e.honked = true; SFX.honk(); const [sx, sy] = proj(e.x, e.d); pop('¡PI-PIII!', sx, sy - 34, '#fff', 10); if (Math.random() < 0.5) Voice.say('anita', '¡Que viene un aluguer!'); }
+        break;
+    }
+  },
+  autoSide() {
+    let best = null;
+    for (const e of this.ents) if (e.type === 'target' && !e.served) { const dd = e.d - this.p.d; if (dd > -15 && dd < 160 && (!best || dd < best.d - this.p.d)) best = e; }
+    return best ? best.side : 1;
+  },
+  throwIt(side) {
+    const p = this.p;
+    if (p.cd > 0 || p.crash > 0) return;
+    if (this.ammo <= 0) {
+      p.cd = 0.5; SFX.empty();
+      pop('¡SIN ' + this.L.ammoName + '!', 160, 70, '#ff5a3c', 10);
+      return;
+    }
+    this.ammo--; p.cd = p.turbo > 0 ? 0.13 : 0.28;
+    this.proj.push({ x: p.x, d: p.d, z: 16, vx: side * 175, vd: p.v + 18, vz: 65, t: 0 });
+    SFX.throw();
+    if (Math.random() < 0.25) pop('¡FIIIU!', CX + p.x + side * 30, PY - 40, '#fff', 8, 0.6);
+  },
+  serve(e) {
+    e.served = true; e.st = 0; this.served++;
+    const pts = 100 * this.combo * (this.p.turbo > 0 ? 2 : 1);
+    G.score += pts;
+    const [sx, sy] = proj(e.x, e.d);
+    SFX.hit(); if (e.kind === 'monkey') SFX.monkey(); if (e.kind === 'grill') SFX.sizzle();
+    pop(pick(this.L.hitPops), sx, sy - 44, '#7CFC00', 10);
+    pop('+' + pts, sx, sy - 28, '#ffd400', 8, 0.8);
+    if (this.combo >= 2) pop('COMBO x' + this.combo, 160, 40, '#ff8cf0', 10, 0.9);
+    this.combo = Math.min(5, this.combo + 1);
+    const [who, text] = pick(this.L.hitLines);
+    Voice.say(who, text);
+    sburst(sx, sy - 30, 10, ['#ffd400', '#ff3b6b', '#fff'], 60, 120, 2, 0.6);
+  },
+  burst(x, d, z, n, cols, spd, s) {
+    for (let i = 0; i < n; i++) this.wparts.push({ x, d, z, vx: rnd(-spd, spd), vd: rnd(-spd, spd) * 0.5, vz: rnd(30, spd * 2), grav: 220, life: rnd(0.4, 0.9), t: 0, c: pick(cols), s });
+  },
+  hitOb(e) {
+    const p = this.p, D = OBDEF[e.type], [sx, sy] = proj(e.x, e.d);
+    if (p.star > 0 && D.hit === 'crash') {
+      e.flying = true; e.vx = (e.x >= p.x ? 1 : -1) * 160; e.vz = 140; G.score += 50; SFX.boing();
+      pop(pick(['¡PUMBA!', '¡ZASCA!', '¡FUERA!']), sx, sy - 30, '#7CFC00', 12); return;
+    }
+    switch (D.hit) {
+      case 'crash': {
+        if (p.inv > 0) return;
+        p.crash = 1.0; G.lives--; shake = 0.4;
+        const c = CRASH[e.type] || ['¡CATAPLÁN!', 'alvarito', '¡Ay, mi madre!', null];
+        SFX.crash(); if (c[3]) SFX[c[3]]();
+        pop(c[0], sx, sy - 34, '#ff5a3c', 14); pop(pick(['¡CATAPLÁN!', '¡PATAPLÁN!', '¡CRASH!']), CX + p.x, PY - 60, '#ffd400', 12);
+        Voice.say(c[1], c[2], true);
+        this.burst(p.x, p.d, 20, 10, ['#ffd400', '#fff', '#ff5a3c'], 70, 2);
+        if (e.type !== 'aluguer' && e.type !== 'hole' && e.type !== 'rock') { e.vx = (e.x >= p.x ? 1 : -1) * 70; e.dir = Math.sign(e.vx); }
+        this.combo = 1;
+        break;
+      }
+      case 'feathers':
+        if (e.hitDone) return; e.hitDone = true; e.dir = e.x >= p.x ? 1 : -1; e.vx = e.dir * 90;
+        G.score = Math.max(0, G.score - 10); SFX.cluck();
+        this.burst(e.x, e.d, 6, 10, ['#fff', '#f2efe6', '#e02020'], 50, 2);
+        pop('¡CLOC!', sx, sy - 20, '#fff', 10);
+        Voice.say('anita', '¡Perdón, señora gallina!');
+        break;
+      case 'collect':
+        e.dead = true; this.ammo++; G.score += 20; SFX.cluck();
+        this.burst(e.x, e.d, 6, 8, ['#fff', '#f2efe6'], 40, 2);
+        pop('¡CLOC! +1', sx, sy - 20, '#fff', 10);
+        if (this.ammo % 3 === 1) Voice.say(pick(['anita', 'alvarito']), pick(['¡A la bolsa!', '¡Gallina a bordo!', '¡Cloc cloc, para la brasa!']));
+        break;
+      case 'slip':
+        if (e.hitDone) return; e.hitDone = true;
+        p.slip = 0.7; p.slipDir = Math.random() < 0.5 ? -1 : 1; SFX.slip();
+        pop('¡ZAS!', sx, sy - 20, '#ffe135', 12); Voice.say('alvarito', '¡Resbalón bananero!');
+        break;
+      case 'sand':
+        p.sand = 0.3;
+        if (!e.hitDone) { e.hitDone = true; noise(0.4, 0.2, 1500); pop('¡FSSSS!', sx, sy - 16, '#f3e3b5', 10); }
+        break;
+      case 'pinch':
+        if (e.hitDone) return; e.hitDone = true; G.score = Math.max(0, G.score - 15); SFX.pinch();
+        pop('¡PINZAZO!', sx, sy - 18, '#ff5a3c', 10); Voice.say('anita', '¡Ay, un cangrejo!');
+        break;
+      case 'ball':
+        if (e.hitDone) return; e.hitDone = true; e.flying = true; e.vx = (e.x >= p.x ? 1 : -1) * 120; e.vz = 170; e.z = 4;
+        G.score += 25; SFX.boing(); pop('¡BOING!', sx, sy - 22, '#5ad7ff', 12);
+        break;
+      case 'thief':
+        if (e.hitDone) return; e.hitDone = true;
+        if (this.ammo > 0) { this.ammo--; e.carry = true; e.vx *= 1.6; pop('¡MONO LADRÓN!', sx, sy - 26, '#ff5a3c', 10); Voice.say('alvarito', '¡Eh, mono ladrón, devuelve la gallina!', true); SFX.monkey(); }
+        else { pop('¡UH UH!', sx, sy - 20, '#fff', 10); SFX.monkey(); }
+        break;
+      case 'ammo':
+        e.dead = true; this.ammo += 5; SFX.pickup(); pop('+5 ' + this.L.ammoName, sx, sy - 20, '#7CFC00', 8);
+        Voice.say('anita', this.L.icon === 'banana' ? '¡Más bananas!' : '¡Más pastéis!');
+        break;
+      case 'life':
+        e.dead = true; G.lives = Math.min(5, G.lives + 1); SFX.pickup(); pop('¡CACHUPA! +1', sx, sy - 20, '#ffb347', 10);
+        Voice.say('alvarito', '¡Cachupa! ¡Energía para todo el día!');
+        break;
+      case 'star':
+        e.dead = true; G.score += 50; SFX.pickup(); pop('+50 MORABEZA', sx, sy - 20, '#ffd400', 8);
+        break;
+      case 'grogue':
+        e.dead = true; p.turbo = 6; Music.speed = 1.25; SFX.gulp(); SFX.power(); shake = 0.2;
+        pop('¡GROGUE POWER!', 160, 80, '#ffb347', 14, 1.4);
+        Voice.say('alvarito', pick(['¡Un traguito de grogue y a toda mecha!', '¡Grogue de Santiago, turbo activado!']), true);
+        break;
+      case 'strela':
+        e.dead = true; p.star = 7; SFX.gulp(); SFX.power();
+        pop('¡MODO STRELA!', 160, 80, '#ff5a5a', 14, 1.4);
+        Voice.say('anita', pick(['¡Strela Kriola! ¡Somos invencibles!', '¡Una Strela fresquita y nadie nos para!']), true);
+        break;
+    }
+  },
+  band(x1, x2, da, db, c) {
+    const P = [proj(x1, da), proj(x2, da), proj(x2, db), proj(x1, db)];
+    const base = c === 'sea' ? '#1f6fb5' : c === 'asphalt' ? '#4d4d57' : c === 'cobble' ? '#6f655a' : c;
+    poly(P, base);
+    if (c === 'sea') {
+      const x0 = Math.max(x1, -230);
+      for (let d = Math.floor(da / 14) * 14; d < db; d += 14) for (let x = x0; x < x2 - 6; x += 26) {
+        const [sx, sy] = proj(x + Math.sin(this.t * 2 + d * 0.13 + x) * 4, d);
+        rect(sx, sy, 6, 1, '#7fc4ff');
+      }
+    } else if (c === 'asphalt') {
+      for (let d = Math.ceil(da / 40) * 40; d < db; d += 40) { const [a, b] = proj(0, d), [c2, d2] = proj(0, d + 16); line(a, b, c2, d2, '#e8c547', 2); }
+      line(...proj(x1 + 2, da), ...proj(x1 + 2, db), '#ddd', 1); line(...proj(x2 - 2, da), ...proj(x2 - 2, db), '#ddd', 1);
+    } else if (c === 'cobble') {
+      const cols = ['#7f7466', '#8a7f70', '#74695c'];
+      for (let d = Math.ceil(da / 6) * 6; d < db; d += 6) {
+        const r = Math.round(d / 6), off = (r % 2) * 4;
+        for (let x = x1 + off; x < x2 - 6; x += 8) { const [sx, sy] = proj(x, d); rect(sx, sy - 4, 7, 4, cols[(r * 7 + x) & 1 ? 0 : (r + x) % 3 === 0 ? 2 : 1]); }
+      }
+    }
+  },
+  drawEnt(e) {
+    const [sx, sy] = proj(e.x, e.d), t = e.t;
+    switch (e.type) {
+      case 'target':
+        if (e.kind === 'person') {
+          drawPerson(sx, sy, { skin: e.skin, shirt: e.shirt, hair: e.hair, scarf: e.side > 0 && e.skin === SKINS[1] ? e.scarf : null, t, wave: !e.served, jump: e.served && e.st < 1.5, happy: e.served });
+          if (!e.served) bubble(sx, sy - 26 - (blink(3) ? 1 : 0), iconPastel); else { iconPastel(sx + 6, sy - 15); if (e.st < 2) heart(sx, sy - 34 - e.st * 6); }
+        } else if (e.kind === 'monkey') {
+          drawTree(sx, sy + 2, { dark: false }); rect(sx - 2, sy - 16, 12, 2, '#6b4a2b');
+          drawMonkey(sx + 4, sy - 15, t, { wave: !e.served, jump: !e.served, eat: e.served });
+          if (!e.served) bubble(sx + 4, sy - 33 - (blink(3) ? 1 : 0), iconBanana); else if (e.st < 2) heart(sx + 4, sy - 36 - e.st * 6);
+        } else {
+          drawGrillStand(sx, sy, t, { skin: e.skin, shirt: e.shirt, scarf: e.scarf, happy: e.served });
+          if (!e.served) bubble(sx + 2, sy - 34 - (blink(3) ? 1 : 0), (x, y) => iconHen(x, y, true)); else if (e.st < 2) heart(sx + 2, sy - 38 - e.st * 6);
+        }
+        break;
+      case 'goat': drawGoat(sx, sy, t, e.dir); break;
+      case 'dog': drawDog(sx, sy, t, e.dir); break;
+      case 'chicken': case 'hen': drawHen(sx, sy, t, e.dir, e.col); break;
+      case 'donkey': drawDonkey(sx, sy, t, e.dir); break;
+      case 'tourist': drawPerson(sx, sy, { skin: '#f4b9a0', shirt: '#ff6fa8', pants: '#f5deb3', hat: '#fff', camera: true, walk: !e.wait, t }); break;
+      case 'aluguer': drawVan(sx, sy, t, e.dir, e.stripe); break;
+      case 'hole': drawHole(sx, sy); break;
+      case 'peel': drawPeel(sx, sy); break;
+      case 'rock': drawRock(sx, sy); break;
+      case 'sand': drawSand(sx, sy); break;
+      case 'crab': drawCrab(sx, sy, t); break;
+      case 'ball': drawBall(sx, sy, e.z, t); break;
+      case 'thief': drawRunMonkey(sx, sy, t, e.vx >= 0 ? 1 : -1, e.carry); break;
+      default: {
+        const b = Math.sin(t * 4) * 2;
+        ell(sx, sy, 6, 2, 'rgba(0,0,0,.25)');
+        const fn = { ammo: AMMO_ICON[this.L.icon] || iconPastel, cachupa: iconCachupa, star: (x, y) => iconStar(x, y, t), grogue: iconGrogue, strela: iconStrela }[e.type];
+        if (fn) { if (e.type === 'grogue' || e.type === 'strela') circ(sx, sy - 10 + b, 8, 'rgba(255,255,255,.25)'); fn(sx, sy - 10 + b); }
+      }
+    }
+  },
+  drawDecor(dc, sx, sy) {
+    switch (dc.k) {
+      case 'houseCosta': drawHouseCosta(sx, sy, dc); break;
+      case 'houseBanana': drawHouseBanana(sx, sy, dc); break;
+      case 'banana': drawBananaPlant(sx, sy, this.t); break;
+      case 'palm': drawPalm(sx, sy, this.t); break;
+      case 'tree': drawTree(sx, sy, dc); break;
+      case 'euca': drawEuca(sx, sy); break;
+      case 'bush': drawBush(sx, sy); break;
+      case 'terrace': drawTerrace(sx, sy); break;
+      case 'boat': drawBoat(sx, sy, dc); break;
+      case 'rock': drawRock(sx, sy); break;
+      case 'umbrella': drawUmbrella(sx, sy, dc); break;
+      case 'sign': drawSign(sx, sy, dc); break;
+      case 'ruivaz': drawRuiVaz(sx, sy); break;
+      case 'pelourinho': drawPelourinho(sx, sy); break;
+      case 'poilao': drawPoilao(sx, sy, this.t); break;
+    }
+  },
+  draw() {
+    const p = this.p, L = this.L;
+    g.save();
+    if (shake > 0) g.translate(R(rnd(-4, 4) * shake * 2), R(rnd(-4, 4) * shake * 2));
+    rect(-10, -10, W + 20, H + 20, '#000');
+    const d0 = camD - 70, d1 = camD + 270;
+    for (let i = 0; i < L.zones.length; i++) {
+      const a = L.zones[i][0], b = i + 1 < L.zones.length ? L.zones[i + 1][0] : 1e9;
+      const s = Math.max(a, d0), e = Math.min(b, d1);
+      if (s >= e) continue;
+      for (const [x1, x2, c] of GROUND[L.zones[i][1]]) this.band(x1, x2, s, e, c);
+    }
+    // línea de meta
+    if (L.len > d0 && L.len < d1) for (let i = 0; i < 13; i++) for (let j = 0; j < 2; j++) { const [sx, sy] = proj(-52 + i * 8, L.len + j * 4); rect(sx, sy - 4, 8, 4, (i + j) % 2 ? '#fff' : '#111'); }
+    const list = [];
+    for (const e of this.ents) {
+      if (e.d < d0 || e.d > d1) continue;
+      const [, sy] = proj(e.x, e.d), D = OBDEF[e.type];
+      if (D && D.flat) this.drawEnt(e);
+      else list.push({ y: sy, f: () => { if (e.flying) { g.save(); g.translate(0, -e.z); this.drawEnt(e); g.restore(); } else this.drawEnt(e); } });
+    }
+    for (const dc of this.decor) {
+      if (dc.d < d0 - 40 || dc.d > d1 + 60) continue;
+      const [sx, sy] = proj(dc.x, dc.d);
+      if (sx < -80 || sx > W + 80) continue;
+      list.push({ y: sy, f: () => this.drawDecor(dc, sx, sy) });
+    }
+    if (L.len > d0 - 40 && L.len < d1) { const [sx, sy] = proj(0, L.len); list.push({ y: sy + 0.5, f: () => drawFinish(sx, sy) }); }
+    for (const pr of this.proj) {
+      const [sx, sy] = proj(pr.x, pr.d);
+      list.push({ y: sy, f: () => { ell(sx, sy, 3, 1, 'rgba(0,0,0,.3)'); (AMMO_ICON[L.icon] || iconPastel)(sx, sy - pr.z); } });
+    }
+    for (const w of this.wparts) { const [sx, sy] = proj(w.x, w.d); list.push({ y: sy, f: () => rect(sx, sy - w.z, w.s, w.s, w.c) }); }
+    const psx = CX + p.x, psy = PY;
+    list.push({ y: psy, f: () => {
+      if (p.crash > 0) drawCrashMoto(psx, psy, p.t, 1 - p.crash);
+      else if (!(p.inv > 0 && Math.floor(p.t * 14) % 2)) {
+        const bump = this.zoneAt(p.d) === 'cidade' || this.zoneAt(p.d) === 'monte' || this.zoneAt(p.d) === 'malagueta' ? (Math.sin(p.t * 30) > 0 ? 1 : 0) : 0;
+        drawMoto(psx, psy, p.t, { bob: p.v > 10 ? bump : 0, speed: p.v, turbo: p.turbo > 0, star: p.star > 0 });
+      }
+    } });
+    list.sort((a, b) => a.y - b.y);
+    list.forEach(o => o.f());
+    if (this.fogA > 0.02) {
+      rect(0, 0, W, H, `rgba(235,240,245,${0.55 * this.fogA})`);
+      for (let i = 0; i < 7; i++) ell((i * 67 + this.t * 18) % (W + 80) - 40, 30 + (i * 41) % 170, 40, 14, `rgba(255,255,255,${0.35 * this.fogA})`);
+    }
+    if (p.turbo > 0) rect(0, 0, W, H, `rgba(255,150,40,${0.08 + 0.04 * Math.sin(this.t * 10)})`);
+    g.restore();
+    this.drawHud();
+  },
+  drawHud() {
+    const p = this.p, L = this.L;
+    rect(0, 0, W, 13, 'rgba(0,0,0,.7)');
+    txt(String(G.score).padStart(6, '0'), 4, 3, '#ffd400');
+    for (let i = 0; i < G.lives; i++) iconHelmet(66 + i * 10, 7);
+    (AMMO_ICON[L.icon] || iconPastel)(126, 6);
+    txt('x' + this.ammo, 134, 3, this.ammo > 0 ? '#fff' : '#ff5a3c');
+    txt(L.short, 316, 3, '#7CFC00', 8, 'right');
+    if (this.combo > 1) txt('COMBO x' + this.combo, 176, 3, '#ff8cf0');
+    let yy = 16;
+    if (p.turbo > 0) { iconGrogue(8, yy + 4); txt('GROGUE ' + Math.ceil(p.turbo), 16, yy, '#ffb347'); yy += 12; }
+    if (p.star > 0) { iconStrela(8, yy + 4); txt('STRELA ' + Math.ceil(p.star), 16, yy, '#ff5a5a'); }
+    rect(40, 231, 240, 4, '#000'); rect(41, 232, 238, 2, '#333');
+    rect(41, 232, 238 * clamp(p.d / L.len, 0, 1), 2, '#ffd400');
+    rect(40 + 238 * clamp(p.d / L.len, 0, 1) - 1, 229, 3, 7, '#fff');
+    txt('META', 284, 229, '#fff', 8);
+    if (this.state === 'ready') {
+      panel(40, 70, 240, 76);
+      txt(L.short, 160, 80, '#ffd400', 8, 'center');
+      txt(L.name, 160, 94, '#fff', 8, 'center');
+      const c = Math.max(1, 3 - Math.floor(this.st));
+      txt(String(c), 160, 112, '#7CFC00', 24, 'center', '#000');
+    }
+    if (this.state === 'done') {
+      panel(36, 56, 248, 120);
+      txt('¡FASE SUPERADA!', 160, 66, '#7CFC00', 8, 'center');
+      txt('ENTREGAS ' + this.served + '/' + this.targets, 60, 86, '#fff');
+      txt('BONUS     +' + this.bonus, 60, 100, '#fff');
+      txt('PUNTOS ' + G.score, 60, 116, '#ffd400');
+      const c = this.served / this.targets;
+      txt(c > 0.8 ? '¡MORABEZA TOTAL!' : c > 0.5 ? '¡SABI SABI!' : '¡NO STRESS!', 160, 136, '#ff8cf0', 8, 'center');
+      if (this.st > 1.2 && blink(2)) txt(isTouch ? 'TOCA PARA SEGUIR' : 'ESPACIO PARA SEGUIR', 160, 158, '#fff', 8, 'center');
+    }
+    if (this.state === 'over') {
+      panel(36, 66, 248, 100);
+      txt('¡GAME OVER!', 160, 80, '#ff5a3c', 16, 'center', '#000');
+      txt('NI LA CACHUPA OS SALVA...', 160, 108, '#fff', 8, 'center');
+      if (this.st > 1 && blink(2)) txt(isTouch ? 'TOCA: REINTENTAR' : 'ESPACIO: REINTENTAR', 160, 140, '#ffd400', 8, 'center');
+    }
+    if (this.state === 'go' && this.t < 9) {
+      rect(0, 196, W, 32, 'rgba(0,0,0,.55)');
+      const help = isTouch ? 'CRUCETA: MOVER · LANZA: BOTONES' : 'FLECHAS · Z/X LANZAR · ESPACIO AUTO';
+      txt(help, 160, 200, '#fff', 8, 'center');
+      const goal = L.target === 'person' ? 'LANZA PASTÉIS A QUIEN TE HACE SEÑAS' : L.target === 'monkey' ? 'LANZA BANANAS A LOS MACACOS' : 'RECOGE GALLINAS Y LÁNZALAS A LAS BRASAS';
+      txt(goal, 160, 214, '#ffd400', 8, 'center');
+    }
+  },
+  leave() { if (this.engine) this.engine.stop(); Music.speed = 1; }
+};
+
+// ---------------------------------------------------------- minijuego: el atún mosqueado
+function drawTuna(cx, cy) {
+  ell(cx + 4, cy + 4, 70, 14, 'rgba(0,0,0,.25)');
+  poly([[cx + 62, cy - 2], [cx + 92, cy - 22], [cx + 84, cy], [cx + 94, cy + 20]], '#4b4f7a');
+  ell(cx, cy, 70, 20, '#c9c6e0');
+  ell(cx, cy - 8, 64, 11, '#8d8fbf');
+  ell(cx - 4, cy + 7, 60, 9, '#e3e1f1');
+  ell(cx - 54, cy + 1, 16, 15, '#c9c6e0');
+  poly([[cx - 70, cy - 2], [cx - 60, cy - 10], [cx - 60, cy + 6]], '#b0aed0');
+  rect(cx - 72, cy, 12, 1, '#2b2b2b');
+  circ(cx - 55, cy - 5, 4, '#fff'); circ(cx - 55, cy - 5, 2, '#111');
+  line(cx - 42, cy - 14, cx - 40, cy + 12, '#9a98be', 1);
+  poly([[cx - 20, cy + 4], [cx + 6, cy + 2], [cx - 8, cy + 14]], '#b9b7d6');
+  for (let i = 0; i < 6; i++) { rect(cx + 30 + i * 6, cy - 16 + i, 3, 3, '#f4c430'); rect(cx + 30 + i * 6, cy + 13 - i, 3, 3, '#f4c430'); }
+  poly([[cx - 8, cy - 18], [cx + 12, cy - 30], [cx + 20, cy - 16]], '#6c6e9e');
+}
+const Flies = {
+  enter() {
+    this.state = 'intro'; this.t = 30; this.flies = []; this.meter = 0; this.cx = 160; this.cy = 130;
+    this.spawn = 0.6; this.cd = 0; this.swat = 0; this.count = 0; this.el = 0; this.grog = 0; this.bottle = null; this.bottleT = 7;
+    this.rt = 0; Music.play('mini'); this.buzz = makeLoop('sawtooth', 185, 900, 22, 25);
+    store.set('step', step); store.set('score', G.score);
+  },
+  onTuna(x, y) { return ((x - 170) / 78) ** 2 + ((y - 146) / 22) ** 2 <= 1; },
+  newTarget(f) { for (let i = 0; i < 20; i++) { const x = rnd(95, 245), y = rnd(128, 166); if (this.onTuna(x, y)) { f.tx = x; f.ty = y; return; } } f.tx = 170; f.ty = 146; },
+  update(dt) {
+    if (!this.buzz.o && AC) this.buzz = makeLoop('sawtooth', 185, 900, 22, 25);
+    if (this.state === 'intro') { if (act()) { this.state = 'play'; Voice.say('anita', '¡A por las moscas!', true); } return; }
+    if (this.state === 'result') { this.rt += dt; this.buzz.set(0); if (this.rt > 1 && act()) { this.buzz.stop(); next(); } return; }
+    this.el += dt; this.t -= dt; if (this.cd > 0) this.cd -= dt; if (this.swat > 0) this.swat -= dt; if (this.grog > 0) this.grog -= dt;
+    const sp = this.grog > 0 ? 280 : 170;
+    if (keys.left) this.cx -= sp * dt; if (keys.right) this.cx += sp * dt; if (keys.up) this.cy -= sp * dt; if (keys.down) this.cy += sp * dt;
+    if (ptr.moved) { this.cx = ptr.x; this.cy = ptr.y; ptr.moved = false; }
+    this.cx = clamp(this.cx, 8, 312); this.cy = clamp(this.cy, 20, 232);
+    this.spawn -= dt;
+    if (this.spawn <= 0) {
+      const n = this.el > 14 ? 2 : 1;
+      for (let i = 0; i < n; i++) {
+        const side = ri(0, 2), f = { x: side === 0 ? -5 : side === 1 ? 325 : rnd(0, 320), y: side === 2 ? -5 : rnd(20, 200), state: 'in', t: rnd(0, 5), big: Math.random() < 0.15, hp: 1 };
+        if (f.big) f.hp = 2;
+        this.newTarget(f); this.flies.push(f);
+      }
+      this.spawn = Math.max(0.3, 1.0 - this.el * 0.025);
+    }
+    let landed = 0, flying = 0;
+    for (const f of this.flies) {
+      f.t += dt;
+      if (f.state === 'in') {
+        const dx = f.tx - f.x, dy = f.ty - f.y, d = Math.hypot(dx, dy);
+        const v = f.big ? 55 : 80;
+        f.x += dx / d * v * dt + Math.sin(f.t * 17) * 40 * dt; f.y += dy / d * v * dt + Math.cos(f.t * 13) * 40 * dt;
+        if (d < 3) f.state = 'land';
+        flying++;
+      } else if (f.state === 'land') {
+        landed += f.big ? 2 : 1;
+        if (Math.random() < dt * 0.3) { f.state = 'in'; this.newTarget(f); }
+      } else if (f.state === 'dead') { f.y += 40 * dt; if (f.t > 0.5) f.gone = true; }
+    }
+    this.flies = this.flies.filter(f => !f.gone);
+    this.meter = Math.min(1, this.meter + landed * dt * 0.011);
+    this.buzz.set(Math.min(0.07, (flying + landed * 0.3) * 0.008), 170 + flying * 6);
+    if (act() && this.cd <= 0) this.doSwat();
+    this.bottleT -= dt;
+    if (this.bottleT <= 0 && !this.bottle) { this.bottle = { x: rnd(40, 280), y: rnd(50, 100), t: 4 }; this.bottleT = 11; }
+    if (this.bottle && (this.bottle.t -= dt) <= 0) this.bottle = null;
+    if (this.meter >= 1 || this.t <= 0) this.finish(this.meter < 1);
+  },
+  doSwat() {
+    this.cd = this.grog > 0 ? 0.08 : 0.16; this.swat = 0.12;
+    const r = this.grog > 0 ? 24 : 14;
+    if (this.bottle && Math.hypot(this.bottle.x - this.cx, this.bottle.y - this.cy) < 14) {
+      this.bottle = null; this.grog = 6; SFX.gulp(); SFX.power(); pop('¡GROGUE POWER!', 160, 60, '#ffb347', 14);
+      Voice.say('alvarito', '¡Un traguito de grogue y mosquero turbo!', true); return;
+    }
+    let k = 0;
+    for (const f of this.flies) {
+      if (f.state === 'dead') continue;
+      if (Math.hypot(f.x - this.cx, f.y - this.cy) < r) {
+        f.hp--;
+        if (f.hp <= 0) { f.state = 'dead'; f.t = 0; k++; sburst(f.x, f.y, 4, ['#222', '#7a1d1d'], 30, 80, 1, 0.4); }
+        else { pop('¡TOC!', f.x, f.y - 10, '#fff', 8, 0.5); }
+      }
+    }
+    if (k > 0) {
+      SFX.splat(); this.count += k; G.score += 20 * k * (k > 1 ? 2 : 1);
+      this.meter = Math.max(0, this.meter - 0.015 * k);
+      pop(k >= 3 ? '¡TRIPLE PLAF!' : k === 2 ? '¡DOBLE PLAF!' : pick(['¡PLAF!', '¡ZAS!', '¡CHAF!']), this.cx, this.cy - 18, k > 1 ? '#ff8cf0' : '#ffd400', k > 1 ? 12 : 10, 0.7);
+      if (this.count % 12 === 0) Voice.say(pick(['anita', 'alvarito', 'bia']), pick(['¡Fuera, moscas!', '¡Toma mosquerazo!', '¡Sabi!', '¡Limpinho!']));
+    } else { SFX.whiff(); if (Math.random() < 0.3) pop('¡FIUU!', this.cx, this.cy - 14, '#fff', 8, 0.5); }
+  },
+  finish(win) {
+    this.state = 'result'; this.rt = 0; this.win = win;
+    this.bonus = win ? 500 + Math.round((1 - this.meter) * 500) : 100;
+    G.score += this.bonus;
+    if (win) { SFX.win(); Voice.say('bia', '¡Obrigadu, fidjus! Atún limpinho como el mar de Santiago.', true); }
+    else { SFX.lose(); Voice.say('bia', '¡Ai, atún mosqueado total! No pasa nada: no stress.', true); }
+  },
+  drawScene() {
+    rect(0, 0, W, 118, '#2e2f35');
+    for (let r = 0; r < 6; r++) for (let c = 0; c < 9; c++) rect((c * 38 + (r % 2) * 19) - 10, r * 20, 36, 18, ['#3a3b42', '#34353b', '#414249'][(r + c) % 3]);
+    rect(0, 118, W, 122, '#6e6a66');
+    for (let r = 0; r < 12; r++) for (let c = 0; c < 22; c++) rect(c * 15 + (r % 2) * 7 - 4, 120 + r * 10, 13, 8, ['#7b7772', '#66625e', '#74706b'][(r * 3 + c) % 3]);
+    ell(170, 176, 82, 16, '#c8c13a'); ell(170, 170, 82, 18, '#cfc8b2');
+    txt('MILHO', 196, 172, '#555', 8);
+    drawTuna(170, 146);
+    g.save(); g.translate(40, 226); g.scale(2, 2);
+    drawPerson(0, 0, { skin: '#6b3e1f', shirt: '#27ae60', skirt: '#f1c40f', scarf: '#e74c3c', earring: true, happy: true, t: performance.now() / 1000, wave: this.state === 'intro' });
+    g.restore();
+    ell(42, 232, 18, 4, '#9fb5c9'); rect(26, 226, 32, 6, '#7f99b3');
+  },
+  draw() {
+    this.drawScene();
+    for (const f of this.flies) {
+      const s = f.big ? 3 : 2, wing = Math.sin(f.t * 60) > 0;
+      if (f.state === 'dead') { rect(f.x - 1, f.y, s + 1, 1, '#111'); continue; }
+      rect(f.x - s / 2, f.y - s / 2, s, s, f.big ? '#2f6f4f' : '#111');
+      if (f.state === 'in' || wing) { rect(f.x - s, f.y - s - 1, s, 1, 'rgba(230,230,255,.8)'); rect(f.x + 1, f.y - s - 1, s, 1, 'rgba(230,230,255,.8)'); }
+    }
+    if (this.bottle) { circ(this.bottle.x, this.bottle.y, 10, blink(6) ? 'rgba(255,200,80,.5)' : 'rgba(255,255,255,.3)'); g.save(); g.translate(this.bottle.x, this.bottle.y); g.scale(2, 2); iconGrogue(0, 0); g.restore(); }
+    // mosquero
+    const x = R(this.cx), y = R(this.cy), s = this.grog > 0 ? 24 : 14, fl = this.swat > 0;
+    line(x + 4, y + 4, x + 20, y + 28, '#8b5a2b', 3);
+    rect(x - s / 2, y - s / 2, s, s, fl ? '#b02a37' : '#e63946');
+    for (let i = 2; i < s; i += 3) { rect(x - s / 2 + i, y - s / 2 + 1, 1, s - 2, '#8d1b27'); rect(x - s / 2 + 1, y - s / 2 + i, s - 2, 1, '#8d1b27'); }
+    // HUD
+    rect(0, 0, W, 14, 'rgba(0,0,0,.75)');
+    txt('MOSQUEÓMETRO', 4, 3, '#fff');
+    rect(104, 3, 102, 8, '#fff'); rect(105, 4, 100, 6, '#222'); rect(105, 4, 100 * this.meter, 6, this.meter > 0.7 ? '#ff3b3b' : '#7CFC00');
+    txt(String(Math.max(0, Math.ceil(this.t))).padStart(2, '0'), 222, 3, '#ffd400');
+    txt(String(G.score).padStart(6, '0'), 316, 3, '#ffd400', 8, 'right');
+    if (this.grog > 0) txt('¡GROGUE! ' + Math.ceil(this.grog), 4, 18, '#ffb347');
+    if (this.state === 'intro') {
+      panel(30, 34, 260, 98);
+      txt('¡EL ATÚN MOSQUEADO!', 160, 44, '#ffd400', 8, 'center');
+      wrap(isTouch ? 'Toca las moscas para espantarlas del atún. Si se llena el mosqueómetro... ¡atún perdido! Toca el grogue para un mosquero turbo.' : 'Mueve el mosquero (ratón o flechas) y pulsa clic/ESPACIO para espantar moscas. Que no se llene el mosqueómetro. ¡Pilla el grogue para un mosquero turbo!', 236, 8)
+        .forEach((l, i) => txt(l, 42, 60 + i * 11, '#fff'));
+      if (blink(2)) txt('¡PREPARADOS!', 160, 118, '#7CFC00', 8, 'center');
+    }
+    if (this.state === 'result') this.drawResult();
+  },
+  drawResult() {
+    panel(40, 50, 240, 110);
+    txt(this.win ? '¡ATÚN LIMPINHO!' : '¡ATÚN MOSQUEADO!', 160, 62, this.win ? '#7CFC00' : '#ff5a3c', 8, 'center');
+    txt('MOSCAS: ' + this.count, 60, 84, '#fff');
+    txt('BONUS: +' + this.bonus, 60, 98, '#fff');
+    txt('PUNTOS: ' + G.score, 60, 114, '#ffd400');
+    if (this.rt > 1 && blink(2)) txt(isTouch ? 'TOCA PARA SEGUIR' : 'ESPACIO PARA SEGUIR', 160, 140, '#fff', 8, 'center');
+  },
+  leave() { if (this.buzz) this.buzz.stop(); }
+};
+
+// ---------------------------------------------------------- minijuego: pinta la casa vieja
+const PAINTS = ['#e63946', '#ffd400', '#2a9df4', '#3cb371', '#ffffff', '#ff7f11', '#b5179e', '#00c2c7'];
+const WALL = { x: 16, y: 34, w: 288, h: 116 }, DOOR = { x: 24, y: 64, w: 38, h: 86 }, WIN = { x: 152, y: 60, w: 46, h: 52 }, ANITA = { x: 126, y: 100, w: 32, h: 80 };
+const inR = (x, y, r) => x >= r.x && x < r.x + r.w && y >= r.y && y < r.y + r.h;
+const Paint = {
+  enter() {
+    this.state = 'intro'; this.t = 35; this.rt = 0; this.cx = 230; this.cy = 80; this.cd = 0; this.ci = 0;
+    this.layer = document.createElement('canvas'); this.layer.width = W; this.layer.height = H;
+    this.lg = this.layer.getContext('2d');
+    this.cells = []; this.total = 0; this.painted = 0;
+    for (let y = WALL.y; y < WALL.y + WALL.h; y += 8) for (let x = WALL.x; x < WALL.x + WALL.w; x += 8) {
+      const cx = x + 4, cy = y + 4, ok = !inR(cx, cy, DOOR) && !inR(cx, cy, WIN) && !inR(cx, cy, ANITA);
+      this.cells.push({ x: cx, y: cy, ok, p: false }); if (ok) this.total++;
+    }
+    this.shots = []; this.drips = []; this.anitaSpots = []; this.grog = 0; this.bottle = null; this.bottleT = 6; this.pen = 0;
+    Music.play('mini');
+    store.set('step', step); store.set('score', G.score);
+  },
+  get cover() { return this.total ? this.painted / this.total : 0; },
+  update(dt) {
+    if (this.state === 'intro') { if (act()) { this.state = 'play'; Voice.say('anita', '¡Venga, Alvarito, píntala de colores! ¡Pero a mí no!', true); } return; }
+    if (this.state === 'result') { this.rt += dt; if (this.rt > 1 && act()) next(); return; }
+    this.t -= dt; if (this.cd > 0) this.cd -= dt; if (this.grog > 0) this.grog -= dt;
+    const sp = 170;
+    if (keys.left) this.cx -= sp * dt; if (keys.right) this.cx += sp * dt; if (keys.up) this.cy -= sp * dt; if (keys.down) this.cy += sp * dt;
+    if (ptr.moved) { this.cx = ptr.x; this.cy = ptr.y; ptr.moved = false; }
+    this.cx = clamp(this.cx, 4, 316); this.cy = clamp(this.cy, 20, 200);
+    if ((act() || pressed.throwL || pressed.throwR) && this.cd <= 0) this.throwPaint();
+    for (const s of this.shots) { s.t += dt; if (s.t >= 0.2 && !s.done) { s.done = true; this.splat(s.x, s.y, s.c); } }
+    this.shots = this.shots.filter(s => !s.done);
+    for (const d of this.drips) if (d.len < d.max) { const l2 = Math.min(d.max, d.len + dt * 22); this.lg.fillStyle = d.c; this.lg.fillRect(R(d.x), R(d.y + d.len), d.w, R(l2 - d.len) + 1); d.len = l2; }
+    this.bottleT -= dt;
+    if (this.bottleT <= 0 && !this.bottle) { this.bottle = { x: rnd(210, 290), y: 140, t: 5 }; this.bottleT = 12; }
+    if (this.bottle && (this.bottle.t -= dt) <= 0) this.bottle = null;
+    if (this.t <= 0 || this.cover >= 0.92) this.finish();
+  },
+  throwPaint() {
+    this.cd = this.grog > 0 ? 0.12 : 0.22;
+    if (this.bottle && Math.hypot(this.bottle.x - this.cx, this.bottle.y - 8 - this.cy) < 14) {
+      this.bottle = null; this.grog = 6; SFX.gulp(); SFX.power(); pop('¡GROGUE POWER!', 160, 60, '#ffb347', 14);
+      Voice.say('alvarito', '¡Grogue! ¡Ahora pinto como un huracán!', true); return;
+    }
+    const c = PAINTS[this.ci]; this.ci = (this.ci + ri(1, 3)) % PAINTS.length;
+    this.shots.push({ x: this.cx, y: this.cy, c, t: 0 });
+    SFX.throw();
+  },
+  splat(x, y, c) {
+    const big = this.grog > 0 ? 1.6 : 1, L = this.lg, r = 9 * big;
+    SFX.splat();
+    pop(pick(['¡SPLASH!', '¡CHOF!', '¡PLOF!', '¡SPLAT!']), x, y - 16, c === '#ffffff' ? '#ddd' : c, 10, 0.6);
+    if (inR(x, y, ANITA)) {
+      this.anitaSpots.push({ x: x - ANITA.x, y: y - ANITA.y, c }); this.pen += 50; G.score = Math.max(0, G.score - 50);
+      pop('¡EH! ¡QUE A MÍ NO!', 142, 90, '#ff5a3c', 10); Voice.say('anita', pick(['¡Eh! ¡Que a mí no!', '¡Alvarito, que soy Anita, no la pared!']), true);
+      return;
+    }
+    if (!inR(x, y, WALL) && !(y > WALL.y - 20 && y < WALL.y && x > WALL.x && x < WALL.x + WALL.w)) { pop('¡FUERA!', x, y, '#fff', 8, 0.5); return; }
+    if (inR(x, y, WIN)) { this.pen += 20; G.score = Math.max(0, G.score - 20); pop('¡LA VENTANA NO!', x, y - 26, '#5ad7ff', 8); Voice.say('anita', '¡La ventana azul no!'); }
+    L.save(); L.beginPath(); L.rect(WALL.x, WALL.y - 20, WALL.w, WALL.h + 20); L.clip();
+    L.fillStyle = c;
+    L.beginPath(); L.arc(x, y, r, 0, Math.PI * 2); L.fill();
+    for (let i = 0; i < 10; i++) { const a = rnd(0, Math.PI * 2), d = rnd(r, r * 2.4); L.beginPath(); L.arc(x + Math.cos(a) * d, y + Math.sin(a) * d, rnd(1, 3.5) * big, 0, Math.PI * 2); L.fill(); }
+    L.strokeStyle = c; L.lineWidth = 1.5;
+    for (let i = 0; i < 4; i++) { const a = rnd(0, Math.PI * 2); L.beginPath(); L.moveTo(x, y); L.quadraticCurveTo(x + Math.cos(a) * r * 2, y + rnd(-r, r), x + Math.cos(a) * r * 3, y + Math.sin(a) * r * 2); L.stroke(); }
+    L.restore();
+    for (let i = 0; i < 3; i++) this.drips.push({ x: x + rnd(-r, r), y: y + rnd(0, r * 0.6), len: 0, max: rnd(8, 30), w: ri(1, 2), c });
+    let n = 0;
+    for (const cell of this.cells) if (cell.ok && !cell.p && Math.hypot(cell.x - x, cell.y - y) < r * 1.7) { cell.p = true; this.painted++; n++; }
+    G.score += n * 4;
+    if (n >= 6 && Math.random() < 0.2) Voice.say(pick(['anita', 'alvarito']), pick(['¡Arte caboverdiano!', '¡Qué colorido!', '¡Sabi!']));
+  },
+  finish() {
+    this.state = 'result'; this.rt = 0;
+    const c = this.cover;
+    this.bonus = Math.round(c * 1000);
+    G.score += this.bonus;
+    SFX.win();
+    Voice.say('anita', c > 0.7 ? '¡Una obra de arte en la Cidade Velha!' : '¡Arte abstracto! Bueno... ¡no stress!', true);
+  },
+  drawAnita(x, y, t) {
+    g.save(); g.translate(x, y); g.scale(2, 2);
+    const sw = Math.sin(t * 3) > 0 ? 1 : 0;
+    rect(-6, -40, 12, 20, '#4a2e1a'); rect(-7, -36, 3, 16, '#4a2e1a'); rect(4, -36, 3, 14, '#4a2e1a');
+    rect(-3, -38, 6, 7, '#e8a882'); rect(-2, -36, 1, 1, '#222'); rect(1, -36, 1, 1, '#222'); rect(-1, -33, 3, 1, '#a0302a');
+    rect(-4, -40, 8, 2, '#4a2e1a');
+    rect(-4, -30, 8, 9, '#f4f4f4'); rect(-6, -29, 2, 7, '#e8a882'); rect(4, -29, 2, 7, '#e8a882');
+    for (let i = 0; i < 6; i++) for (let j = 0; j < 3; j++) rect(-6 + i * 2, -21 + j * 2, 2, 2, ['#c0392b', '#f1c40f', '#111', '#fff'][(i + j * 2) % 4]);
+    rect(-2, -15, 2, 10, '#e8a882'); rect(1, -15 + sw, 2, 9, '#e8a882');
+    rect(-3, -5, 3, 2, '#c0c0c0'); rect(1, -6 + sw, 3, 2, '#c0c0c0');
+    for (const s of this.anitaSpots || []) rect(s.x / 2 - 8, s.y / 2 - 40, 3, 3, s.c);
+    g.restore();
+  },
+  drawScene() {
+    const t = performance.now() / 1000;
+    rect(0, 0, W, H, '#dfe9ee');
+    poly([[230, 40], [280, 20], [330, 40], [330, 160], [230, 160]], '#6a8f4e');
+    rect(0, 150, W, 90, '#5e5a57');
+    for (let r = 0; r < 9; r++) for (let c = 0; c < 26; c++) ell(c * 13 + (r % 2) * 6, 156 + r * 10, 6, 4, ['#6f6a66', '#57534f', '#7b7570'][(r + c) % 3]);
+    // pared de piedra
+    rect(WALL.x, WALL.y, WALL.w, WALL.h, '#8f8c88');
+    for (let i = 0; i < 70; i++) { const x = WALL.x + (i * 47) % WALL.w, y = WALL.y + (i * 29) % WALL.h; rect(x, y, 14, 1, '#77736e'); rect(x, y, 1, 7, '#77736e'); }
+    // puerta y ventana
+    rect(DOOR.x - 3, DOOR.y - 3, DOOR.w + 6, DOOR.h + 3, '#a7b0b5');
+    rect(DOOR.x, DOOR.y, DOOR.w, DOOR.h, '#9a6b3c'); rect(DOOR.x + 4, DOOR.y + 4, DOOR.w - 8, 36, '#4f5b63'); rect(DOOR.x + 4, DOOR.y + 44, DOOR.w - 8, 38, '#4f5b63');
+    rect(WIN.x - 5, WIN.y - 5, WIN.w + 10, WIN.h + 10, '#a7b0b5');
+    rect(WIN.x, WIN.y, WIN.w, WIN.h, '#6fa8dc');
+    for (let i = 3; i < WIN.h - 3; i += 3) { rect(WIN.x + 2, WIN.y + i, WIN.w / 2 - 3, 1, '#4b84b8'); rect(WIN.x + WIN.w / 2 + 1, WIN.y + i, WIN.w / 2 - 3, 1, '#4b84b8'); }
+    rect(WIN.x + WIN.w / 2 - 1, WIN.y, 2, WIN.h, '#3d6f99');
+    if (this.layer) g.drawImage(this.layer, 0, 0);
+    // techo de paja
+    poly([[WALL.x - 8, WALL.y + 2], [WALL.x + WALL.w + 8, WALL.y + 2], [WALL.x + WALL.w, 6], [WALL.x, 6]], '#8a7a5c');
+    for (let x = WALL.x - 6; x < WALL.x + WALL.w + 6; x += 3) rect(x, WALL.y - 2 + (x % 2), 2, 5, '#6d5f45');
+    // banco y planta
+    rect(98, 150, 154, 22, '#a39f99'); for (let i = 0; i < 12; i++) ell(104 + i * 12, 150, 6, 3, '#cfcac2');
+    ell(210, 136, 22, 16, '#3f8f3a'); ell(196, 140, 12, 10, '#4fa64a'); ell(224, 132, 10, 9, '#357a31');
+    this.drawAnita(142, 180, t);
+    // perrito junto al muro
+    drawDog(290, 190, t, -1);
+    rect(258, 160, 60, 14, '#e9e4d8'); for (let i = 0; i < 6; i++) ell(262 + i * 10, 160, 6, 4, '#f4f0e6');
+  },
+  draw() {
+    const t = performance.now() / 1000;
+    this.drawScene();
+    if (this.bottle) { circ(this.bottle.x, this.bottle.y - 8, 10, blink(6) ? 'rgba(255,200,80,.5)' : 'rgba(255,255,255,.4)'); g.save(); g.translate(this.bottle.x, this.bottle.y - 8); g.scale(2, 2); iconGrogue(0, 0); g.restore(); }
+    // Alvarito con el cubo (abajo a la izquierda)
+    g.save(); g.translate(56, 236); g.scale(2, 2);
+    drawPerson(0, 0, { skin: '#e8a882', shirt: '#9ccbd6', pants: '#3a3f4a', hair: '#3b2414', t, armsUp: this.cd > 0 });
+    rect(-3, -18, 6, 3, '#4a2e1a');
+    g.restore();
+    rect(70, 214, 14, 14, '#ddd'); rect(71, 212, 12, 4, PAINTS[this.ci]);
+    for (const s of this.shots) { const k = s.t / 0.2; const x = 78 + (s.x - 78) * k, y = 212 + (s.y - 212) * k - Math.sin(k * Math.PI) * 30; circ(x, y, 3, s.c); }
+    // mirilla
+    const c = PAINTS[this.ci], s = this.grog > 0 ? 14 : 9;
+    g.strokeStyle = '#000'; g.lineWidth = 3; g.beginPath(); g.arc(R(this.cx), R(this.cy), s, 0, 7); g.stroke();
+    g.strokeStyle = c; g.lineWidth = 1.5; g.beginPath(); g.arc(R(this.cx), R(this.cy), s, 0, 7); g.stroke();
+    rect(this.cx - 1, this.cy - 1, 2, 2, c);
+    rect(0, 0, W, 14, 'rgba(0,0,0,.75)');
+    txt('PINTADO ' + Math.round(this.cover * 100) + '%', 4, 3, '#7CFC00');
+    txt(String(Math.max(0, Math.ceil(this.t))).padStart(2, '0'), 160, 3, '#ffd400', 8, 'center');
+    txt(String(G.score).padStart(6, '0'), 316, 3, '#ffd400', 8, 'right');
+    if (this.grog > 0) txt('¡GROGUE! ' + Math.ceil(this.grog), 200, 18, '#ffb347');
+    if (this.state === 'intro') {
+      panel(30, 30, 260, 104);
+      txt('¡PINTA LA CASA VIEJA!', 160, 40, '#ffd400', 8, 'center');
+      wrap('Cidade Velha fue la primera capital. Dale color a esta casa de piedra: apunta y lanza pintura (' + (isTouch ? 'toca la pared' : 'ratón/flechas + clic o ESPACIO') + '). ¡Ni la ventana azul ni Anita! El grogue da brochazos gigantes.', 236, 8)
+        .forEach((l, i) => txt(l, 42, 56 + i * 11, '#fff'));
+      if (blink(2)) txt('¡A PINTAR!', 160, 120, '#7CFC00', 8, 'center');
+    }
+    if (this.state === 'result') {
+      panel(40, 50, 240, 110);
+      const cv2 = this.cover;
+      txt(cv2 > 0.7 ? '¡OBRA DE ARTE!' : cv2 > 0.4 ? '¡ARTE ABSTRACTO!' : '¡POLLOCK BADIU!', 160, 62, '#7CFC00', 8, 'center');
+      txt('PINTADO: ' + Math.round(cv2 * 100) + '%', 60, 84, '#fff');
+      txt('BONUS: +' + this.bonus + (this.pen ? '  -' + this.pen : ''), 60, 98, '#fff');
+      txt('PUNTOS: ' + G.score, 60, 114, '#ffd400');
+      if (this.rt > 1 && blink(2)) txt(isTouch ? 'TOCA PARA SEGUIR' : 'ESPACIO PARA SEGUIR', 160, 140, '#fff', 8, 'center');
+    }
+  }
+};
+
+// ---------------------------------------------------------- minijuego: selfie con el Poilão
+const Selfie = {
+  enter() { this.state = 'intro'; this.shots = []; this.cur = 0; this.dir = 1; this.newZone(); this.flash = 0; this.wait = 0; this.rt = 0; this.t = 0; Music.play('title'); store.set('step', step); store.set('score', G.score); },
+  newZone() { const n = this.shots.length; this.zw = [0.28, 0.2, 0.14][n] || 0.14; this.zc = rnd(0.2, 0.8); this.speed = [0.9, 1.3, 1.8][n] || 1.8; },
+  update(dt) {
+    this.t += dt;
+    if (this.state === 'intro') { if (act()) { this.state = 'play'; Voice.say('anita', '¡Selfie con el abuelo árbol! ¡Sonríe, Alvarito!', true); } return; }
+    if (this.state === 'result') { this.rt += dt; if (this.rt > 1 && act()) next(); return; }
+    if (this.flash > 0) this.flash -= dt;
+    if (this.wait > 0) { this.wait -= dt; if (this.wait <= 0) { if (this.shots.length >= 3) this.finish(); else this.newZone(); } return; }
+    this.cur += this.dir * this.speed * dt;
+    if (this.cur > 1) { this.cur = 1; this.dir = -1; } if (this.cur < 0) { this.cur = 0; this.dir = 1; }
+    if (act()) {
+      const d = Math.abs(this.cur - this.zc);
+      const q = d < this.zw / 6 ? 'PERFECTA' : d < this.zw / 2 ? 'SABI' : 'MOVIDA';
+      this.shots.push(q); this.flash = 0.3; this.wait = 1.1; SFX.shutter();
+      const pts = { PERFECTA: 300, SABI: 150, MOVIDA: 20 }[q]; G.score += pts;
+      pop(q === 'PERFECTA' ? '¡FOTO PERFECTA!' : q === 'SABI' ? '¡FOTO SABI!' : '¡MOVIDA!', 160, 40, q === 'MOVIDA' ? '#ff5a3c' : '#7CFC00', 12);
+      pop('¡CLIC!', 240, 80, '#fff', 10, 0.6);
+      Voice.say(q === 'MOVIDA' ? 'alvarito' : 'anita', q === 'PERFECTA' ? '¡Patata! ¡Perfecta!' : q === 'SABI' ? '¡Patata!' : '¡Uy, ha salido movida!', true);
+    }
+  },
+  finish() {
+    this.state = 'result'; this.rt = 0;
+    const good = this.shots.filter(s => s !== 'MOVIDA').length;
+    if (good >= 2) { SFX.win(); G.score += 200; } else SFX.lose();
+  },
+  drawBg() {
+    const t = performance.now() / 1000;
+    rect(0, 0, W, H, '#d8ead0');
+    for (let i = 0; i < 12; i++) { const a = t * 0.3 + i * Math.PI / 6; line(150, 22, 150 + Math.cos(a) * 200, 22 + Math.sin(a) * 200, 'rgba(255,255,220,.25)', 3); }
+    rect(0, 150, W, 90, '#5f8f45');
+    rect(0, 186, W, 54, '#8a6a4a');
+    // tronco: contrafuertes que bajan como murallas
+    const bark = '#7d786c', dark = '#5c584f', lite = '#9d988b';
+    poly([[96, 196], [128, 150], [136, 60], [184, 60], [192, 150], [224, 196]], bark);
+    [[40, 204, 132, 120], [70, 210, 138, 110], [112, 214, 146, 96], [160, 216, 160, 90], [206, 214, 174, 96], [250, 210, 182, 110], [282, 204, 188, 120]].forEach(([a, b, c, d]) => {
+      poly([[a - 7, b], [a + 7, b], [c + 4, d], [c - 4, d]], bark);
+      line(a, b - 1, c, d, dark, 2); line(a + 3, b - 2, c + 2, d, lite, 1);
+    });
+    for (let i = 0; i < 9; i++) line(138 + i * 5, 62, 132 + i * 7, 150, i % 2 ? dark : lite, 1);
+    ell(160, 120, 6, 10, dark);
+    // ramas y copa
+    line(140, 64, 96, 36, bark, 6); line(180, 64, 226, 34, bark, 6); line(160, 62, 160, 26, bark, 5);
+    const greens = ['#2f7a2c', '#3a8f36', '#2a6d28', '#46a041', '#357a31'];
+    [[40, 30, 46, 26], [110, 20, 50, 24], [190, 18, 52, 24], [270, 32, 52, 28], [70, 58, 34, 16], [250, 62, 36, 16], [160, 40, 40, 18], [8, 64, 26, 16], [312, 70, 26, 16]]
+      .forEach(([x, y, rx, ry], i) => ell(x, y, rx, ry, greens[i % greens.length]));
+    for (let i = 0; i < 40; i++) rect((i * 37) % W, (i * 23) % 80, 3, 2, i % 2 ? '#56b04f' : '#24611f');
+    circ(150, 22, 7, '#fffbe0'); circ(150, 22, 3, '#fff');
+    for (let i = 0; i < 20; i++) rect(20 + i * 15, 222 + (i % 2) * 3, 12, 6, '#a39383');
+  },
+  draw() {
+    this.drawBg();
+    // móvil
+    const jit = this.state === 'play' && this.wait <= 0 ? Math.min(6, Math.abs(this.cur - this.zc) * 18) : 0;
+    rect(88, 52, 144, 108, '#111'); rect(92, 56, 136, 100, '#5d7d55');
+    const jx = R(rnd(-jit, jit)), jy = R(rnd(-jit, jit));
+    poly([[100, 156], [130, 96], [190, 96], [220, 156]], '#8d8a80');
+    if (imgOk(IMG['cara-alvarito'])) g.drawImage(IMG['cara-alvarito'], 98 + jx, 70 + jy, 60, 72);
+    if (imgOk(IMG['cara-anita'])) g.drawImage(IMG['cara-anita'], 160 - jx, 74 - jy, 60, 72);
+    rect(92, 56, 136, 3, '#000'); rect(150, 154, 20, 2, '#444');
+    if (jit < 1.5 && this.state === 'play' && this.wait <= 0) { rect(96, 60, 6, 1, '#7CFC00'); rect(96, 60, 1, 6, '#7CFC00'); rect(218, 60, 6, 1, '#7CFC00'); rect(223, 60, 1, 6, '#7CFC00'); }
+    if (this.flash > 0) rect(0, 0, W, H, `rgba(255,255,255,${this.flash / 0.3})`);
+    // barra de timing
+    panel(40, 170, 240, 26);
+    const x0 = 50, w = 220;
+    rect(x0, 179, w, 8, '#333');
+    rect(x0 + (this.zc - this.zw / 2) * w, 179, this.zw * w, 8, '#3cb371');
+    rect(x0 + (this.zc - this.zw / 6) * w, 179, this.zw / 3 * w, 8, '#7CFC00');
+    const cx = x0 + this.cur * w; poly([[cx - 4, 174], [cx + 4, 174], [cx, 180]], '#ffd400'); rect(cx - 1, 179, 2, 8, '#fff');
+    for (let i = 0; i < 3; i++) { const s = this.shots[i]; rect(118 + i * 30, 206, 24, 18, '#222'); rect(120 + i * 30, 208, 20, 14, s ? (s === 'MOVIDA' ? '#ff5a3c' : s === 'SABI' ? '#3cb371' : '#ffd400') : '#555'); }
+    txt('POILÃO DE BOA ENTRADA', 160, 4, '#fff', 8, 'center', '#000');
+    txt(String(G.score).padStart(6, '0'), 316, 228, '#ffd400', 8, 'right', '#000');
+    if (this.state === 'intro') {
+      panel(30, 40, 260, 86);
+      txt('¡SELFIE CON EL POILÃO!', 160, 50, '#ffd400', 8, 'center');
+      wrap('Pulsa ' + (isTouch ? 'la pantalla' : 'ESPACIO') + ' cuando la flecha esté en la zona verde: ¡3 fotos, cada vez más rápido! Fuera de la zona... foto movida.', 236, 8).forEach((l, i) => txt(l, 42, 66 + i * 11, '#fff'));
+      if (blink(2)) txt('¡PATATA!', 160, 112, '#7CFC00', 8, 'center');
+    }
+    if (this.state === 'result') {
+      panel(40, 60, 240, 90);
+      const good = this.shots.filter(s => s !== 'MOVIDA').length;
+      txt(good >= 2 ? '¡ÁLBUM SABI!' : '¡FOTOS MOVIDAS!', 160, 72, good >= 2 ? '#7CFC00' : '#ff5a3c', 8, 'center');
+      txt('FOTOS BUENAS: ' + good + '/3', 60, 94, '#fff');
+      txt('PUNTOS: ' + G.score, 60, 110, '#ffd400');
+      if (this.rt > 1 && blink(2)) txt(isTouch ? 'TOCA PARA SEGUIR' : 'ESPACIO PARA SEGUIR', 160, 132, '#fff', 8, 'center');
+    }
+  }
+};
+
+// ---------------------------------------------------------- minijuego: frango assado en Tarrafal
+const Grill = {
+  enter() {
+    this.state = 'intro'; this.t = 30; this.items = []; this.px = 160; this.usePtr = false; this.spawn = 0.5; this.caught = 0; this.stun = 0; this.big = 0; this.fast = 0; this.rt = 0; this.tt = 0;
+    Music.play('mini'); store.set('step', step); store.set('score', G.score);
+  },
+  update(dt) {
+    this.tt += dt;
+    if (this.state === 'intro') { if (act()) { this.state = 'play'; Voice.say('tuta', '¡Frango assado na brasa! ¡Coged, coged!', true); } return; }
+    if (this.state === 'result') { this.rt += dt; if (this.rt > 1 && act()) next(); return; }
+    this.t -= dt; if (this.stun > 0) this.stun -= dt; if (this.big > 0) this.big -= dt; if (this.fast > 0) this.fast -= dt;
+    const sp = (this.fast > 0 ? 320 : 200) * (this.stun > 0 ? 0.4 : 1);
+    if (ptr.moved) this.usePtr = true;
+    if (keys.left || keys.right) this.usePtr = false;
+    if (keys.left) this.px -= sp * dt; if (keys.right) this.px += sp * dt;
+    if (this.usePtr) this.px += clamp(ptr.x - this.px, -sp * dt, sp * dt);
+    this.px = clamp(this.px, 20, 300);
+    this.spawn -= dt;
+    if (this.spawn <= 0) {
+      const r = Math.random();
+      const type = r < 0.5 ? 'coxa' : r < 0.68 ? 'asa' : r < 0.8 ? 'malagueta' : r < 0.9 ? 'carvao' : r < 0.95 ? 'strela' : 'grogue';
+      this.items.push({ type, x: rnd(140, 180), y: 84, vx: rnd(-75, 75), vy: rnd(-170, -110), r: 0 });
+      this.spawn = Math.max(0.28, 0.75 - (30 - this.t) * 0.012);
+      if (Math.random() < 0.3) SFX.sizzle();
+    }
+    const pw = this.big > 0 ? 56 : 32;
+    for (const it of this.items) {
+      const py = it.y;
+      it.vy += 170 * dt; it.x += it.vx * dt; it.y += it.vy * dt; it.r += dt * 6;
+      if (it.x < 6 || it.x > 314) it.vx *= -1;
+      if (py < 184 && it.y >= 184 && Math.abs(it.x - this.px) < pw / 2 + 4) { this.catchIt(it); it.dead = true; }
+      if (it.y > 240) it.dead = true;
+    }
+    this.items = this.items.filter(i => !i.dead);
+    if (this.t <= 0) this.finish();
+  },
+  catchIt(it) {
+    const x = it.x;
+    switch (it.type) {
+      case 'coxa': case 'asa':
+        this.caught++; G.score += it.type === 'coxa' ? 30 : 20; SFX.nom();
+        pop(pick(['¡ÑAM!', '¡SABI!', '¡CHSSS!', '¡RICO!']), x, 170, '#ffd400', 10, 0.6);
+        if (this.caught % 6 === 0) Voice.say(pick(['anita', 'alvarito']), pick(['¡Qué rico el frango assado!', '¡Otro trozo para el plato!', '¡Esto está sabi sabi!']));
+        break;
+      case 'malagueta':
+        this.stun = 1; G.score = Math.max(0, G.score - 40); SFX.burn(); shake = 0.3;
+        pop('¡PICA PICA!', x, 160, '#ff3b3b', 12); sburst(this.px + 10, 190, 14, ['#ff3b3b', '#ffb347', '#ffd400'], 70, -40, 3, 0.6);
+        Voice.say('alvarito', '¡Malagueta! ¡Fuego, fuego!', true);
+        break;
+      case 'carvao':
+        this.stun = 0.6; G.score = Math.max(0, G.score - 25); SFX.burn();
+        pop('¡QUEMA!', x, 160, '#ff7f11', 12); Voice.say('anita', '¡Eso es carbón!');
+        break;
+      case 'strela':
+        this.big = 6; SFX.gulp(); SFX.power(); pop('¡STRELA! PLATO XL', 160, 120, '#ff5a5a', 12);
+        Voice.say('anita', '¡Una Strela Kriola bien fría! ¡Plato gigante!', true);
+        break;
+      case 'grogue':
+        this.fast = 6; SFX.gulp(); SFX.power(); pop('¡GROGUE! TURBO', 160, 120, '#ffb347', 12);
+        Voice.say('alvarito', '¡Grogue! ¡Ahora soy un rayo!', true);
+        break;
+    }
+  },
+  finish() { this.state = 'result'; this.rt = 0; this.bonus = this.caught * 10; G.score += this.bonus; SFX.win(); Voice.say('tuta', '¡Obrigadu! ¡Buen provecho, fidjus!', true); },
+  drawBg() {
+    const t = performance.now() / 1000;
+    const sky = ['#ff7e5f', '#ff9966', '#ffb27a', '#ffc68f', '#ffd9a6', '#ffe8bf'];
+    sky.forEach((c, i) => rect(0, i * 14, W, 14, c));
+    circ(250, 70, 16, '#fff0b3');
+    rect(0, 84, W, 34, '#2b7fc1');
+    for (let i = 0; i < 16; i++) rect((i * 41 + t * 10) % W, 88 + (i * 7) % 26, 8, 1, '#8fd0ff');
+    rect(0, 118, W, 122, '#f3e3b5');
+    for (let i = 0; i < 30; i++) rect((i * 53) % W, 124 + (i * 17) % 110, 2, 1, '#e0cb93');
+    drawPalm(26, 150, t); drawPalm(296, 140, t); drawUmbrella(60, 128, { c: '#e74c3c' });
+    // puesto del frango assado
+    g.save(); g.translate(130, 110); g.scale(2, 2); drawPerson(0, 0, { skin: '#6b3e1f', shirt: '#8e44ad', scarf: '#f1c40f', apron: true, earring: true, happy: true, t, wave: this.state !== 'play' }); g.restore();
+    g.save(); g.translate(196, 110); g.scale(2, 2); drawPerson(0, 0, { skin: '#8d5524', shirt: '#16a085', scarf: '#e74c3c', apron: true, earring: true, happy: true, t: t + 1 }); g.restore();
+    rect(110, 98, 100, 6, '#8b5a2b'); rect(112, 104, 4, 26, '#6b4423'); rect(204, 104, 4, 26, '#6b4423');
+    rect(120, 84, 80, 14, '#2b2b2b'); rect(122, 82, 76, 3, blink(5) ? '#ff5722' : '#ffab40');
+    for (let i = 0; i < 6; i++) { ell(130 + i * 12, 84, 4, 2, '#8b4a1b'); }
+    for (let i = 0; i < 5; i++) { const k = (t * 0.6 + i / 5) % 1; ell(130 + i * 14 + Math.sin(k * 6) * 4, 78 - k * 50, 4 + k * 8, 3 + k * 5, `rgba(230,230,230,${0.5 * (1 - k)})`); }
+    rect(118, 20, 84, 16, '#fff'); rect(119, 21, 82, 14, '#c0392b'); txt('FRANGO', 160, 25, '#fff', 8, 'center');
+    rect(158, 36, 4, 46, '#6b4423');
+  },
+  drawItem(it) {
+    const x = R(it.x), y = R(it.y);
+    switch (it.type) {
+      case 'coxa': ell(x, y, 6, 4, '#a0521d'); ell(x - 1, y - 1, 4, 2, '#c8742e'); rect(x + 5, y - 1, 5, 2, '#f5f0e1'); rect(x + 9, y - 2, 2, 4, '#f5f0e1'); break;
+      case 'asa': poly([[x - 6, y + 2], [x, y - 5], [x + 6, y + 1], [x, y + 4]], '#b5651d'); rect(x - 2, y - 2, 3, 2, '#d4893a'); break;
+      case 'malagueta': rect(x - 6, y - 1, 10, 3, '#e02020'); rect(x + 3, y - 2, 3, 2, '#e02020'); rect(x - 8, y, 2, 1, '#e02020'); rect(x + 5, y - 3, 3, 1, '#2e8b2e'); break;
+      case 'carvao': ell(x, y, 5, 4, '#1a1a1a'); if (blink(8)) rect(x - 1, y - 1, 2, 2, '#ff5722'); break;
+      case 'strela': g.save(); g.translate(x, y); g.scale(1.6, 1.6); iconStrela(0, 0); g.restore(); break;
+      case 'grogue': g.save(); g.translate(x, y); g.scale(1.6, 1.6); iconGrogue(0, 0); g.restore(); break;
+    }
+  },
+  draw() {
+    g.save(); if (shake > 0) g.translate(R(rnd(-3, 3)), R(rnd(-3, 3)));
+    this.drawBg();
+    for (const it of this.items) this.drawItem(it);
+    const pw = this.big > 0 ? 56 : 32, x = R(this.px);
+    g.save(); g.translate(x, 236); g.scale(2, 2);
+    drawPerson(0, 0, { skin: '#e8a882', shirt: '#9ccbd6', pants: '#3a3f4a', hair: '#3b2414', armsUp: true, t: this.tt });
+    rect(-3, -18, 6, 3, '#4a2e1a');
+    g.restore();
+    rect(x - 9, 186, 2, 6, '#e8a882'); rect(x + 7, 186, 2, 6, '#e8a882');
+    ell(x, 186, pw / 2, 4, '#fff'); ell(x, 185, pw / 2 - 3, 2, '#e8e8e8');
+    for (let i = 0; i < Math.min(8, this.caught); i++) ell(x - 8 + (i % 4) * 5, 182 - Math.floor(i / 4) * 2, 3, 2, '#a0521d');
+    if (this.stun > 0) for (let i = 0; i < 4; i++) rect(x + 6 + i * 4, 156 - i * 2 + Math.sin(this.tt * 30 + i) * 2, 3, 3, i % 2 ? '#ff3b3b' : '#ffd400');
+    // Anita animando desde la arena
+    g.save(); g.translate(clamp(x - 40, 14, 306), 236); g.scale(2, 2);
+    drawPerson(0, 0, { skin: '#e8a882', shirt: '#b3202a', pants: '#222', hair: '#4a2e1a', t: this.tt, jump: true, wave: true, happy: true });
+    rect(-4, -21, 2, 8, '#4a2e1a');
+    g.restore();
+    g.restore();
+    rect(0, 0, W, 14, 'rgba(0,0,0,.75)');
+    txt('TROZOS ' + this.caught, 4, 3, '#7CFC00');
+    txt(String(Math.max(0, Math.ceil(this.t))).padStart(2, '0'), 160, 3, '#ffd400', 8, 'center');
+    txt(String(G.score).padStart(6, '0'), 316, 3, '#ffd400', 8, 'right');
+    if (this.big > 0) txt('STRELA XL ' + Math.ceil(this.big), 4, 18, '#ff5a5a');
+    if (this.fast > 0) txt('GROGUE ' + Math.ceil(this.fast), 220, 18, '#ffb347');
+    if (this.state === 'intro') {
+      panel(26, 40, 268, 100);
+      txt('¡FRANGO ASSADO EN TARRAFAL!', 160, 50, '#ffd400', 8, 'center');
+      wrap('Mueve el plato (' + (isTouch ? 'arrastra o ◀ ▶' : 'flechas o ratón') + ') y atrapa los trozos de pollo. ¡Ojo con las malaguetas que pican y el carbón! Strela = plato gigante. Grogue = turbo.', 244, 8)
+        .forEach((l, i) => txt(l, 36, 66 + i * 11, '#fff'));
+      if (blink(2)) txt('¡A COMER!', 160, 126, '#7CFC00', 8, 'center');
+    }
+    if (this.state === 'result') {
+      panel(40, 56, 240, 100);
+      txt('¡BARRIGA LLENA!', 160, 68, '#7CFC00', 8, 'center');
+      txt('TROZOS: ' + this.caught, 60, 90, '#fff');
+      txt('BONUS: +' + this.bonus, 60, 104, '#fff');
+      txt('PUNTOS: ' + G.score, 60, 120, '#ffd400');
+      if (this.rt > 1 && blink(2)) txt(isTouch ? 'TOCA PARA SEGUIR' : 'ESPACIO PARA SEGUIR', 160, 140, '#fff', 8, 'center');
+    }
+  }
+};
+
+// ---------------------------------------------------------- portada y final
+const Title = {
+  enter() { this.t = 0; Music.play('title'); G.hi = store.get('hi', 0); this.saved = store.get('step', 0); this.savedScore = store.get('score', 0); },
+  update(dt) {
+    this.t += dt;
+    if (pressed.up && this.saved > 1) { audioInit(); G.score = this.savedScore; G.lives = 3; SFX.select(); go(this.saved); return; }
+    if (act()) { audioInit(); G.score = 0; G.lives = 3; SFX.select(); Voice.say('narr', 'Santiago en moto. ¡Anita y Alvarito!', true); next(); }
+  },
+  draw() {
+    BG.title();
+    const bob = Math.sin(this.t * 3) * 2;
+    txt('SANTIAGO', 160, 14 + bob, '#ffd400', 24, 'center', '#000');
+    txt('EN MOTO', 160, 44 + bob, '#fff', 16, 'center', '#000');
+    txt('ANITA & ALVARITO · CABO VERDE', 160, 66, '#fff3c4', 8, 'center', '#000');
+    drawPortrait(98, 84, 'alvarito'); drawPortrait(182, 84, 'anita');
+    heart(160, 104 + Math.sin(this.t * 6) * 2);
+    rect(0, 182, W, 20, '#4d4d57');
+    for (let i = 0; i < 10; i++) rect(((i * 40 - this.t * 120) % 360 + 360) % 360 - 20, 191, 16, 2, '#e8c547');
+    const mx = ((this.t * 70) % 400) - 40;
+    drawMoto(mx, 196, this.t, { speed: 100 });
+    rect(0, 202, W, 38, 'rgba(0,0,0,.6)');
+    if (blink(2)) txt(isTouch ? 'TOCA PARA EMPEZAR' : 'ESPACIO: NUEVA PARTIDA', 160, 206, '#7CFC00', 8, 'center');
+    if (this.saved > 1) txt(isTouch ? '▲ CONTINUAR PARTIDA' : '▲ ARRIBA: CONTINUAR', 160, 218, '#ffd400', 8, 'center');
+    txt('RÉCORD ' + G.hi, 160, 230, '#fff', 8, 'center');
+  }
+};
+const End = {
+  enter() { this.t = 0; Music.play('ride'); G.hi = Math.max(G.hi, G.score); store.set('hi', G.hi); store.set('step', 0); SFX.win(); this.fw = 0; },
+  update(dt) {
+    this.t += dt; this.fw -= dt;
+    if (this.fw <= 0) { this.fw = 0.5; const x = rnd(40, 280), y = rnd(30, 110); sburst(x, y, 24, [pick(['#ffd400', '#ff3b6b', '#5ad7ff', '#7CFC00', '#fff'])], 90, 60, 2, 1.2); noise(0.3, 0.15, 1200); }
+    if (this.t > 2 && act()) go(0);
+  },
+  draw() {
+    rect(0, 0, W, H, '#0b1a3a');
+    for (let i = 0; i < 40; i++) rect((i * 71) % W, (i * 37) % 140, 1, 1, '#fff');
+    txt('¡MANTENHA!', 160, 12, '#ffd400', 16, 'center', '#000');
+    txt('FIN DEL VIAJE POR SANTIAGO', 160, 34, '#fff', 8, 'center');
+    drawPortrait(70, 50, 'alvarito'); drawPortrait(210, 50, 'anita');
+    txt('PUNTOS', 160, 62, '#fff', 8, 'center'); txt(String(G.score), 160, 76, '#7CFC00', 16, 'center', '#000');
+    txt('RÉCORD ' + G.hi, 160, 98, '#ffd400', 8, 'center');
+    const al = ['postal-moto', 'postal-rua-banana', 'postal-atun', 'postal-casa-pintada', 'postal-rui-vaz', 'postal-grogue', 'postal-poilao', 'postal-selfie-poilao', 'postal-playa', 'postal-strela', 'postal-mirador', 'postal-selfie-monte'];
+    al.forEach((n, i) => { const im = IMG[n], x = 12 + (i % 6) * 50, y = 116 + Math.floor(i / 6) * 50; rect(x - 1, y - 1, 46, 46, '#fff'); if (imgOk(im)) { const s = Math.min(im.naturalWidth, im.naturalHeight); g.drawImage(im, (im.naturalWidth - s) / 2, (im.naturalHeight - s) / 2, s, s, x, y, 44, 44); } });
+    drawFx();
+    if (this.t > 2 && blink(2)) txt(isTouch ? 'TOCA PARA VOLVER A EMPEZAR' : 'ESPACIO: VOLVER A EMPEZAR', 160, 222, '#fff', 8, 'center');
+  }
+};
+
+// ---------------------------------------------------------- el guion
+const STORY = [
+  { s: Title },
+  { s: Dialog, a: { bg: 'title', lines: [
+    ['narr', 'Isla de Santiago, Cabo Verde. La más grande del archipiélago: tierra badiu, de funaná y de batuku.'],
+    ['alvarito', '¡Anita! He alquilado la moto más amarilla de Praia: ¡la TORO TANK!'],
+    ['anita', '¡Me encanta! ¿Y adónde vamos?'],
+    ['alvarito', 'A recorrer la isla entera: Cidade Velha, el poilão gigante, la Serra da Malagueta y las playas de Tarrafal.'],
+    ['anita', '¡Pues vamos! Como dicen aquí: ¡no stress!']] } },
+  { s: Postcard, a: { img: 'postal-moto', title: 'LA TORO TANK', text: 'Nuestra montura: una scooter amarilla aparcada en Praia, la capital. ¡Lista para subir montañas y bajar a playas!' } },
+  { s: MapScene, a: { leg: 0, phase: 'FASE 1', title: 'PRAIA > CIDADE VELHA', text: 'Por la carretera de la costa hasta la antigua capital. Lanza pastéis com diabo dentro (empanadillas de atún con picante) a quien te haga señas. ¡Cuidado con cabras, perros, baches y los aluguer, las furgonetas colectivas!' } },
+  { s: Ride, a: 0 },
+  { s: Postcard, a: { img: 'postal-rua-banana', title: 'RUA BANANA', text: 'Cidade Velha (antes Ribeira Grande) nació en 1462: la primera ciudad europea en los trópicos. Su Rua Banana, de casas de piedra y techo de paja, es de las calles más antiguas. UNESCO desde 2009.' } },
+  { s: Dialog, a: { bg: 'tuna', music: 'mini', lines: [
+    ['bia', '¡Oi, fidjus! Atum fresku, kaba di pexka... ¡pero mirad cuántas moscas! ¿Me ayudáis?'],
+    ['anita', '¡Pásame el mosquero, Alvarito! ¡Esas moscas se van a enterar!'],
+    ['alvarito', '¡Con cuidado, que este atún es para los pastéis!']] } },
+  { s: Flies },
+  { s: Postcard, a: { img: 'postal-atun', title: 'ATUM FRESKU', text: 'Atún de aleta amarilla (mira las pínulas doradas) recién pescado, sobre un saco de milho.', extra: 'Con él se rellenan los pastéis com diabo dentro.' } },
+  { s: Dialog, a: { bg: 'house', music: 'mini', lines: [
+    ['anita', 'Me siento un ratito en este banco... ¡qué casa más bonita!'],
+    ['alvarito', 'Es piedra de la primera capital de Cabo Verde, la capital hasta 1770. Le falta... ¡COLOR!'],
+    ['anita', '¡Ni se te ocurra salpicarme, eh!']] } },
+  { s: Paint },
+  { s: Postcard, a: { img: 'postal-casa-pintada', title: 'LA CASA DE COLORES', text: 'En Cidade Velha también hay arte: muros salpicados de pintura, contraventanas azules y un perro de guardia. Cerca, el Pelourinho de mármol (s. XVI) y la Fortaleza Real de São Filipe.' } },
+  { s: MapScene, a: { leg: 1, phase: 'FASE 2', title: 'CIDADE VELHA > RUI VAZ > BOA ENTRADA', text: 'Subida a las montañas del interior, entre niebla y eucaliptos. Lanza bananas a los macacos verdes: llegaron de África occidental hace siglos. ¡Ojo con los burros, las piedras y la niebla!' } },
+  { s: Ride, a: 1 },
+  { s: Postcard, a: { img: 'postal-rui-vaz', title: 'RUI VAZ', text: 'Pueblo-mirador a unos 800 m, entre eucaliptos y nubes, junto al Monte Tchota y al Pico da Antónia (1.394 m), el techo de Santiago.', extra: 'Las letras de colores son el selfie obligatorio.' } },
+  { s: Postcard, a: { img: 'postal-grogue', title: 'UN GROGUE', text: 'Aguardiente de caña de azúcar, destilada en los trapiches de Santiago. En el juego, un traguito = ¡TURBO! (En la vida real, con la moto, mejor después.)' } },
+  { s: Dialog, a: { bg: 'tree', lines: [
+    ['alvarito', '¡Anita, mira eso! ¡El Poilão de Boa Entrada, cerca de Assomada!'],
+    ['anita', '¡Madre mía, qué raíces! Parecen paredes. ¡Es gigante!'],
+    ['alvarito', 'Dicen que tiene siglos y siglos. Casi milenario. Ahí arriba está la Serra da Malagueta.'],
+    ['anita', '¡Selfie con el abuelo árbol! Pon tu mejor sonrisa... ¡y péinate un poco!'],
+    ['alvarito', '¡Este pelo es culpa de la moto, no mía!']] } },
+  { s: Selfie },
+  { s: Postcard, a: { img: 'postal-selfie-poilao', title: '¡FOTO SABI!', text: 'Anita y Alvarito con el gigante de Boa Entrada. Prueba superada: abrazo al árbol más grande de Cabo Verde.' } },
+  { s: Postcard, a: { img: 'postal-poilao', title: 'POILÃO DE BOA ENTRADA', text: 'Una ceiba (kapok, Ceiba pentandra) de unos 25 m con raíces como murallas: el árbol más grande de Cabo Verde. En su copa anidaban garzas imperiales.' } },
+  { s: MapScene, a: { leg: 2, phase: 'FASE 3', title: 'MALAGUETA > TARRAFAL', text: 'Cruzando la Serra da Malagueta hasta las playas del norte. Atrapa las gallinas sueltas (van a la bolsa de plástico) y lánzalas a las senhoras del frango assado. ¡Cuidado con los monos ladrones de Tarrafal!' } },
+  { s: Ride, a: 2 },
+  { s: Postcard, a: { img: 'postal-playa', title: '¡A LA PLAYA!', text: 'Arena dorada, piscinas de roca y atardeceres de fuego. Después de tanta moto, un chapuzón en el Atlántico sabe a gloria.' } },
+  { s: Dialog, a: { bg: 'beach', music: 'mini', lines: [
+    ['tuta', '¡Oi! ¿Traéis las galinhas? ¡Sabi! Agora... ¡frango assado na brasa!'],
+    ['alvarito', '¡Plato en mano! ¡Que no caiga ni un trozo!'],
+    ['anita', '¡Y cuidado con las malaguetas, que pican más que el sol de Tarrafal!']] } },
+  { s: Grill },
+  { s: Postcard, a: { img: 'postal-strela', title: 'STRELA KRIOLA', text: 'La cerveza de Cabo Verde, "fidju di tera", bien fría frente al mar. En el juego, una Strela = ¡modo estrella invencible!' } },
+  { s: Dialog, a: { bg: 'map', lines: [
+    ['anita', '¡Qué día, Alvarito! Pastéis, moscas, pintura, monos, un árbol gigante y frango assado...'],
+    ['alvarito', 'Y todo con morabeza, la hospitalidad caboverdiana. ¡Mantenha, Santiago!'],
+    ['narr', 'Mantenha: saludos, en kriolu. ¡Hasta la próxima aventura!']] } },
+  { s: Postcard, a: { img: 'postal-selfie-monte', title: '¡MANTENHA!', text: 'Fin del viaje de Anita y Alvarito por la isla de Santiago. Nos vemos en la próxima isla: ¿Fogo, con su volcán?' } },
+  { s: End }
+];
+
+// ---------------------------------------------------------- motor de escenas
+let scene = Title, step = 0, paused = false;
+function go(i) {
+  if (scene && scene.leave) scene.leave();
+  step = clamp(i, 0, STORY.length - 1);
+  const s = STORY[step];
+  scene = s.s; pops = []; sparts = []; shake = 0;
+  clearPressed();
+  scene.enter(s.a);
+}
+function next() { go(step + 1); }
+window.__santiago = { go, get step() { return step; }, get scene() { return scene; }, G, STORY };
+
+let last = performance.now();
+function frame(ts) {
+  const dt = Math.min(0.05, (ts - last) / 1000); last = ts;
+  if (pressed.music) toggleMusic();
+  if (pressed.voice) toggleVoice();
+  if (pressed.pause && scene !== Title) { paused = !paused; if (paused) Voice.stop(); }
+  if (!paused) { scene.update(dt); updateFx(dt); }
+  g.imageSmoothingEnabled = false;
+  scene.draw();
+  if (scene !== End) drawFx();
+  if (paused) { rect(0, 0, W, H, 'rgba(0,0,0,.6)'); txt('PAUSA', 160, 100, '#ffd400', 16, 'center', '#000'); txt('P PARA SEGUIR', 160, 126, '#fff', 8, 'center'); }
+  Music.update();
+  clearPressed();
+  requestAnimationFrame(frame);
+}
+document.addEventListener('visibilitychange', () => { if (document.hidden && scene !== Title) { paused = true; Voice.stop(); } });
+const startAt = parseInt(new URLSearchParams(location.search).get('paso') || '0', 10);
+const boot = () => { resize(); go(isNaN(startAt) ? 0 : startAt); requestAnimationFrame(t => { last = t; frame(t); }); };
+if (document.fonts && document.fonts.load) Promise.race([document.fonts.load('8px "Press Start 2P"'), new Promise(r => setTimeout(r, 1500))]).then(boot, boot);
+else boot();
+})();
+</script>
+</body>
+</html>
