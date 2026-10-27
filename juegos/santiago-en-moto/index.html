@@ -34,6 +34,7 @@ body.touch #pad{display:flex}
 <div id="opts">
   <button class="b small" id="bMusic" type="button">MUSICA: SI</button>
   <button class="b small" id="bVoice" type="button">VOCES: SI</button>
+  <button class="b small" id="bPause" type="button">PAUSA</button>
   <button class="b small" id="bFull" type="button">PANTALLA</button>
 </div>
 <div id="pad">
@@ -379,6 +380,7 @@ function toggleMusic() { audioInit(); opt.music = !opt.music; store.set('music',
 function toggleVoice() { opt.voice = !opt.voice; store.set('voice', opt.voice); if (!opt.voice) Voice.stop(); refreshOpts(); }
 bMusic.addEventListener('click', toggleMusic);
 bVoice.addEventListener('click', toggleVoice);
+document.getElementById('bPause').addEventListener('click', () => { pressed.pause = true; });
 document.getElementById('bFull').addEventListener('click', () => {
   const el = document.documentElement;
   try { if (!document.fullscreenElement) el.requestFullscreen && el.requestFullscreen(); else document.exitFullscreen(); } catch (e) { /* no disponible */ }
@@ -2846,13 +2848,15 @@ function frame(ts) {
   const dt = Math.min(0.05, (ts - last) / 1000); last = ts;
   if (pressed.music) toggleMusic();
   if (pressed.voice) toggleVoice();
-  if (pressed.pause && scene !== Title) { paused = !paused; if (paused) Voice.stop(); }
+  if (pressed.pause && scene !== Title) { paused = !paused; if (paused) Voice.stop(); clearPressed(); }
+  else if (paused && act()) { paused = false; clearPressed(); } // en el móvil se reanuda tocando la pantalla o el botón OK
+  document.getElementById('bPause').textContent = paused ? 'SEGUIR' : 'PAUSA';
   if (!paused) { scene.update(dt); updateFx(dt); }
   g.setTransform(S, 0, 0, S, 0, 0);
   g.imageSmoothingEnabled = false;
   scene.draw();
   if (scene !== End) drawFx();
-  if (paused) { rect(0, 0, W, H, 'rgba(0,0,0,.6)'); txt('PAUSA', 160, 100, '#ffd400', 16, 'center', '#000'); txt('P PARA SEGUIR', 160, 126, '#fff', 8, 'center'); }
+  if (paused) { rect(0, 0, W, H, 'rgba(0,0,0,.6)'); txt('PAUSA', 160, 100, '#ffd400', 16, 'center', '#000'); txt(isTouch ? 'TOCA LA PANTALLA PARA SEGUIR' : 'P O ESPACIO PARA SEGUIR', 160, 126, '#fff', 8, 'center'); }
   Music.update();
   clearPressed();
   requestAnimationFrame(frame);

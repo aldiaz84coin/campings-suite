@@ -53,7 +53,8 @@ Cada fase desbloquea una postal con una foto del viaje.
 | Mover / acelerar / frenar | Flechas o WASD | Cruceta |
 | Lanzar a izquierda / derecha | Z / X | ◀ LANZA / LANZA ▶ |
 | Lanzar automático, confirmar, golpear, lanzarse | Espacio / Enter / clic | OK o tocar la pantalla |
-| Música / voces / pausa | M / V / P | Botones bajo la pantalla |
+| Música / voces | M / V | Botones bajo la pantalla |
+| Pausa / seguir | P o Esc (seguir: también Espacio) | Botón PAUSA / SEGUIR o tocar la pantalla |
 
 `?paso=N` en la URL salta a un paso concreto del guion (útil para probar).
 
