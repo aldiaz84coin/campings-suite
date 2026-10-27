@@ -1035,9 +1035,11 @@ const CRASH = {
 const NOISY = { cow: ['¡MUUU!', 'moo'], sleeper: ['¡ZZZ!', 'snore'], walkers: ['¡BLA BLA!', null], vendor: ['¡PEXE FRESKU!', null], jogger: ['¡UF UF!', null] };
 const LEVELS = [
   { short: 'FASE 1', name: 'PRAIA > CIDADE VELHA', len: 3600, ammo: 12, ammoName: 'PASTÉIS', icon: 'pastel', target: 'person',
-    zones: [[0, 'costa'], [1750, 'cidade']], tgap: [120, 175], ogap: [80, 130], curve: [22, 300, 8, 110], parties: 1,
-    obs: { goat: 2, dog: 2, chicken: 3, aluguer: 3, hole: 2, peel: 3, tourist: 2, walkers: 3, cow: 1, sleeper: 1, jogger: 2, vendor: 2 },
-    picks: ['ammo', 'star', 'star', 'grogue', 'ammo', 'cachupa', 'star', 'strela', 'ammo', 'star', 'grogue'],
+    zones: [[0, 'costa'], [1750, 'cidade']], tgap: [120, 175], ogap: [125, 185], curve: [22, 300, 8, 110], parties: 1,
+    // primera fase más suave: menos obstáculos, sin perros, más vidas, freno loco menos frecuente y casi sin deriva
+    easy: { lives: 5, cruise: 70, brake: [20, 30], drift: 0.2, inv: 2.4 },
+    obs: { goat: 1, chicken: 3, aluguer: 2, hole: 1, peel: 2, walkers: 2, cow: 1, jogger: 1, vendor: 1 },
+    picks: ['ammo', 'star', 'cachupa', 'star', 'grogue', 'ammo', 'cachupa', 'star', 'strela', 'ammo', 'star', 'grogue'],
     signs: [[1700, 'CIDADE VELHA'], [1950, 'RUA BANANA']], specials: [[3150, 'pelourinho', 100]],
     hitPops: ['¡ÑAM!', '¡OBRIGADU!', '¡SABI!', '¡ÑAM ÑAM!'],
     hitLines: [['anita', '¡Toma pastel!'], ['alvarito', '¡Con diabo dentro!'], ['anita', '¡Bon apetit!'], ['npc', '¡Obrigadu!'], ['npc', '¡Sabi sabi!']] },
@@ -1078,9 +1080,10 @@ function mkOb(type, x, d, extra = {}) {
 const Ride = {
   enter(li) {
     this.li = li; const L = this.L = LEVELS[li];
-    G.lives = Math.max(G.lives, 3);
+    this.E = L.easy || {};
+    G.lives = Math.max(G.lives, this.E.lives || 3);
     this.scoreAtStart = G.score;
-    this.p = { x: 0, d: 0, v: 0, crash: 0, inv: 0, slip: 0, slipDir: 0, sand: 0, cd: 0, turbo: 0, star: 0, t: 0, brake: 0, brakeT: rnd(7, 11) };
+    this.p = { x: 0, d: 0, v: 0, crash: 0, inv: 0, slip: 0, slipDir: 0, sand: 0, cd: 0, turbo: 0, star: 0, t: 0, brake: 0, brakeT: this.E.brake ? rnd(14, 20) : rnd(7, 11) };
     const c = L.curve;
     roadOff = c ? d => c[0] * Math.sin(d / c[1]) + c[2] * Math.sin(d / c[3] + 1) : () => 0;
     this.escT = rnd(8, 12); this.partySaid = {};
@@ -1225,27 +1228,27 @@ const Ride = {
     if (p.crash > 0) {
       p.crash -= dt; p.v = Math.max(0, p.v - 220 * dt);
       if (p.crash <= 0) {
-        if (G.lives <= 0) { this.state = 'over'; this.st = 0; SFX.lose(); Music.stop(); Voice.say('narr', '¡Game over! Ni la cachupa os salva.', true); }
-        else p.inv = 1.6;
+        if (G.lives <= 0) { this.state = 'over'; this.st = 0; SFX.lose(); Music.stop(); Voice.say('narr', '¡Game over! Ni la cachupa os salva.', true); return; }
+        else p.inv = this.E.inv || 1.6;
       }
     } else {
       let steer = (keys.left ? -1 : 0) + (keys.right ? 1 : 0);
       if (p.slip > 0) { p.slip -= dt; steer = p.slipDir * 1.7; }
       p.x += steer * (p.turbo > 0 ? 115 : 95) * dt;
       const top = p.turbo > 0 ? 175 : 135;
-      const tv = keys.up ? top : keys.down ? 38 : (p.turbo > 0 ? 130 : 82);
+      const tv = keys.up ? top : keys.down ? 38 : (p.turbo > 0 ? 130 : this.E.cruise || 82);
       p.v += (tv - p.v) * Math.min(1, dt * 1.8);
       if (p.sand > 0) { p.sand -= dt; p.v = Math.min(p.v, 45); }
       // el freno delantero tiene vida propia
       if ((p.brakeT -= dt) <= 0 && p.v > 50) {
-        p.brakeT = rnd(10, 17); p.brake = 0.75; SFX.screech();
+        p.brakeT = this.E.brake ? rnd(...this.E.brake) : rnd(10, 17); p.brake = 0.75; SFX.screech();
         pop('¡ÑIIIIIC!', CX + p.x, PY - 70, '#fff', 12);
         Voice.say(pick(['alvarito', 'anita']), pick(['¡Otra vez el freno delantero!', '¡Esta moto tiene vida propia!', '¡Que se frena sola!', '¡Freno fantasma!']), true);
         this.burst(p.x + 10, p.d, 2, 8, ['#ddd', '#aaa'], 30, 2);
       }
       if (p.brake > 0) { p.brake -= dt; p.v = Math.max(14, p.v - 320 * dt); }
       // en las curvas la moto se va hacia fuera si no giras
-      p.x -= (roadOff(p.d + 6) - roadOff(p.d)) / 6 * p.v * dt * 0.55;
+      p.x -= (roadOff(p.d + 6) - roadOff(p.d)) / 6 * p.v * dt * (this.E.drift || 0.55);
       if (pressed.throwL) this.throwIt(-1);
       if (pressed.throwR) this.throwIt(1);
       if (act()) this.throwIt(this.autoSide());
@@ -1288,7 +1291,7 @@ const Ride = {
       if (!e.active && dd < 230) e.active = true;
       if (e.active) this.behave(e, dt, dd);
       e.x += e.vx * dt; e.d += e.vd * dt;
-      if (p.crash <= 0 && !e.dead && Math.abs(e.x - p.x) < (e.w + 14) / 2 && Math.abs(e.d - p.d) < (e.l + 10) / 2 && (e.z || 0) < 14) this.hitOb(e);
+      if (p.crash <= 0 && !e.dead && Math.abs(e.x - p.x) < (e.w + 12) / 2 && Math.abs(e.d - p.d) < (e.l + 8) / 2 && (e.z || 0) < 14) this.hitOb(e);
     }
     this.ents = this.ents.filter(e => !e.dead);
     // ---- proyectiles
