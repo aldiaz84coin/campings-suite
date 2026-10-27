@@ -2945,7 +2945,7 @@ const End = {
 };
 
 // ---------------------------------------------------------- modo libre: elegir fase
-let freeMode = false, freeIdx = 0;
+let freeMode = false, freeIdx = 0, freePhase = 0;
 const FreePlay = {
   enter() {
     this.t = 0; Music.play('title'); document.getElementById('bMenu').hidden = true;
@@ -2976,7 +2976,10 @@ const FreePlay = {
     if (k === FREE.length) { freeMode = false; go(0); return; }
     this.last = k; this.newBest = null; G.score = 0; G.lives = 3; G.hens = Math.max(G.hens || 0, 6);
     document.getElementById('bMenu').hidden = false;
-    go(FREE[k].i);
+    // empieza por su presentación: el mapa de la ruta y los diálogos que la preceden
+    freePhase = FREE[k].i;
+    let i = freePhase; while (i > 0 && (STORY[i - 1].s === Dialog || STORY[i - 1].s === MapScene)) i--;
+    go(i);
   },
   draw() {
     rect(0, 0, W, H, '#14284a');
@@ -3122,7 +3125,19 @@ function go(i) {
   // guarda el punto de la historia para poder CONTINUAR (no en el modo libre)
   if (!freeMode && step > 1 && scene !== End) { store.set('step', step); store.set('score', G.score); }
 }
-function next() { if (freeMode) toFree(); else go(step + 1); }
+// en el modo libre, tras la fase se ven sus postales y diálogos de historia; luego, vuelta al selector
+function freeAfter(n) {
+  const e = STORY[n];
+  if (!e) return false;
+  if (e.s === Postcard) return true;
+  if (e.s !== Dialog) return false;
+  let j = n; while (STORY[j] && STORY[j].s === Dialog) j++;
+  return !(STORY[j] && PLAYABLE.includes(STORY[j].s)); // el diálogo de presentación de la fase siguiente no
+}
+function next() {
+  if (!freeMode) return go(step + 1);
+  if (step < freePhase || freeAfter(step + 1)) go(step + 1); else toFree();
+}
 window.__santiago = { go, get step() { return step; }, get scene() { return scene; }, G, STORY,
   get kind() { const all = { Title, Dialog, Postcard, MapScene, Ride, Flies, Paint, Selfie, Grill, Sign, Chase, Tapper, Bomba, Snorkel, Ligue, FreePlay, End }; return Object.keys(all).find(k => all[k] === scene); } };
 

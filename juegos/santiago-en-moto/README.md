@@ -68,7 +68,8 @@ Cada fase desbloquea una postal con una foto del viaje.
 - **Continuar**: la partida se guarda en el navegador al pasar cada paso de la
   historia, y vuelve justo ahí.
 - **Jugar libre**: elige cualquier fase suelta (carreras y minijuegos), con el
-  récord de cada una. Al acabar vuelves al selector; el botón *MENU FASES*
+  récord de cada una. Cada fase empieza con su mapa o diálogo de presentación
+  y termina con sus postales e historia; luego vuelves al selector; el botón *MENU FASES*
   sale de una fase a medias.
 
 `?paso=N` en la URL salta a un paso concreto del guion (útil para probar).
