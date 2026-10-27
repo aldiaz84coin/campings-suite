@@ -27,6 +27,7 @@ body.touch #pad{display:flex}
 .small{font-size:8px;padding:6px 8px;border-width:2px}
 .up{grid-column:2;grid-row:1}.lf{grid-column:1;grid-row:2}.dn{grid-column:2;grid-row:2}.rt{grid-column:3;grid-row:2}
 .ok{grid-column:1 / span 2}
+[hidden]{display:none!important}
 </style>
 </head>
 <body>
@@ -35,6 +36,7 @@ body.touch #pad{display:flex}
   <button class="b small" id="bMusic" type="button">MUSICA: SI</button>
   <button class="b small" id="bVoice" type="button">VOCES: SI</button>
   <button class="b small" id="bPause" type="button">PAUSA</button>
+  <button class="b small" id="bMenu" type="button" hidden>MENU FASES</button>
   <button class="b small" id="bFull" type="button">PANTALLA</button>
 </div>
 <div id="pad">
@@ -869,7 +871,8 @@ const BG = {
   piscina() { Bomba.drawScene(); },
   snorkel() { Snorkel.drawScene(); },
   yard() { Chase.drawScene(); },
-  sign() { Sign.drawScene(); }
+  sign() { Sign.drawScene(); },
+  ligue() { Ligue.drawScene(); }
 };
 
 // ---------------------------------------------------------- escena: postal
@@ -1008,7 +1011,7 @@ const OBDEF = {
   grogue: { w: 14, l: 12, hit: 'grogue' }, strela: { w: 14, l: 12, hit: 'strela' },
   walkers: { w: 18, l: 8, hit: 'crash' }, dancer: { w: 8, l: 6, hit: 'crash' }, tuned: { w: 34, l: 12, hit: 'crash' },
   cow: { w: 22, l: 10, hit: 'crash', feed: true }, sleeper: { w: 12, l: 8, hit: 'crash' }, jogger: { w: 8, l: 6, hit: 'crash' },
-  vendor: { w: 9, l: 6, hit: 'crash' }
+  vendor: { w: 9, l: 6, hit: 'crash' }, rival: { w: 9, l: 6, hit: 'bump' }
 };
 const CRASH = {
   goat: ['¡BEEEE!', 'alvarito', '¡Cabra loca!', 'bee'], dog: ['¡GUAU!', 'anita', '¡Ese perro nos ha pillado!', 'woof'],
@@ -1074,7 +1077,7 @@ const Ride = {
     this.p = { x: 0, d: 0, v: 0, crash: 0, inv: 0, slip: 0, slipDir: 0, sand: 0, cd: 0, turbo: 0, star: 0, t: 0, brake: 0, brakeT: this.E.brake ? rnd(14, 20) : rnd(7, 11) };
     const c = L.curve;
     roadOff = c ? d => c[0] * Math.sin(d / c[1]) + c[2] * Math.sin(d / c[3] + 1) : () => 0;
-    this.escT = rnd(8, 12); this.partySaid = {};
+    this.escT = rnd(8, 12); this.partySaid = {}; this.rivalGot = 0;
     this.ammo = L.hens ? Math.max(3, G.hens || 0) : L.ammo; this.proj = []; this.wparts = []; this.served = 0; this.combo = 1;
     this.state = 'ready'; this.st = 0; this.t = 0; this.fogA = 0; this.fogSaid = false; this.lastCount = 4;
     this.build();
@@ -1082,7 +1085,7 @@ const Ride = {
     Music.play('ride'); Music.speed = 1;
     if (this.engine) this.engine.stop();
     this.engine = makeLoop('sawtooth', 50, 520, 14, 0.015, 'gain');
-    store.set('step', step); store.set('score', G.score);
+   
   },
   zoneAt(d) { let z = this.L.zones[0][1]; for (const [a, t] of this.L.zones) if (d >= a) z = t; return z; },
   build() {
@@ -1147,6 +1150,7 @@ const Ride = {
       while (d < L.len - 250) {
         const k = ri(1, 3), side = Math.random() < 0.5 ? -1 : 1;
         for (let i = 0; i < k; i++) ents.push(mkOb('hen', side * rnd(56, 66), d + i * 14, { dir: -side, col: pick(['#f2efe6', '#a0522d', '#f2efe6']) }));
+        if (Math.random() < 0.45) ents.push(mkOb('rival', -side * 62, d + 40, { skin: pick(SKINS), shirt: pick(SHIRTS), scarf: pick(SCARVES), got: 0 }));
         d += rnd(130, 200);
       }
     }
@@ -1331,6 +1335,20 @@ const Ride = {
         if (!e.stopped && Math.abs(e.x) < 10) { e.stopped = true; e.wait = 2; SFX.moo(); const [sx, sy] = proj(e.x, e.d); pop('¡MUUU!', sx, sy - 26, '#fff', 10); }
         if (e.wait > 0) { e.wait -= dt; e.vx = 0; } else if (Math.abs(e.x) < 78) e.vx = e.dir * 11; else e.vx = 0;
         break;
+      case 'rival': {
+        if (e.wait > 0) { e.wait -= dt; e.vx = 0; e.vd = 0; break; }
+        let best = null, bd = 1e9;
+        for (const h of this.ents) if (h.type === 'hen' && !h.dead) { const dist = Math.hypot(h.x - e.x, h.d - e.d); if (dist < bd && dist < 120) { bd = dist; best = h; } }
+        if (!best) { e.vx = 0; e.vd = 0; break; }
+        e.vx = (best.x - e.x) / (bd || 1) * 48; e.vd = (best.d - e.d) / (bd || 1) * 48; e.dir = e.vx >= 0 ? 1 : -1;
+        if (bd < 8) {
+          best.dead = true; e.got++; e.wait = 0.8; this.rivalGot = (this.rivalGot || 0) + 1; SFX.cluck();
+          const [sx, sy] = proj(e.x, e.d); pop(pick(['¡ESTA É MINHA!', '¡PA NHA PANELA!', '¡LENTO, RAPAZ!']), sx, sy - 34, '#ff8cf0', 8);
+          if (Math.random() < 0.5) Voice.say('npc', pick(['¡Esta é minha!', '¡Pa nha panela!', '¡Lento, rapaz!', '¡Las gallinas del pueblo son del pueblo!']));
+          else Voice.say('anita', pick(['¡Alvarito, que la vecina nos la quita!', '¡Esa gallina era nuestra!']));
+        }
+        break;
+      }
       case 'walkers': case 'vendor': case 'jogger': case 'sleeper':
         if (!e.said && dd < 140) { e.said = true; const n = NOISY[e.type]; const [sx, sy] = proj(e.x, e.d); pop(n[0], sx, sy - 30, '#fff', 8, 0.9); if (n[1]) SFX[n[1]](); }
         break;
@@ -1441,6 +1459,10 @@ const Ride = {
         if (this.ammo > 0) { this.ammo--; e.carry = true; e.vx *= 1.6; pop('¡MONO LADRÓN!', sx, sy - 26, '#ff5a3c', 10); Voice.say('alvarito', '¡Eh, mono ladrón, devuelve la gallina!', true); SFX.monkey(); }
         else { pop('¡UH UH!', sx, sy - 20, '#fff', 10); SFX.monkey(); }
         break;
+      case 'bump':
+        if (e.hitDone) return; e.hitDone = true; p.v *= 0.4; SFX.thud();
+        pop('¡OLHA O RAPAZ!', sx, sy - 30, '#fff', 8); Voice.say('npc', '¡Cuidado, rapaz! ¡Que llevo galinhas!', true);
+        break;
       case 'ammo':
         e.dead = true; this.ammo += 5; SFX.pickup(); pop('+5 ' + this.L.ammoName, sx, sy - 20, '#7CFC00', 8);
         Voice.say('anita', { pastel: '¡Más pastéis!', mango: '¡Más mangas!', jornal: '¡Más periódicos!' }[this.L.icon]);
@@ -1508,6 +1530,11 @@ const Ride = {
       case 'dancer': drawPerson(sx, sy, { dance: true, t: t + (e.t || 0), skin: e.skin, shirt: e.shirt, hair: e.hair, happy: true }); break;
       case 'tuned': drawTuned(sx, sy, t, e); break;
       case 'cow': drawCow(sx, sy, t, e.dir); break;
+      case 'rival':
+        drawPerson(sx, sy, { skin: e.skin, shirt: e.shirt, skirt: e.scarf, scarf: e.scarf, earring: true, walk: !(e.wait > 0), run: true, t, happy: e.got > 0 });
+        rect(sx + e.dir * 5 - 3, sy - 14, 6, 7, 'rgba(170,215,255,.6)');
+        if (e.got) { rect(sx + e.dir * 5 - 2, sy - 15, 3, 2, '#f2efe6'); rect(sx + e.dir * 5 - 1, sy - 16, 1, 1, '#e02020'); }
+        break;
       case 'sleeper': drawSleeper(sx, sy, t); break;
       case 'dog': drawDog(sx, sy, t, e.dir); break;
       case 'chicken': case 'hen': drawHen(sx, sy, t, e.dir, e.col); break;
@@ -1630,6 +1657,7 @@ const Ride = {
       txt('¡FASE SUPERADA!', 160, 66, '#7CFC00', 8, 'center');
       txt('ENTREGAS ' + this.served + '/' + this.targets, 60, 86, '#fff');
       txt('BONUS     +' + this.bonus, 60, 100, '#fff');
+      if (L.hens) txt('PARA LAS VIZINHAS ' + (this.rivalGot || 0), 160, 126, '#ff8cf0', 8, 'center');
       txt('PUNTOS ' + G.score, 60, 116, '#ffd400');
       const c = this.served / this.targets;
       txt(c > 0.8 ? '¡MORABEZA TOTAL!' : c > 0.5 ? '¡SABI SABI!' : '¡NO STRESS!', 160, 136, '#ff8cf0', 8, 'center');
@@ -1673,7 +1701,7 @@ const Flies = {
     this.state = 'intro'; this.t = 30; this.flies = []; this.meter = 0; this.cx = 160; this.cy = 130;
     this.spawn = 0.6; this.cd = 0; this.swat = 0; this.count = 0; this.el = 0; this.grog = 0; this.bottle = null; this.bottleT = 7;
     this.rt = 0; Music.play('mini'); this.buzz = makeLoop('sawtooth', 185, 900, 22, 25);
-    store.set('step', step); store.set('score', G.score);
+   
   },
   onTuna(x, y) { return ((x - 170) / 78) ** 2 + ((y - 146) / 22) ** 2 <= 1; },
   newTarget(f) { for (let i = 0; i < 20; i++) { const x = rnd(95, 245), y = rnd(128, 166); if (this.onTuna(x, y)) { f.tx = x; f.ty = y; return; } } f.tx = 170; f.ty = 146; },
@@ -1819,7 +1847,7 @@ const Paint = {
     }
     this.shots = []; this.drips = []; this.anitaSpots = []; this.grog = 0; this.bottle = null; this.bottleT = 6; this.pen = 0;
     Music.play('mini');
-    store.set('step', step); store.set('score', G.score);
+   
   },
   get cover() { return this.total ? this.painted / this.total : 0; },
   update(dt) {
@@ -1963,7 +1991,7 @@ const Paint = {
 
 // ---------------------------------------------------------- minijuego: selfie con el Poilão
 const Selfie = {
-  enter() { this.state = 'intro'; this.shots = []; this.cur = 0; this.dir = 1; this.newZone(); this.flash = 0; this.wait = 0; this.rt = 0; this.t = 0; Music.play('title'); store.set('step', step); store.set('score', G.score); },
+  enter() { this.state = 'intro'; this.shots = []; this.cur = 0; this.dir = 1; this.newZone(); this.flash = 0; this.wait = 0; this.rt = 0; this.t = 0; Music.play('title'); },
   newZone() { const n = this.shots.length; this.zw = [0.28, 0.2, 0.14][n] || 0.14; this.zc = rnd(0.2, 0.8); this.speed = [0.9, 1.3, 1.8][n] || 1.8; },
   update(dt) {
     this.t += dt;
@@ -2055,7 +2083,7 @@ const Selfie = {
 const Grill = {
   enter() {
     this.state = 'intro'; this.t = 30; this.items = []; this.px = 160; this.usePtr = false; this.spawn = 0.5; this.caught = 0; this.stun = 0; this.big = 0; this.fast = 0; this.rt = 0; this.tt = 0;
-    Music.play('mini'); store.set('step', step); store.set('score', G.score);
+    Music.play('mini');
   },
   update(dt) {
     this.tt += dt;
@@ -2239,7 +2267,7 @@ const Sign = {
   enter() {
     this.state = 'intro'; this.i = 0; this.placed = []; this.cx = 160; this.cd = 1; this.t = 0; this.sway = 0;
     this.drop = null; this.fall = null; this.misses = 0; this.perfect = 0; this.rt = 0;
-    Music.play('mini'); store.set('step', step); store.set('score', G.score);
+    Music.play('mini');
   },
   slotX(i) { return 50 + i * 44; },
   update(dt) {
@@ -2328,9 +2356,13 @@ const Chase = {
   enter() {
     this.state = 'intro'; this.t = 35; this.rt = 0; this.count = 0; this.headT = 6; this.headHen = null;
     this.a = { x: 160, y: 170, dx: 1, dy: 0, stun: 0, dive: 0, flat: 0, walk: false, usePtr: false };
-    this.hens = []; for (let i = 0; i < 11; i++) this.addHen(false);
+    this.hens = []; for (let i = 0; i < 12; i++) this.addHen(false);
+    // las vizinhas del pueblo también vienen a por gallinas
+    this.rcount = 0;
+    this.rivals = [[30, 210, '#e74c3c', '#f1c40f', '#6b3e1f'], [290, 214, '#2980b9', '#e67e22', '#8d5524']]
+      .map(([x, y, shirt, scarf, skin]) => ({ x, y, shirt, scarf, skin, t: rnd(0, 3), wait: 1.2, count: 0, dir: 1 }));
     this.rooster = { x: 60, y: 130, vx: 0, vy: 0, cd: 1.5, t: 0 };
-    Music.play('mini'); store.set('step', step); store.set('score', G.score);
+    Music.play('mini');
   },
   addHen(coop) {
     this.hens.push({ x: coop ? 282 : rnd(40, 280), y: coop ? 96 : rnd(100, 220), vx: 0, vy: 0, t: rnd(0, 5), state: 'wander', flap: 0,
@@ -2375,10 +2407,13 @@ const Chase = {
     for (const h of this.hens) {
       if (h.state === 'bag' || h.state === 'head') continue;
       h.t += dt; if (h.flap > 0) h.flap -= dt;
-      const dx = h.x - A.x, dy = h.y - A.y, d = Math.hypot(dx, dy) || 1;
-      if (d < 50) {
+      const d = Math.hypot(h.x - A.x, h.y - A.y) || 1;
+      let tx = A.x, ty = A.y, td = d, lim = 50;
+      for (const rv of this.rivals) { const rd = Math.hypot(h.x - rv.x, h.y - rv.y); if (rd < 34 && rd < td) { tx = rv.x; ty = rv.y; td = rd; lim = 34; } }
+      const dx = h.x - tx, dy = h.y - ty;
+      if (td < lim) {
         h.state = 'flee';
-        h.vx = dx / d * 80 + Math.sin(h.t * 13) * 28; h.vy = dy / d * 80 + Math.cos(h.t * 11) * 28;
+        h.vx = dx / (td || 1) * 80 + Math.sin(h.t * 13) * 28; h.vy = dy / (td || 1) * 80 + Math.cos(h.t * 11) * 28;
         if (Math.random() < dt * 1.6) { h.flap = 0.4; SFX.cluck(); if (Math.random() < 0.4) pop(pick(['¡CLOC!', '¡COCOCÓ!', '¡KÉÉÉ!']), h.x, h.y - 14, '#fff', 8, 0.5); }
       } else if (Math.random() < dt * 0.8) { h.state = 'wander'; const a = rnd(0, 6.28); h.vx = Math.cos(a) * 22; h.vy = Math.sin(a) * 22; }
       h.x += h.vx * dt; h.y += h.vy * dt;
@@ -2391,6 +2426,28 @@ const Chase = {
         sburst(h.x, h.y - 6, 10, ['#fff', '#f2efe6', h.col], 60, 80, 2, 0.6);
         if (this.count % 3 === 0) { pop('¡BOLSA LLENA!', 160, 60, '#ffd400', 12); Voice.say('anita', '¡Bolsa llena! ¡La cuelgo en la moto!'); }
         else if (Math.random() < 0.3) Voice.say('alvarito', pick(['¡Ven aquí, pitinha!', '¡Soy el rey de las gallinas!', '¡Otra para los pinchitos!']));
+      }
+    }
+    for (const rv of this.rivals) {
+      rv.t += dt;
+      if (rv.wait > 0) { rv.wait -= dt; continue; }
+      if (A.dive > 0 && Math.hypot(rv.x - A.x, rv.y - A.y) < 12) {
+        A.dive = 0; A.stun = 0.5; A.flat = 0.5; rv.wait = 0.8; SFX.thud();
+        pop('¡EPA!', rv.x, rv.y - 44, '#fff', 10); Voice.say('npc', pick(['¡Olha o rapaz!', '¡Cuidado, que yo también quiero gallinas!']), true);
+        continue;
+      }
+      let best = null, bd = 1e9;
+      for (const h of this.hens) if (h.state !== 'bag' && h.state !== 'head') { const dd = Math.hypot(h.x - rv.x, h.y - rv.y); if (dd < bd) { bd = dd; best = h; } }
+      if (!best) continue;
+      rv.dir = best.x >= rv.x ? 1 : -1;
+      rv.x = clamp(rv.x + (best.x - rv.x) / (bd || 1) * 36 * dt, YARD[0], YARD[1]);
+      rv.y = clamp(rv.y + (best.y - rv.y) / (bd || 1) * 36 * dt, YARD[2], YARD[3]);
+      if (bd < 9) {
+        best.state = 'bag'; rv.count++; this.rcount++; rv.wait = 1.8; SFX.cluck();
+        pop(pick(['¡ESTA É MINHA!', '¡PA NHA PANELA!', '¡LENTO, RAPAZ!']), rv.x, rv.y - 44, '#ff8cf0', 8);
+        sburst(best.x, best.y - 6, 8, ['#fff', best.col], 50, 80, 2, 0.5);
+        if (Math.random() < 0.4) Voice.say('npc', pick(['¡Esta é minha!', '¡Pa nha panela!', '¡Lento, rapaz!', '¡Las gallinas del pueblo son del pueblo!']));
+        else if (Math.random() < 0.3) Voice.say('anita', pick(['¡Alvarito, que la vecina nos las quita!', '¡Esa señora corre más que tú!']));
       }
     }
     if (this.hens.filter(h => h.state !== 'bag').length < 6) { this.addHen(true); if (Math.random() < 0.4) pop('¡SALE OTRA!', 282, 80, '#fff', 8); }
@@ -2409,8 +2466,10 @@ const Chase = {
   },
   finish() {
     this.state = 'result'; this.rt = 0;
-    G.hens = Math.max(3, this.count); this.bonus = this.count * 20; G.score += this.bonus; SFX.win();
-    Voice.say('tuta', this.count >= 10 ? '¡Sabi! ¡Eres un apanhador de galinhas!' : '¡Pocas... pero gorditas!', true);
+    this.won = this.count > this.rcount;
+    G.hens = Math.max(3, this.count); this.bonus = this.count * 20 + (this.won ? 200 : 0); G.score += this.bonus;
+    if (this.won) { SFX.win(); Voice.say('tuta', '¡Sabi! ¡Les habéis ganado a las vizinhas!', true); }
+    else { SFX.lose(); Voice.say('npc', '¡Ja! ¡Las vizinhas ganamos! Esta noche, pinchitos en mi casa.', true); }
   },
   drawScene() {
     const t = performance.now() / 1000;
@@ -2430,6 +2489,11 @@ const Chase = {
     for (const h of this.hens) if (h.state !== 'bag' && h.state !== 'head') list.push([h.y, () => scaled(h.x, h.y - (h.flap > 0 ? 4 : 0), 1.6, () => drawHen(0, 0, h.t * (h.state === 'flee' ? 2 : 1), h.vx >= 0 ? 1 : -1, h.col))]);
     const r = this.rooster;
     list.push([r.y, () => scaled(r.x, r.y, 1.7, () => drawRooster(0, 0, r.t * 2, r.vx >= 0 ? 1 : -1))]);
+    for (const rv of this.rivals) list.push([rv.y, () => scaled(rv.x, rv.y, 2, () => {
+      drawPerson(0, 0, { skin: rv.skin, shirt: rv.shirt, skirt: rv.scarf, scarf: rv.scarf, earring: true, walk: rv.wait <= 0, run: true, t: rv.t, happy: rv.wait > 0, armsUp: rv.wait > 0 });
+      rect(rv.dir * 5 - 3, -14, 6, 7, 'rgba(170,215,255,.6)');
+      if (rv.count) { rect(rv.dir * 5 - 2, -15, 3, 2, '#f2efe6'); rect(rv.dir * 5 - 1, -16, 1, 1, '#e02020'); }
+    })]);
     list.push([A.y, () => {
       g.save(); g.translate(R(A.x), R(A.y));
       if (A.dive > 0 || A.flat > 0) g.rotate((A.dx >= 0 ? 1 : -1) * 1.45);
@@ -2441,15 +2505,15 @@ const Chase = {
     }]);
     list.sort((a, b) => a[0] - b[0]).forEach(o => o[1]());
     g.restore();
-    hudBar('GALLINAS ' + this.count, String(Math.max(0, Math.ceil(this.t))).padStart(2, '0'));
-    if (this.state === 'intro') introPanel('¡GALINHAS A LA BOLSA!', 'Para los pinchitos, Nha Tuta las quiere vivas y en bolsa de plástico. Acércate y lánzate en plancha (' + (isTouch ? 'OK' : 'ESPACIO') + '). ¡Ojo con el gallo! Si una se te sube a la cabeza, pulsa para cazarla.', '¡PITAS, PITAS, PITAS!');
-    if (this.state === 'result') resultPanel(this.count >= 10 ? '¡REY DE LAS GALLINAS!' : '¡ALGO ES ALGO!', ['GALLINAS: ' + this.count, 'BOLSAS: ' + Math.ceil(this.count / 3), 'BONUS: +' + this.bonus, 'PUNTOS: ' + G.score], this.rt);
+    hudBar('VOS ' + this.count + ' VIZ ' + this.rcount, String(Math.max(0, Math.ceil(this.t))).padStart(2, '0'));
+    if (this.state === 'intro') introPanel('¡GALINHAS A LA BOLSA!', 'Nha Tuta las quiere vivas y en bolsa. Lánzate en plancha (' + (isTouch ? 'OK' : 'ESPACIO') + ') y caza más que las dos vizinhas, que también vienen a por ellas. ¡Ojo con el gallo! Si una se te sube a la cabeza, pulsa.', '¡PITAS, PITAS, PITAS!');
+    if (this.state === 'result') resultPanel(this.won ? '¡GANÁIS A LAS VIZINHAS!' : '¡LAS VIZINHAS GANAN!', ['VOSOTROS: ' + this.count, 'VIZINHAS: ' + this.rcount, 'BONUS: +' + this.bonus, 'PUNTOS: ' + G.score], this.rt, this.won);
   }
 };
 
 // ---------------------------------------------------------- celebración 1: Strelas en el Alquimia (estilo Tapper)
 const Tapper = {
-  enter() { this.state = 'intro'; this.t = 22; this.bottles = []; this.spawn = 0.8; this.caught = 0; this.broken = 0; this.stolen = 0; this.rt = 0; this.grab = 0; Music.play('title'); store.set('step', step); store.set('score', G.score); },
+  enter() { this.state = 'intro'; this.t = 22; this.bottles = []; this.spawn = 0.8; this.caught = 0; this.broken = 0; this.stolen = 0; this.rt = 0; this.grab = 0; Music.play('title'); },
   update(dt) {
     if (this.state === 'intro') { if (act()) { this.state = 'play'; Voice.say('alvarito', '¡Camarero! ¡Unas Strelas bien frías!', true); } return; }
     if (this.state === 'result') { this.rt += dt; if (this.rt > 1 && act()) next(); return; }
@@ -2516,7 +2580,7 @@ const Tapper = {
 
 // ---------------------------------------------------------- celebración 2: ¡bomba en la piscina!
 const Bomba = {
-  enter() { this.state = 'intro'; this.jumps = []; this.j = null; this.t = 0; this.rt = 0; this.h = 0; this.colX = 210; Music.play('title'); store.set('step', step); store.set('score', G.score); },
+  enter() { this.state = 'intro'; this.jumps = []; this.j = null; this.t = 0; this.rt = 0; this.h = 0; this.colX = 210; Music.play('title'); },
   update(dt) {
     this.t += dt; this.colX = 210 + Math.sin(this.t * 0.5) * 40;
     if (this.state === 'intro') { if (act()) { this.state = 'play'; Voice.say('alvarito', '¡Agárrate, colega, que va bomba!', true); } return; }
@@ -2587,7 +2651,7 @@ const Snorkel = {
     this.state = 'intro'; this.t = 24; this.rt = 0; this.d = { x: 110, y: 120, dx: 1, dy: 0, usePtr: false, walk: false };
     this.an = { x: 80, y: 130 }; this.air = 1; this.items = []; this.spawn = 0.3; this.stun = 0; this.pics = 0; this.chT = 7; this.tt = 0;
     for (let i = 0; i < 4; i++) this.items.push({ k: 'shell', x: rnd(30, 290), y: rnd(214, 226), c: pick(['#ffb3c7', '#ffe0a3', '#fff']) });
-    Music.play('title'); store.set('step', step); store.set('score', G.score);
+    Music.play('title');
   },
   update(dt) {
     this.tt += dt;
@@ -2670,13 +2734,174 @@ const Snorkel = {
   }
 };
 
-// ---------------------------------------------------------- portada y final
-const Title = {
-  enter() { this.t = 0; Music.play('title'); G.hi = store.get('hi', 0); this.saved = store.get('step', 0); this.savedScore = store.get('score', 0); },
+// ---------------------------------------------------------- minijuego: ¡que no ligue! (playa de Tarrafal)
+const LIGUE_TESTS = [
+  { k: 'coco', ask: '¡Broder! ¿A que no me traes un coco de esa palmera?', hint: '¡SACUDE LA PALMERA!', n: 6 },
+  { k: 'chancla', ask: 'He perdido la chancla... está por allí, creo... o no...', hint: '¡COGE LA CHANCLA!', n: 1 },
+  { k: 'flexiones', ask: '¿Tú haces flexiones, broder? Haz diez, a ver...', hint: '¡FLEXIONES!', n: 10 },
+  { k: 'castillo', ask: 'Hazme un castillo de arena... uno bonito, ¿eh?', hint: '¡CONSTRUYE!', n: 7 },
+  { k: 'balon', ask: '¡El balón se ha ido al agua! Tráelo, broder...', hint: '¡RESCATA EL BALÓN!', n: 3 }
+];
+const FLIRT = [
+  [0.15, '¿Me das tu móvil?'], [0.4, '¿Tienes Instagram?'], [0.65, '¿Y Facebook? ¿TikTok?'], [0.85, '¿Una Strela al atardecer?']
+];
+const ANITA_NO = ['Tengo novio, ¿eh?', 'No, gracias...', '¡ALVARITOOO!', 'Que no, pesado.'];
+const ANITA_POS = { x: 54, y: 186 };
+const Ligue = {
+  enter() {
+    this.state = 'intro'; this.rt = 0; this.t = 0; this.done = 0; this.strikes = 0; this.meter = 0; this.say = ''; this.sayT = 0; this.anitaSay = ''; this.anitaT = 0;
+    this.a = { x: 96, y: 196, dx: 1, dy: 0, usePtr: false, walk: false };
+    this.c = { x: 128, y: 176, mode: 'wait', wait: 1.5, t: 0, line: -1 };
+    this.prog = 0; this.newTest();
+    Music.play('title');
+  },
+  newTest() {
+    const T = LIGUE_TESTS[this.done % LIGUE_TESTS.length];
+    const spots = { coco: [292, 150], chancla: [250 + rnd(-20, 30), 210], flexiones: [230, 170], castillo: [276, 214], balon: [rnd(200, 290), 132] };
+    this.test = Object.assign({ x: spots[T.k][0], y: spots[T.k][1] }, T);
+    this.prog = 0;
+    this.talk(T.ask);
+  },
+  talk(text) { this.say = text; this.sayT = 3; Voice.say('rasta', text, true); },
+  anita(text) { this.anitaSay = text; this.anitaT = 2.2; Voice.say('anita', text, true); },
   update(dt) {
     this.t += dt;
-    if (pressed.up && this.saved > 1) { audioInit(); G.score = this.savedScore; G.lives = 3; SFX.select(); go(this.saved); return; }
-    if (act()) { audioInit(); G.score = 0; G.lives = 3; SFX.select(); Voice.say('narr', 'Santiago en moto. ¡Anita y Alvarito!', true); next(); }
+    if (this.state === 'intro') { if (act()) { this.state = 'play'; this.talk(this.test.ask); } return; }
+    if (this.state === 'result') { this.rt += dt; if (this.rt > 1 && act()) next(); return; }
+    if (this.sayT > 0) this.sayT -= dt; if (this.anitaT > 0) this.anitaT -= dt;
+    const A = this.a, C = this.c, T = this.test;
+    moveInput(A, 112, dt, [12, 308, 128, 228]);
+    // prueba: llegar al sitio y pulsar
+    const atTest = Math.hypot(A.x - T.x, A.y - T.y) < 22;
+    if (atTest && act()) {
+      this.prog++; SFX.blip();
+      const fx = { coco: ['¡SACUDE!', '#3f8f3a'], chancla: ['¡CHANCLA!', '#ff4f4f'], flexiones: ['¡UNA!', '#fff'], castillo: ['¡PLAF!', '#e7cf8f'], balon: ['¡CHOF!', '#5ad7ff'] }[T.k];
+      pop(fx[0], T.x, T.y - 30, fx[1], 8, 0.4);
+      if (T.k === 'flexiones') pop(String(this.prog), A.x + 14, A.y - 40, '#ffd400', 10, 0.4);
+      if (this.prog >= T.n) {
+        this.done++; G.score += 150; SFX.pickup();
+        pop('¡PRUEBA SUPERADA!', T.x, T.y - 44, '#7CFC00', 10);
+        if (this.done >= 5) return this.finish();
+        this.newTest();
+      }
+    }
+    // el colega: si Alvarito se aleja de Anita, va a por ella
+    const farA = Math.hypot(A.x - ANITA_POS.x, A.y - ANITA_POS.y);
+    C.t += dt;
+    if (C.mode === 'wait') { C.wait -= dt; if (C.wait <= 0 && farA > 80) C.mode = 'go'; }
+    else if (C.mode === 'go' || C.mode === 'flirt') {
+      const tx = ANITA_POS.x + 22, ty = ANITA_POS.y - 4, d = Math.hypot(tx - C.x, ty - C.y);
+      if (d > 3) { C.mode = 'go'; C.x += (tx - C.x) / d * 42 * dt; C.y += (ty - C.y) / d * 42 * dt; }
+      else {
+        C.mode = 'flirt';
+        this.meter += dt * (0.16 + this.done * 0.03);
+        const li = FLIRT.findIndex(([v], i) => this.meter >= v && (i === FLIRT.length - 1 || this.meter < FLIRT[i + 1][0]));
+        if (li >= 0 && li !== C.line) { C.line = li; this.talk(FLIRT[li][1]); setTimeout(() => this.state === 'play' && this.anita(pick(ANITA_NO)), 1300); }
+        if (this.meter >= 1) {
+          this.strikes++; this.meter = 0; C.line = -1; C.mode = 'flee'; SFX.lose(); shake = 0.3;
+          pop('¡LE HA PEDIDO EL INSTA!', 120, 90, '#ff5a3c', 12, 1.4);
+          this.anita('¡Que no, pesado! ¡Alvarito, ven ya!');
+          if (this.strikes >= 3) return this.finish();
+        }
+      }
+    } else if (C.mode === 'flee') {
+      const tx = 170, ty = 150, d = Math.hypot(tx - C.x, ty - C.y);
+      if (d > 4) { C.x += (tx - C.x) / d * 95 * dt; C.y += (ty - C.y) / d * 95 * dt; } else { C.mode = 'wait'; C.wait = 1.2; }
+    }
+    // Alvarito llega a tiempo: el colega se va
+    if ((C.mode === 'go' || C.mode === 'flirt') && Math.hypot(A.x - C.x, A.y - C.y) < 30) {
+      C.mode = 'flee'; C.line = -1; this.meter = Math.max(0, this.meter - 0.45); G.score += 50; SFX.boing();
+      pop('¡FUERA, COLEGA!', C.x, C.y - 50, '#7CFC00', 10);
+      this.talk(pick(['Tranquilo, broder... solo le preguntaba la hora...', 'Eeeh... yo pasaba por aquí...', 'No stress, broder, no stress...', 'Le enseñaba... las estrellas...']));
+    }
+  },
+  finish() {
+    this.state = 'result'; this.rt = 0;
+    this.won = this.strikes < 3;
+    this.bonus = this.done * 50 + (3 - this.strikes) * 150; G.score += this.bonus;
+    if (this.won) { SFX.win(); Voice.say('anita', '¡Mi héroe! Y tú, colega, ¡a por otra Strela!', true); }
+    else { SFX.lose(); Voice.say('rasta', 'Broder... no me ha dado el Insta... pero me ha dado... ¡un no!', true); }
+  },
+  drawScene() {
+    const t = performance.now() / 1000;
+    ['#ffcf8a', '#ffd9a0', '#ffe3b6', '#bfe9ff'].forEach((c, i) => rect(0, i * 18, W, 18, c));
+    poly([[200, 72], [250, 40], [300, 70], [320, 60], [320, 76], [200, 76]], '#4f7a3f');
+    rect(0, 72, W, 50, '#2b8fd0');
+    for (let i = 0; i < 18; i++) rect((i * 41 + t * 10) % W, 78 + (i * 9) % 40, 8, 1, '#8fd0ff');
+    for (let x = 0; x < W; x += 8) rect(x, 118 + Math.sin(t * 2 + x * 0.15) * 2, 8, 3, '#e3f6ff');
+    rect(0, 122, W, 118, '#f6e7bd'); for (let i = 0; i < 40; i++) rect((i * 61) % W, 126 + (i * 23) % 110, 2, 1, '#e3cf95');
+    [[150, 108, '#e74c3c'], [186, 112, '#2e86de'], [222, 106, '#27ae60']].forEach(([x, y, c]) => drawBoat(x, y, { c }));
+    drawPalm(292, 150, t); drawPalm(18, 140, t); drawUmbrella(30, 196, { c: '#f1c40f' });
+    rect(26, 184, 52, 12, '#e74c3c'); for (let i = 0; i < 6; i++) rect(26 + i * 9, 184, 4, 12, '#fff');
+    scaled(ANITA_POS.x, ANITA_POS.y, 2, () => drawPerson(0, 0, { face: 'anita', shirt: '#222', pants: '#7c121b', t, wave: (this.anitaT || 0) > 0 }));
+    rect(4, 128, 70, 14, '#1a1033'); txt('TARRAFAL', 39, 131, '#ffd400', 8, 'center');
+  },
+  bubble(x, y, text, col) {
+    const lines = wrap(text, 120, 8), w = Math.max(...lines.map(l => tw(l))) + 10, h = lines.length * 10 + 6;
+    const bx = clamp(x - w / 2, 4, W - w - 4), by = Math.max(18, y - h);
+    rect(bx, by, w, h, '#000'); rect(bx + 1, by + 1, w - 2, h - 2, col);
+    lines.forEach((l, i) => txt(l, bx + 5, by + 4 + i * 10, '#000'));
+  },
+  draw() {
+    g.save(); if (shake > 0) g.translate(R(rnd(-3, 3)), R(rnd(-3, 3)));
+    this.drawScene();
+    const t = this.t, T = this.test, A = this.a, C = this.c;
+    if (this.state !== 'result') {
+      switch (T.k) {
+        case 'coco': { const sh = Math.sin(t * 30) * Math.min(1, this.prog) * 2; circ(T.x - 2 + sh, 116, 3, '#6b4a1a'); circ(T.x + 4 + sh, 118, 3, '#6b4a1a'); break; }
+        case 'chancla': rect(T.x - 7, T.y - 2, 14, 4, '#ff4f4f'); rect(T.x - 2, T.y - 4, 1, 3, '#222'); rect(T.x + 1, T.y - 4, 1, 3, '#222'); break;
+        case 'flexiones': rect(T.x - 16, T.y - 2, 32, 6, '#2e86de'); break;
+        case 'castillo': { const k = this.prog / T.n; rect(T.x - 10, T.y - 4 - 10 * k, 20, 4 + 10 * k, '#e7cf8f'); if (k > 0.6) rect(T.x - 3, T.y - 22 * k, 6, 8, '#d9bd7a'); break; }
+        case 'balon': drawBall(T.x, T.y, Math.abs(Math.sin(t * 3)) * 3, t); break;
+      }
+      if (blink(3)) { g.strokeStyle = '#ffd400'; g.lineWidth = 1; g.strokeRect(T.x - 18, T.y - 30, 36, 36); }
+      rect(T.x - 16, T.y + 8, 32, 4, '#000'); rect(T.x - 15, T.y + 9, 30 * this.prog / T.n, 2, '#7CFC00');
+      txt(T.hint, T.x, T.y - 42, '#fff', 8, 'center', '#000');
+    }
+    const list = [
+      [C.y, () => scaled(C.x, C.y, 2, () => drawPerson(0, 0, Object.assign({ t: C.t, walk: C.mode === 'go' || C.mode === 'flee', run: C.mode === 'flee', phone: C.mode === 'flirt', wave: C.mode === 'wait' }, RASTA)))],
+      [A.y, () => {
+        const push = this.test.k === 'flexiones' && Math.hypot(A.x - T.x, A.y - T.y) < 22;
+        g.save(); g.translate(R(A.x), R(A.y)); if (push) g.rotate(-1.4 + (this.prog % 2) * 0.2); g.scale(2, 2);
+        drawPerson(0, 0, { face: 'alvarito', shirt: '#9ccbd6', pants: '#1f3a8a', t, walk: A.walk, armsUp: this.test.k === 'coco' && Math.hypot(A.x - T.x, A.y - T.y) < 22 });
+        g.restore();
+      }]
+    ];
+    list.sort((a, b) => a[0] - b[0]).forEach(o => o[1]());
+    if (C.mode === 'flirt') for (let i = 0; i < 3; i++) heart(C.x - 10 + i * 10, C.y - 60 - ((t * 20 + i * 7) % 16), '#ff3b6b');
+    if (this.sayT > 0) this.bubble(C.x, C.y - 50, this.say, '#c8ffb0');
+    if (this.anitaT > 0) this.bubble(ANITA_POS.x + 10, ANITA_POS.y - 50, this.anitaSay, '#ffd0e0');
+    g.restore();
+    hudBar('PRUEBAS ' + this.done + '/5', 'LIGUE');
+    rect(186, 3, 64, 8, '#fff'); rect(187, 4, 62, 6, '#222'); rect(187, 4, 62 * Math.min(1, this.meter), 6, this.meter > 0.65 ? '#ff3b6b' : '#ff9ac0');
+    for (let i = 0; i < 3; i++) heart(266 + i * 10, 22, i < 3 - this.strikes ? '#ff3b6b' : '#555');
+    if (this.state === 'intro') introPanel('¡QUE NO LIGUE!', 'El colega te pone pruebas lejos de Anita. En cuanto te alejas, va a pedirle el móvil, el Instagram y el Facebook. Ve a cada prueba (' + (isTouch ? 'arrastra o cruceta' : 'flechas o ratón') + '), pulsa ' + (isTouch ? 'OK' : 'ESPACIO') + ' para hacerla y vuelve corriendo a espantarlo.', '¡A POR ÉL!');
+    if (this.state === 'result') resultPanel(this.won ? '¡ANITA A SALVO!' : '¡QUÉ PESADO EL COLEGA!', ['PRUEBAS: ' + this.done + '/5', 'INTENTOS DE LIGUE: ' + this.strikes + '/3', 'BONUS: +' + this.bonus, 'PUNTOS: ' + G.score], this.rt, this.won);
+  }
+};
+
+// ---------------------------------------------------------- portada y final
+const Title = {
+  enter() { this.t = 0; this.sel = 0; Music.play('title'); G.hi = store.get('hi', 0); this.saved = store.get('step', 0); this.savedScore = store.get('score', 0); },
+  options() {
+    const o = [['NUEVA PARTIDA', 'new']];
+    if (this.saved > 1) { const f = FREE.filter(f => f.i <= this.saved).pop(); o.push(['CONTINUAR' + (f ? ': ' + f.name : ''), 'cont']); }
+    o.push(['JUGAR LIBRE (ELIGE FASE)', 'free']);
+    return o;
+  },
+  update(dt) {
+    this.t += dt;
+    const o = this.options();
+    if (pressed.up) { this.sel = (this.sel + o.length - 1) % o.length; SFX.blip(); }
+    if (pressed.down) { this.sel = (this.sel + 1) % o.length; SFX.blip(); }
+    if (pressed.tap) { const k = Math.floor((ptr.y - 203) / 12); if (k >= 0 && k < o.length) this.run(o[k][1]); return; }
+    if (pressed.action) this.run(o[this.sel][1]);
+  },
+  run(k) {
+    audioInit(); SFX.select(); G.lives = 3;
+    if (k === 'new') { freeMode = false; G.score = 0; Voice.say('narr', 'Santiago en moto. ¡Anita y Alvarito!', true); next(); }
+    else if (k === 'cont') { freeMode = false; G.score = this.savedScore; go(this.saved); }
+    else { FreePlay.last = null; toFree(); }
   },
   draw() {
     BG.title();
@@ -2686,14 +2911,15 @@ const Title = {
     txt('ANITA & ALVARITO · CABO VERDE', 160, 66, '#fff3c4', 8, 'center', '#000');
     drawPortrait(98, 84, 'alvarito'); drawPortrait(182, 84, 'anita');
     heart(160, 104 + Math.sin(this.t * 6) * 2);
-    rect(0, 182, W, 20, '#4d4d57');
-    for (let i = 0; i < 10; i++) rect(((i * 40 - this.t * 120) % 360 + 360) % 360 - 20, 191, 16, 2, '#e8c547');
-    const mx = ((this.t * 70) % 400) - 40;
-    drawMoto(mx, 196, this.t, { speed: 100 });
-    rect(0, 202, W, 38, 'rgba(0,0,0,.6)');
-    if (blink(2)) txt(isTouch ? 'TOCA PARA EMPEZAR' : 'ESPACIO: NUEVA PARTIDA', 160, 206, '#7CFC00', 8, 'center');
-    if (this.saved > 1) txt(isTouch ? '▲ CONTINUAR PARTIDA' : '▲ ARRIBA: CONTINUAR', 160, 218, '#ffd400', 8, 'center');
-    txt('RÉCORD ' + G.hi, 160, 230, '#fff', 8, 'center');
+    rect(0, 176, W, 20, '#4d4d57');
+    for (let i = 0; i < 10; i++) rect(((i * 40 - this.t * 120) % 360 + 360) % 360 - 20, 185, 16, 2, '#e8c547');
+    drawMoto(((this.t * 70) % 400) - 40, 192, this.t, { speed: 100, scale: 0.8 });
+    rect(0, 198, W, 42, 'rgba(0,0,0,.7)');
+    this.options().forEach(([label], i) => {
+      const on = i === this.sel;
+      txt((on ? '> ' : '  ') + label, 160, 205 + i * 12, on ? (blink(3) ? '#7CFC00' : '#ffd400') : '#fff', 8, 'center');
+    });
+    txt('RÉCORD ' + G.hi, 316, 4, '#fff', 8, 'right', '#000');
   }
 };
 const End = {
@@ -2717,6 +2943,65 @@ const End = {
     if (this.t > 2 && blink(2)) txt(isTouch ? 'TOCA PARA VOLVER A EMPEZAR' : 'ESPACIO: VOLVER A EMPEZAR', 160, 222, '#fff', 8, 'center');
   }
 };
+
+// ---------------------------------------------------------- modo libre: elegir fase
+let freeMode = false, freeIdx = 0;
+const FreePlay = {
+  enter() {
+    this.t = 0; Music.play('title'); document.getElementById('bMenu').hidden = true;
+    this.lastScore = null;
+    if (this.last != null && !this.abandon) {
+      this.lastScore = G.score;
+      if (G.score > store.get('best.' + this.last, 0)) { store.set('best.' + this.last, G.score); this.newBest = this.last; }
+    }
+    this.abandon = false;
+  },
+  cell(k) { return [8 + (k % 3) * 102, 30 + Math.floor(k / 3) * 38]; },
+  update(dt) {
+    this.t += dt;
+    const n = FREE.length + 1, prev = freeIdx;
+    if (pressed.right) freeIdx = (freeIdx + 1) % n;
+    if (pressed.left) freeIdx = (freeIdx + n - 1) % n;
+    if (pressed.down) freeIdx = Math.min(n - 1, freeIdx + 3);
+    if (pressed.up) freeIdx = Math.max(0, freeIdx - 3);
+    if (prev !== freeIdx) SFX.blip();
+    if (pressed.tap) {
+      for (let k = 0; k < n; k++) { const [x, y] = this.cell(k); if (ptr.x >= x && ptr.x < x + 98 && ptr.y >= y && ptr.y < y + 34) { freeIdx = k; this.play(k); return; } }
+      return;
+    }
+    if (pressed.action) this.play(freeIdx);
+  },
+  play(k) {
+    SFX.select();
+    if (k === FREE.length) { freeMode = false; go(0); return; }
+    this.last = k; this.newBest = null; G.score = 0; G.lives = 3; G.hens = Math.max(G.hens || 0, 6);
+    document.getElementById('bMenu').hidden = false;
+    go(FREE[k].i);
+  },
+  draw() {
+    rect(0, 0, W, H, '#14284a');
+    for (let i = 0; i < 30; i++) rect((i * 53 + this.t * 6) % W, (i * 37) % H, 5, 1, '#1f3d6b');
+    txt('JUGAR LIBRE', 160, 8, '#ffd400', 16, 'center', '#000');
+    for (let k = 0; k <= FREE.length; k++) {
+      const [x, y] = this.cell(k), on = k === freeIdx, back = k === FREE.length;
+      rect(x, y, 98, 34, on ? (blink(3) ? '#ffd400' : '#fff') : '#000');
+      rect(x + 2, y + 2, 94, 30, back ? '#7c121b' : on ? '#2b5c9e' : '#1f3d6b');
+      if (back) { txt('< VOLVER', x + 49, y + 13, '#fff', 8, 'center'); continue; }
+      const best = store.get('best.' + k, 0);
+      txt(String(k + 1).padStart(2, '0'), x + 6, y + 6, '#7CFC00');
+      if (best) txt(String(best), x + 92, y + 6, this.newBest === k ? '#ff8cf0' : '#9fb5d8', 8, 'right');
+      txt(FREE[k].name, x + 6, y + 19, '#fff');
+    }
+    if (this.lastScore != null) txt((this.newBest != null ? '¡NUEVO RÉCORD! ' : 'PUNTOS: ') + this.lastScore, 160, 226, '#ff8cf0', 8, 'center', '#000');
+    else txt(isTouch ? 'TOCA UNA FASE PARA JUGARLA' : 'FLECHAS + ESPACIO PARA JUGAR', 160, 226, '#fff', 8, 'center');
+  }
+};
+function toFree() {
+  if (scene && scene.leave) scene.leave();
+  freeMode = true; scene = FreePlay; pops = []; sparts = []; shake = 0;
+  clearPressed(); Music.speed = 1; FreePlay.enter();
+}
+document.getElementById('bMenu').addEventListener('click', () => { if (freeMode && scene !== FreePlay) { FreePlay.abandon = true; paused = false; toFree(); } });
 
 // ---------------------------------------------------------- el guion
 const STORY = [
@@ -2789,10 +3074,19 @@ const STORY = [
     ['alvarito', '¿Vivas? ¿En bolsas? ¿En la moto?'],
     ['tuta', 'Claro, fidju. Así llegan fresquinhas a Tarrafal.'],
     ['anita', 'Yo no pienso llevar una gallina en el regazo... ¡Alvarito, tú las coges!'],
+    ['tuta', 'Y daos prisa: las vizinhas también quieren galinhas para su panela. ¡Y corren más que el aluguer!'],
+    ['anita', '¿Competencia? ¡Alvarito, esto es la final del Mundial de gallinas!'],
     ['alvarito', 'Tranquila... soy un experto. Creo. ¿Y ese gallo por qué me mira así?']] } },
   { s: Chase },
   { s: Ride, a: 3 },
   { s: Postcard, a: { img: 'postal-playa', title: '¡A LA PLAYA!', text: 'Arena dorada, piscinas de roca y atardeceres de fuego. Y alguna pluma de gallina pegada en el pelo.' } },
+  { s: Dialog, a: { bg: 'ligue', lines: [
+    ['rasta', 'Eeeh, broder... ¿tú eres fuerte? Seguro que no eres capaz de traerme un coco de esa palmera...'],
+    ['alvarito', '¿Cómo que no? ¡Ahora verás!'],
+    ['anita', 'Alvarito... ¿no ves que te quiere quitar de en medio?'],
+    ['rasta', 'Nooo, broder... yo solo... tranquilo... (mira a Anita de reojo)'],
+    ['narr', 'Haz las pruebas del colega y vuelve rápido: ¡que no le pida el Instagram a Anita!']] } },
+  { s: Ligue },
   { s: Dialog, a: { bg: 'beach', music: 'mini', lines: [
     ['tuta', '¡Oi! ¿Cuántas galinhas traéis? ...¿Y por qué tiene una el señor en la cabeza?'],
     ['alvarito', 'Se ha encariñado. Se llama Cachupa.'],
@@ -2810,6 +3104,10 @@ const STORY = [
   { s: Postcard, a: { img: 'postal-selfie-monte', title: '¡MANTENHA!', text: 'Fin del viaje de Anita y Alvarito por la isla de Santiago. Nos vemos en la próxima isla: ¿Fogo, con su volcán?' } },
   { s: End }
 ];
+// fases jugables sueltas en el modo libre, en el orden de la historia
+const FREE_NAMES = ['PRAIA MOTO', 'ATUN MOSCAS', 'PINTA CASA', 'ALQUIMIA', 'A RUI VAZ', 'CARTEL', 'PISCINA', 'PERIODICOS', 'SELFIE', 'BUCEO', 'GALINHAS', 'A TARRAFAL', 'NO LIGUES', 'PINCHITOS'];
+const PLAYABLE = [Ride, Flies, Paint, Tapper, Sign, Bomba, Selfie, Snorkel, Chase, Ligue, Grill];
+const FREE = STORY.map((e, i) => ({ e, i })).filter(o => PLAYABLE.includes(o.e.s)).map((o, k) => ({ i: o.i, name: FREE_NAMES[k] }));
 
 // ---------------------------------------------------------- motor de escenas
 let scene = Title, step = 0, paused = false;
@@ -2820,10 +3118,12 @@ function go(i) {
   scene = s.s; pops = []; sparts = []; shake = 0;
   clearPressed();
   scene.enter(s.a);
+  // guarda el punto de la historia para poder CONTINUAR (no en el modo libre)
+  if (!freeMode && step > 1 && scene !== End) { store.set('step', step); store.set('score', G.score); }
 }
-function next() { go(step + 1); }
+function next() { if (freeMode) toFree(); else go(step + 1); }
 window.__santiago = { go, get step() { return step; }, get scene() { return scene; }, G, STORY,
-  get kind() { const all = { Title, Dialog, Postcard, MapScene, Ride, Flies, Paint, Selfie, Grill, Sign, Chase, Tapper, Bomba, Snorkel, End }; return Object.keys(all).find(k => all[k] === scene); } };
+  get kind() { const all = { Title, Dialog, Postcard, MapScene, Ride, Flies, Paint, Selfie, Grill, Sign, Chase, Tapper, Bomba, Snorkel, Ligue, FreePlay, End }; return Object.keys(all).find(k => all[k] === scene); } };
 
 let last = performance.now();
 function frame(ts) {

@@ -32,10 +32,16 @@ python3 -m http.server 8000
 9. **Selfie con el Poilão** (minijuego de *timing*).
 10. **Gafas de buzo**: fotos a peces, conchas, medusas y la chancla del colega.
 11. **¡Galinhas a la bolsa!**: persecución en un corral de la Serra da Malagueta,
-    con plancha, gallo defensor y gallina-sombrero.
+    con plancha, gallo defensor, gallina-sombrero y dos vecinas del pueblo que
+    compiten por las mismas gallinas.
 12. **Malagueta > Tarrafal** (carrera): las bolsas cuelgan de la moto, las
-    gallinas se escapan y hay que repartirlas a las senhoras de la brasa.
-13. **Pinchitos en Tarrafal**: atrapa pinchitos; evita malaguetas, carbón y
+    gallinas se escapan, las vecinas salen a quedárselas y hay que repartirlas a
+    las senhoras de la brasa.
+13. **¡Que no ligue!**: en la playa de Tarrafal, el colega de las rastas pone
+    pruebas a Alvarito (coco, chancla, flexiones, castillo, balón) para
+    alejarlo y pedirle a Anita el móvil, el Instagram y el Facebook. Hay que
+    resolverlas y volver corriendo a espantarlo.
+14. **Pinchitos en Tarrafal**: atrapa pinchitos; evita malaguetas, carbón y
     gallinas que siguen vivas.
 
 En todas las carreras la carretera está llena de gente (andando, charlando,
@@ -55,6 +61,15 @@ Cada fase desbloquea una postal con una foto del viaje.
 | Lanzar automático, confirmar, golpear, lanzarse | Espacio / Enter / clic | OK o tocar la pantalla |
 | Música / voces | M / V | Botones bajo la pantalla |
 | Pausa / seguir | P o Esc (seguir: también Espacio) | Botón PAUSA / SEGUIR o tocar la pantalla |
+
+## Partidas
+
+- **Nueva partida**: la historia completa, fase a fase.
+- **Continuar**: la partida se guarda en el navegador al pasar cada paso de la
+  historia, y vuelve justo ahí.
+- **Jugar libre**: elige cualquier fase suelta (carreras y minijuegos), con el
+  récord de cada una. Al acabar vuelves al selector; el botón *MENU FASES*
+  sale de una fase a medias.
 
 `?paso=N` en la URL salta a un paso concreto del guion (útil para probar).
 
