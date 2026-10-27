@@ -27,8 +27,8 @@ python3 -m http.server 8000
    alto de la montaña.
 7. **¡Bomba en la piscina!**: saltos desde el trampolín; Anita puntúa y el
    colega del donut acaba empapado.
-8. **Rui Vaz > Poilão de Boa Entrada** (carrera): niebla y bananas para los
-   macacos verdes.
+8. **Rui Vaz > Poilão de Boa Entrada** (carrera): niebla y periódicos para la
+   gente de los pueblos, como en el *Paperboy* original.
 9. **Selfie con el Poilão** (minijuego de *timing*).
 10. **Gafas de buzo**: fotos a peces, conchas, medusas y la chancla del colega.
 11. **¡Galinhas a la bolsa!**: persecución en un corral de la Serra da Malagueta,

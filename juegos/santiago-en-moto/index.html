@@ -640,20 +640,6 @@ function drawDonkey(x, y, t, dir) {
   r(7, -23, 1, 5, '#777'); r(9, -22, 1, 4, '#777'); r(10, -17, 1, 1, '#000'); r(5, -17, 2, 6, '#555');
   r(-10, -11, 2, 5, '#555');
 }
-function drawMonkey(x, y, t, o = {}) {
-  x = R(x); y = R(y);
-  const fur = '#8b8f5a', j = o.jump ? -Math.abs(Math.sin(t * 8)) * 3 : 0;
-  y += j;
-  rect(x + 3, y - 3, 5, 1, fur); rect(x + 7, y - 6, 1, 3, fur);
-  rect(x - 3, y - 8, 6, 7, fur); rect(x - 2, y - 6, 4, 4, '#b8b88a');
-  rect(x - 3, y - 13, 6, 5, fur); rect(x - 2, y - 12, 4, 3, '#2b2b2b');
-  rect(x - 3, y - 13, 6, 1, '#e8e8d0');
-  rect(x - 1, y - 11, 1, 1, '#fff'); rect(x + 1, y - 11, 1, 1, '#fff');
-  if (o.wave) { const a = Math.sin(t * 10) > 0; rect(x + 3, y - (a ? 14 : 12), 2, 5, fur); rect(x - 5, y - 7, 2, 4, fur); }
-  else { rect(x - 5, y - 8, 2, 5, fur); rect(x + 3, y - 8, 2, 5, fur); }
-  if (o.eat) { rect(x + 2, y - 11, 3, 2, '#ffe135'); rect(x + 4, y - 12, 1, 1, '#6b4a1a'); }
-  if (o.carry) iconHen(x + 6, y - 8, true);
-}
 function drawRunMonkey(x, y, t, dir, carry) {
   const r = M(R(x), R(y), dir), l = Math.sin(t * 18) > 0 ? 1 : 0, fur = '#8b8f5a';
   ell(x, y, 6, 1.5, 'rgba(0,0,0,.25)');
@@ -694,7 +680,7 @@ function heart(x, y, c = '#ff3b6b') { x = R(x); y = R(y); rect(x - 3, y - 2, 2, 
 function bubble(x, y, icon) { x = R(x); y = R(y); rect(x - 8, y - 14, 16, 12, '#000'); rect(x - 7, y - 13, 14, 10, '#fff'); rect(x - 1, y - 3, 3, 2, '#fff'); rect(x - 1, y - 2, 1, 2, '#000'); icon(x, y - 8); }
 // iconos pequeños
 function iconPastel(x, y) { ell(x, y + 1, 4, 2.5, '#e0a040'); rect(x - 4, y + 1, 8, 1, '#b9742a'); rect(x - 2, y - 1, 1, 1, '#f4c56a'); }
-function iconBanana(x, y) { x = R(x); y = R(y); rect(x - 3, y + 1, 6, 2, '#ffe135'); rect(x - 5, y, 2, 2, '#ffe135'); rect(x + 3, y - 1, 2, 2, '#ffe135'); rect(x + 5, y - 2, 1, 1, '#6b4a1a'); rect(x - 2, y + 2, 4, 1, '#d9b800'); }
+function iconJornal(x, y) { x = R(x); y = R(y); rect(x - 5, y - 3, 10, 7, '#555'); rect(x - 4, y - 3, 9, 6, '#f4f1e8'); rect(x - 3, y - 2, 7, 1, '#c0392b'); rect(x - 3, y, 3, 2, '#999'); rect(x + 1, y, 3, 1, '#bbb'); rect(x + 1, y + 1, 3, 1, '#bbb'); }
 function iconHen(x, y, bag) {
   x = R(x); y = R(y);
   if (bag) { rect(x - 5, y - 5, 10, 10, 'rgba(160,210,255,.55)'); rect(x - 1, y - 7, 2, 2, 'rgba(160,210,255,.9)'); }
@@ -705,7 +691,7 @@ function iconStar(x, y, t = 0) { x = R(x); y = R(y); const k = Math.abs(Math.cos
 function iconGrogue(x, y) { x = R(x); y = R(y); rect(x - 3, y - 4, 7, 9, '#000'); rect(x - 2, y - 4, 5, 8, '#dff3f7'); rect(x - 2, y, 5, 4, '#d99a1e'); rect(x - 2, y, 5, 1, '#f2c14e'); rect(x - 1, y - 3, 1, 3, '#fff'); }
 function iconStrela(x, y) { x = R(x); y = R(y); rect(x - 1, y - 8, 3, 3, '#5a2e0c'); rect(x - 3, y - 5, 7, 11, '#6b3a12'); rect(x - 3, y - 2, 7, 5, '#f39c12'); rect(x, y - 1, 1, 3, '#e02020'); rect(x - 1, y, 3, 1, '#e02020'); rect(x - 1, y - 9, 3, 1, '#c9a227'); }
 function iconHelmet(x, y) { x = R(x); y = R(y); rect(x - 3, y - 3, 6, 2, '#ffd400'); rect(x - 4, y - 1, 8, 3, '#ffd400'); rect(x - 1, y - 1, 4, 2, '#222'); }
-const AMMO_ICON = { pastel: iconPastel, banana: iconBanana, mango: iconMango, hen: (x, y) => iconHen(x, y, true) };
+const AMMO_ICON = { pastel: iconPastel, jornal: iconJornal, mango: iconMango, hen: (x, y) => iconHen(x, y, true) };
 
 // decorados
 function drawHouseCosta(x, y, d) {
@@ -1052,14 +1038,14 @@ const LEVELS = [
     signs: [[300, 'JOÃO VARELA'], [3300, 'RUI VAZ']], specials: [[3870, 'fallen', 96]], fog: [[2600, 3050]],
     hitPops: ['¡ÑAM!', '¡MANGA!', '¡SABI!', '¡OBRIGADU!'],
     hitLines: [['anita', '¡Toma manga!'], ['alvarito', '¡Manga madurita!'], ['npc', '¡Obrigadu!'], ['anita', '¡Vitaminas!']] },
-  { short: 'FASE 3', name: 'RUI VAZ > POILÃO', len: 3800, ammo: 12, ammoName: 'BANANAS', icon: 'banana', target: 'monkey',
+  { short: 'FASE 3', name: 'RUI VAZ > POILÃO', len: 3800, ammo: 12, ammoName: 'PERIÓDICOS', icon: 'jornal', target: 'person',
     zones: [[0, 'monte']], tgap: [110, 165], ogap: [75, 125], curve: [45, 280, 15, 120], parties: 2,
     obs: { goat: 3, donkey: 3, aluguer: 3, rock: 3, dog: 2, cow: 2, walkers: 2, chicken: 2 },
     picks: ['ammo', 'star', 'grogue', 'star', 'ammo', 'cachupa', 'strela', 'star', 'ammo', 'grogue', 'star', 'cachupa'],
     signs: [[300, 'PICOS'], [1900, 'ASSOMADA'], [3100, 'BOA ENTRADA']],
     specials: [[3890, 'poilao', 105]], fog: [[600, 1050], [1700, 2100], [2700, 3000]],
-    hitPops: ['¡UH UH AH AH!', '¡ÑAM!', '¡BANANA!'],
-    hitLines: [['alvarito', '¡Toma banana, macaquito!'], ['anita', '¡Plátano exprés!'], ['alvarito', '¡Directo a la rama!'], ['anita', '¡Qué mono más mono!']] },
+    hitPops: ['¡OBRIGADU!', '¡NOTICIAS!', '¡SABI!', '¡AL BUZÓN!'],
+    hitLines: [['anita', '¡Periódico recién salido!'], ['alvarito', '¡Noticias frescas de Praia!'], ['npc', '¡Obrigadu!'], ['anita', '¡Al buzón!'], ['npc', '¡Sabi! ¿Qué dice el fútbol?']] },
   { short: 'FASE 4', name: 'MALAGUETA > TARRAFAL', len: 4200, ammo: 0, ammoName: 'GALLINAS', icon: 'hen', target: 'grill',
     zones: [[0, 'malagueta'], [1500, 'praia']], tgap: [140, 200], ogap: [80, 130], hens: true, curve: [30, 260, 10, 100], parties: 2,
     obs: { dog: 2, aluguer: 3, sand: 3, crab: 3, ball: 2, thief: 3, hole: 2, walkers: 2, cow: 1, vendor: 2 },
@@ -1389,7 +1375,7 @@ const Ride = {
     const pts = 100 * this.combo * (this.p.turbo > 0 ? 2 : 1);
     G.score += pts;
     const [sx, sy] = proj(e.x, e.d);
-    SFX.hit(); if (e.kind === 'monkey') SFX.monkey(); if (e.kind === 'grill') SFX.sizzle();
+    SFX.hit(); if (e.kind === 'grill') SFX.sizzle();
     pop(pick(this.L.hitPops), sx, sy - 44, '#7CFC00', 10);
     pop('+' + pts, sx, sy - 28, '#ffd400', 8, 0.8);
     if (this.combo >= 2) pop('COMBO x' + this.combo, 160, 40, '#ff8cf0', 10, 0.9);
@@ -1457,7 +1443,7 @@ const Ride = {
         break;
       case 'ammo':
         e.dead = true; this.ammo += 5; SFX.pickup(); pop('+5 ' + this.L.ammoName, sx, sy - 20, '#7CFC00', 8);
-        Voice.say('anita', this.L.icon === 'banana' ? '¡Más bananas!' : '¡Más pastéis!');
+        Voice.say('anita', { pastel: '¡Más pastéis!', mango: '¡Más mangas!', jornal: '¡Más periódicos!' }[this.L.icon]);
         break;
       case 'life':
         e.dead = true; G.lives = Math.min(5, G.lives + 1); SFX.pickup(); pop('¡CACHUPA! +1', sx, sy - 20, '#ffb347', 10);
@@ -1508,10 +1494,6 @@ const Ride = {
           drawPerson(sx, sy, { skin: e.skin, shirt: e.shirt, hair: e.hair, scarf: e.side > 0 && e.skin === SKINS[1] ? e.scarf : null, t, wave: !e.served, jump: e.served && e.st < 1.5, happy: e.served });
           const ic = AMMO_ICON[this.L.icon] || iconPastel;
           if (!e.served) bubble(sx, sy - 26 - (blink(3) ? 1 : 0), ic); else { ic(sx + 6, sy - 15); if (e.st < 2) heart(sx, sy - 34 - e.st * 6); }
-        } else if (e.kind === 'monkey') {
-          drawTree(sx, sy + 2, { dark: false }); rect(sx - 2, sy - 16, 12, 2, '#6b4a2b');
-          drawMonkey(sx + 4, sy - 15, t, { wave: !e.served, jump: !e.served, eat: e.served });
-          if (!e.served) bubble(sx + 4, sy - 33 - (blink(3) ? 1 : 0), iconBanana); else if (e.st < 2) heart(sx + 4, sy - 36 - e.st * 6);
         } else {
           drawGrillStand(sx, sy, t, { skin: e.skin, shirt: e.shirt, scarf: e.scarf, happy: e.served });
           if (!e.served) bubble(sx + 2, sy - 34 - (blink(3) ? 1 : 0), (x, y) => iconHen(x, y, true)); else if (e.st < 2) heart(sx + 2, sy - 38 - e.st * 6);
@@ -1663,7 +1645,7 @@ const Ride = {
       rect(0, 14, W, 30, 'rgba(0,0,0,.55)');
       const help = isTouch ? 'CRUCETA: MOVER · LANZA: BOTONES' : 'FLECHAS · Z/X LANZAR · ESPACIO AUTO';
       txt(help, 160, 18, '#fff', 8, 'center');
-      const goal = L.target === 'person' ? 'LANZA ' + L.ammoName + ' A QUIEN TE HACE SEÑAS' : L.target === 'monkey' ? 'LANZA BANANAS A LOS MACACOS' : 'RECOGE GALLINAS Y LÁNZALAS A LAS BRASAS';
+      const goal = L.target === 'person' ? 'LANZA ' + L.ammoName + ' A QUIEN TE HACE SEÑAS' : 'RECOGE GALLINAS Y LÁNZALAS A LAS BRASAS';
       txt(goal, 160, 32, '#ffd400', 8, 'center');
     }
   },
@@ -2783,7 +2765,7 @@ const STORY = [
     ['alvarito', '¡Agárrate a ese donut, que va bomba!'],
     ['anita', 'Yo hago de jurado. ¡Puntúo del 1 al 10!']] } },
   { s: Bomba },
-  { s: MapScene, a: { leg: 2, phase: 'FASE 3', title: 'RUI VAZ > BOA ENTRADA', text: 'Por el interior, entre niebla y eucaliptos, hacia Assomada. Lanza bananas a los macacos verdes: llegaron de África occidental hace siglos. ¡Ojo con burros, vacas y piedras!' } },
+  { s: MapScene, a: { leg: 2, phase: 'FASE 3', title: 'RUI VAZ > BOA ENTRADA', text: 'Por el interior, entre niebla y eucaliptos, hacia Assomada. Como en el Paperboy original: reparte periódicos a la gente de los pueblos que te hace señas. ¡Ojo con burros, vacas y piedras!' } },
   { s: Ride, a: 2 },
   { s: Postcard, a: { img: 'postal-grogue', title: 'UN GROGUE', text: 'Aguardiente de caña de azúcar, destilada en los trapiches de Santiago. En el juego, un traguito = ¡TURBO! (En la vida real, con la moto, mejor después.)' } },
   { s: Dialog, a: { bg: 'tree', lines: [
