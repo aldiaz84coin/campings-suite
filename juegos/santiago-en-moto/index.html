@@ -2109,7 +2109,7 @@ const Grill = {
       const py = it.y;
       it.vy += 170 * dt; it.x += it.vx * dt; it.y += it.vy * dt; it.r += dt * 6;
       if (it.x < 6 || it.x > 314) it.vx *= -1;
-      if (py < 184 && it.y >= 184 && Math.abs(it.x - this.px) < pw / 2 + 4) { this.catchIt(it); it.dead = true; }
+      if (py < 166 && it.y >= 166 && Math.abs(it.x - this.px) < pw / 2 + 4) { this.catchIt(it); it.dead = true; }
       if (it.y > 240) it.dead = true;
     }
     this.items = this.items.filter(i => !i.dead);
@@ -2121,7 +2121,7 @@ const Grill = {
       case 'viva':
         G.score = Math.max(0, G.score - 20); SFX.cluck(); sburst(x, 180, 14, ['#fff', '#f2efe6', '#e02020'], 80, 60, 2, 0.8);
         pop('¡ESA ESTÁ VIVA!', x, 150, '#ff8cf0', 10);
-        Voice.say('anita', pick(['¡Esa gallina todavía está viva!', '¡Se ha escapado de la bolsa otra vez!', '¡Esa no es un pinchito, Alvarito!']), true);
+        Voice.say('alvarito', pick(['¡Anita, esa gallina todavía está viva!', '¡Se ha escapado de la bolsa otra vez!', '¡Esa no es un pinchito, Anita!']), true);
         break;
       case 'pincho': case 'asa':
         this.caught++; G.score += it.type === 'pincho' ? 30 : 20; SFX.nom();
@@ -2131,11 +2131,11 @@ const Grill = {
       case 'malagueta':
         this.stun = 1; G.score = Math.max(0, G.score - 40); SFX.burn(); shake = 0.3;
         pop('¡PICA PICA!', x, 160, '#ff3b3b', 12); sburst(this.px + 10, 190, 14, ['#ff3b3b', '#ffb347', '#ffd400'], 70, -40, 3, 0.6);
-        Voice.say('alvarito', '¡Malagueta! ¡Fuego, fuego!', true);
+        Voice.say('anita', '¡Malagueta! ¡Fuego, fuego!', true);
         break;
       case 'carvao':
         this.stun = 0.6; G.score = Math.max(0, G.score - 25); SFX.burn();
-        pop('¡QUEMA!', x, 160, '#ff7f11', 12); Voice.say('anita', '¡Eso es carbón!');
+        pop('¡QUEMA!', x, 160, '#ff7f11', 12); Voice.say('alvarito', '¡Anita, eso es carbón!');
         break;
       case 'strela':
         this.big = 6; SFX.gulp(); SFX.power(); pop('¡STRELA! PLATO XL', 160, 120, '#ff5a5a', 12);
@@ -2143,7 +2143,7 @@ const Grill = {
         break;
       case 'grogue':
         this.fast = 6; SFX.gulp(); SFX.power(); pop('¡GROGUE! TURBO', 160, 120, '#ffb347', 12);
-        Voice.say('alvarito', '¡Grogue! ¡Ahora soy un rayo!', true);
+        Voice.say('anita', '¡Grogue! ¡Ahora soy un rayo!', true);
         break;
     }
   },
@@ -2186,15 +2186,15 @@ const Grill = {
     for (const it of this.items) this.drawItem(it);
     const pw = this.big > 0 ? 56 : 32, x = R(this.px);
     g.save(); g.translate(x, 236); g.scale(2, 2);
-    drawPerson(0, 0, { skin: '#e8a882', shirt: '#9ccbd6', pants: '#3a3f4a', face: 'alvarito', armsUp: true, t: this.tt, hen: true });
+    drawPerson(0, 0, { skin: '#e8a882', shirt: '#b3202a', pants: '#222', face: 'anita', armsUp: true, t: this.tt });
     g.restore();
-    rect(x - 9, 186, 2, 6, '#e8a882'); rect(x + 7, 186, 2, 6, '#e8a882');
-    ell(x, 186, pw / 2, 4, '#fff'); ell(x, 185, pw / 2 - 3, 2, '#e8e8e8');
-    for (let i = 0; i < Math.min(8, this.caught); i++) ell(x - 8 + (i % 4) * 5, 182 - Math.floor(i / 4) * 2, 3, 2, '#a0521d');
-    if (this.stun > 0) for (let i = 0; i < 4; i++) rect(x + 6 + i * 4, 156 - i * 2 + Math.sin(this.tt * 30 + i) * 2, 3, 3, i % 2 ? '#ff3b3b' : '#ffd400');
+    rect(x - 9, 168, 2, 14, '#e8a882'); rect(x + 7, 168, 2, 14, '#e8a882');
+    ell(x, 168, pw / 2, 4, '#fff'); ell(x, 167, pw / 2 - 3, 2, '#e8e8e8');
+    for (let i = 0; i < Math.min(8, this.caught); i++) ell(x - 8 + (i % 4) * 5, 164 - Math.floor(i / 4) * 2, 3, 2, '#a0521d');
+    if (this.stun > 0) for (let i = 0; i < 4; i++) rect(x + 6 + i * 4, 146 - i * 2 + Math.sin(this.tt * 30 + i) * 2, 3, 3, i % 2 ? '#ff3b3b' : '#ffd400');
     // Anita animando desde la arena
     g.save(); g.translate(clamp(x - 40, 14, 306), 236); g.scale(2, 2);
-    drawPerson(0, 0, { skin: '#e8a882', shirt: '#b3202a', pants: '#222', face: 'anita', t: this.tt, jump: true, wave: true, happy: true });
+    drawPerson(0, 0, { skin: '#e8a882', shirt: '#9ccbd6', pants: '#3a3f4a', face: 'alvarito', t: this.tt, jump: true, wave: true, happy: true, hen: true });
     g.restore();
     g.restore();
     rect(0, 0, W, 14, 'rgba(0,0,0,.75)');
@@ -3091,7 +3091,8 @@ const STORY = [
     ['tuta', '¡Oi! ¿Cuántas galinhas traéis? ...¿Y por qué tiene una el señor en la cabeza?'],
     ['alvarito', 'Se ha encariñado. Se llama Cachupa.'],
     ['anita', '¡Ni se te ocurra hacerla pinchito!'],
-    ['tuta', 'Ta bom, ta bom... esa se queda de mascota. ¡A la brasa las demás!']] } },
+    ['tuta', 'Ta bom, ta bom... esa se queda de mascota. ¡A la brasa las demás!'],
+    ['anita', '¡Dame el plato, Alvarito! Tú vigila a Cachupa, que yo cazo los pinchitos.']] } },
   { s: Grill },
   { s: Postcard, a: { img: 'postal-strela', title: 'STRELA KRIOLA', text: 'La cerveza de Cabo Verde, "fidju di tera", bien fría frente al mar. En el juego, una Strela = ¡modo estrella invencible!' } },
   { s: Dialog, a: { bg: 'alquimia', lines: [
